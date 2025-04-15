@@ -1,0 +1,24 @@
+/*
+ * Copyright (c) 2025, The casual project. All rights reserved.
+ *
+ * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
+ */
+
+// casual-java group and version
+group = 'se.laz.casual'
+version = '0.0.1-beta-SNAPSHOT'
+
+ext.libs = [
+
+  objenesis: 'org.objenesis:objenesis:3.4',
+  microprofile_config: 'org.eclipse.microprofile.config:microprofile-config-api:1.4',
+  // test
+
+  system_lambda: 'com.github.stefanbirkner:system-lambda:1.2.1',
+  // for spock
+  groovy_bom: 'org.apache.groovy:groovy-bom:4.0.5',
+  groovy: 'org.apache.groovy:groovy',
+  spock_bom: 'org.spockframework:spock-bom:2.3-groovy-4.0',
+  spock_core: 'org.spockframework:spock-core',
+  byte_buddy: 'net.bytebuddy:byte-buddy:1.14.8',
+]

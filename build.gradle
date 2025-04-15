@@ -1,0 +1,64 @@
+/*
+ * Copyright (c) 2025, The casual project. All rights reserved.
+ *
+ * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
+ */
+
+//-*- coding: utf-8 -*-
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url 'https://repo.spring.io/plugins-release' }
+    }
+}
+
+plugins {
+  id "org.sonarqube" version "5.1.0.4882"
+}
+
+apply from: 'testsourcesets.gradle'
+
+defaultTasks 'build'
+
+allprojects{
+  tasks.withType(JavaCompile) { 
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+    options.compilerArgs << "-Xlint:all" << "-Werror"
+  }
+  repositories {
+    mavenCentral()
+  } 
+}
+
+subprojects{  
+  sonar {
+    properties {
+        properties["sonar.host.url"] = 'http://localhost:9000'
+        properties["sonar.verbose"] = "true"
+        properties['sonar.java.source'] = 17
+     }
+  }
+  apply plugin: 'jacoco'
+  apply from: "$rootProject.projectDir/versions.gradle"
+  apply plugin: 'java-library'
+  apply from: "$rootProject.projectDir/publish.gradle"
+  test {
+    finalizedBy jacocoTestReport
+    useJUnitPlatform()
+      testLogging {
+        events "passed", "skipped", "failed"
+      }
+    }
+
+  jacocoTestReport {
+    reports {
+      xml.required = true
+      csv.required = false
+    }
+  }
+
+  test{
+    jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED', '--add-opens=java.base/java.util=ALL-UNNAMED'
+  }
+}
