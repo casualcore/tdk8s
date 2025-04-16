@@ -8,6 +8,7 @@ package se.laz.casual.test.k8s.integration
 
 import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.api.model.Service
+import se.laz.casual.test.k8s.sample.WildflyResources
 import spock.lang.Specification
 
 class Fabric8EqualityChecks extends Specification

@@ -11,6 +11,7 @@ import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import se.laz.casual.test.k8s.TestKube
 import se.laz.casual.test.k8s.connection.KubeConnection
+import se.laz.casual.test.k8s.sample.WildflyResources
 import spock.lang.Shared
 import spock.lang.Specification
 

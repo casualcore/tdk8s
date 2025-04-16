@@ -10,6 +10,7 @@ import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import se.laz.casual.test.k8s.TestKube
+import se.laz.casual.test.k8s.sample.NginxResources
 import spock.lang.Shared
 import spock.lang.Specification
 

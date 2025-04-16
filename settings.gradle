@@ -6,3 +6,4 @@
 
 //-*- coding: utf-8 -*-
 include 'test-kube'
+include 'test-kube-samples'

@@ -4,21 +4,21 @@
  * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
  */
 
-package se.laz.casual.test.k8s.integration
+package se.laz.casual.test.k8s.sample;
 
-import io.fabric8.kubernetes.api.model.IntOrString
-import io.fabric8.kubernetes.api.model.Pod
-import io.fabric8.kubernetes.api.model.PodBuilder
-import io.fabric8.kubernetes.api.model.Service
-import io.fabric8.kubernetes.api.model.ServiceBuilder
-import org.apache.groovy.util.Maps
+import io.fabric8.kubernetes.api.model.IntOrString;
+import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodBuilder;
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServiceBuilder;
 
-class NginxResources
+import java.util.Map;
+
+public class NginxResources
 {
+    public static final Map<String, String> SELECTOR = Map.of( "app", "nginx" );
 
-    public static final Map<String, String> SELECTOR = Maps.of( "app", "nginx" )
-
-    public static final String SIMPLE_NGINX_POD_NAME = "nginx-test"
+    public static final String SIMPLE_NGINX_POD_NAME = "nginx-test";
 
     public static final Pod SIMPLE_NGINX_POD = new PodBuilder()
             .withNewMetadata()
@@ -39,21 +39,21 @@ class NginxResources
             .endReadinessProbe()
             .endContainer()
             .endSpec()
-            .build()
+            .build();
 
-    public static final String SIMPLE_NGINX_SERVICE_NAME = "nginx-service"
+    public static final String SIMPLE_NGINX_SERVICE_NAME = "nginx-service";
 
     public static final Service SIMPLE_NGINX_SERVICE = new ServiceBuilder()
             .withNewMetadata()
-                .withName( SIMPLE_NGINX_SERVICE_NAME )
+            .withName( SIMPLE_NGINX_SERVICE_NAME )
             .endMetadata()
             .withNewSpec()
-                .addToSelector( SELECTOR )
-                .addNewPort().withName( "http" ).withPort( 80 ).endPort()
+            .addToSelector( SELECTOR )
+            .addNewPort().withName( "http" ).withPort( 80 ).endPort()
             .endSpec()
-            .build()
+            .build();
 
-    public static final String EXTERNAL_NGINX_SERVICE_NAME = "nginx-external"
+    public static final String EXTERNAL_NGINX_SERVICE_NAME = "nginx-external";
 
     public static final Service EXTERNAL_NGINX_SERVICE = new ServiceBuilder()
             .withNewMetadata()
@@ -62,12 +62,11 @@ class NginxResources
             .withNewSpec()
             .addToSelector( SELECTOR )
             .addNewPort()
-                .withName( "http" )
-                .withPort( 61819 ) //hope this is free!!
-                .withTargetPort( new IntOrString( 80 ) )
+            .withName( "http" )
+            .withPort( 61819 ) //hope this is free!!
+            .withTargetPort( new IntOrString( 80 ) )
             .endPort()
             .withType("LoadBalancer" )
             .endSpec()
-            .build()
-
+            .build();
 }

@@ -4,19 +4,18 @@
  * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
  */
 
-package se.laz.casual.test.k8s.integration
+package se.laz.casual.test.k8s.sample;
 
+import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodBuilder;
 
-import io.fabric8.kubernetes.api.model.Pod
-import io.fabric8.kubernetes.api.model.PodBuilder
-import org.apache.groovy.util.Maps
+import java.util.Map;
 
-class AlpineResources
+public class AlpineResources
 {
+    public static final Map<String, String> SELECTOR = Map.of( "app", "alpine" );
 
-    public static final Map<String, String> SELECTOR = Maps.of( "app", "alpine" )
-
-    public static final String SIMPLE_ALPINE_POD_NAME = "alpine-test"
+    public static final String SIMPLE_ALPINE_POD_NAME = "alpine-test";
 
     public static final Pod SIMPLE_ALPINE_POD = new PodBuilder()
             .withNewMetadata()
@@ -30,6 +29,5 @@ class AlpineResources
             .withCommand( "sh", "-c", "echo \"up\";trap exit SIGTERM;while true\ndo\n  sleep 0.001\ndone" )
             .endContainer()
             .endSpec()
-            .build()
-
+            .build();
 }

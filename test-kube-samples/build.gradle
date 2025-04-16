@@ -15,9 +15,6 @@ defaultTasks 'build'
 dependencies {
     api 'io.fabric8:kubernetes-client:7.1.0'
 
-    testImplementation libs.system_lambda
-    testImplementation project(":test-kube-samples")
-
     // for spock
     testImplementation platform(libs.groovy_bom)
     testImplementation libs.groovy

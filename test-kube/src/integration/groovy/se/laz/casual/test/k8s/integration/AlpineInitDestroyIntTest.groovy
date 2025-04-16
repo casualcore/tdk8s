@@ -10,6 +10,7 @@ package se.laz.casual.test.k8s.integration
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import se.laz.casual.test.k8s.TestKube
+import se.laz.casual.test.k8s.sample.AlpineResources
 import spock.lang.Shared
 import spock.lang.Specification
 
