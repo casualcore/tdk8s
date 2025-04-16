@@ -6,6 +6,7 @@
 
 package se.laz.casual.test.k8s.connection;
 
+@SuppressWarnings( "java:S110" ) // Deep inheritance ok from RuntimeException.
 public class ConnectionCloseException extends ConnectionException
 {
     private static final long serialVersionUID = 1L;

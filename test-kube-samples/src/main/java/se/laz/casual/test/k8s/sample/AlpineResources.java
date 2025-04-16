@@ -11,8 +11,12 @@ import io.fabric8.kubernetes.api.model.PodBuilder;
 
 import java.util.Map;
 
-public class AlpineResources
+public final class AlpineResources
 {
+    private AlpineResources()
+    {
+    }
+
     public static final Map<String, String> SELECTOR = Map.of( "app", "alpine" );
 
     public static final String SIMPLE_ALPINE_POD_NAME = "alpine-test";

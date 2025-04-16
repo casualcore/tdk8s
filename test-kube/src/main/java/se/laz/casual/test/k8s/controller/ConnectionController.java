@@ -20,13 +20,12 @@ import se.laz.casual.test.k8s.connection.PortForwardedConnection;
 import se.laz.casual.test.k8s.connection.ServiceConnection;
 import se.laz.casual.test.k8s.runtime.ContainerAwareness;
 
-import java.io.IOException;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
+import static se.laz.casual.test.k8s.connection.NetworkChecker.canConnect;
 
 /**
  * Controller responsible for handling connection requests to resources in the TestKube.
@@ -87,13 +86,10 @@ public class ConnectionController
                         .map( ServicePort::getPort )
                         .orElse( -1 );
                 log.info( ()-> "External IP: " + externalIp + ". External Port: " + externalPort );
-                if( !( externalPort == -1 ) )
+                if( externalPort != -1 && canConnect( externalIp, externalPort ) )
                 {
-                    if( canConnect( externalIp, externalPort ) )
-                    {
-                        log.info( ()->"Connection available externally." );
-                        return new ServiceConnection( externalIp, externalPort );
-                    }
+                    log.info( ()->"Connection available externally." );
+                    return new ServiceConnection( externalIp, externalPort );
                 }
             }
 
@@ -103,20 +99,6 @@ public class ConnectionController
         }
 
         throw new ConnectionException( "Unable to connect to service: " + resource );
-    }
-
-    private boolean canConnect( String host, int port )
-    {
-        try( Socket socket = new Socket() )
-        {
-            socket.connect( new InetSocketAddress( host, port ), 500 );
-            return true;
-        }
-        catch( IOException e )
-        {
-            log.finest( "Unable to connect to service externally." );
-        }
-        return false;
     }
 
 

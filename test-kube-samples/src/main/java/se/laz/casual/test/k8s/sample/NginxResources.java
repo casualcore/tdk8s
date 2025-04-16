@@ -14,8 +14,12 @@ import io.fabric8.kubernetes.api.model.ServiceBuilder;
 
 import java.util.Map;
 
-public class NginxResources
+public final class NginxResources
 {
+    private NginxResources()
+    {
+    }
+
     public static final Map<String, String> SELECTOR = Map.of( "app", "nginx" );
 
     public static final String SIMPLE_NGINX_POD_NAME = "nginx-test";

@@ -14,8 +14,12 @@ import io.fabric8.kubernetes.api.model.ServiceBuilder;
 
 import java.util.Map;
 
-public class WildflyResources
+public final class WildflyResources
 {
+    private WildflyResources()
+    {
+    }
+
     public static final Map<String, String> SELECTOR = Map.of( "app", "wildfly" );
 
     public static final String SIMPLE_WILDFLY_POD_NAME = "wildfly-test";

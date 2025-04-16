@@ -21,6 +21,10 @@ package se.laz.casual.test.k8s.runtime;
 public class ContainerAwareness
 {
 
+    private ContainerAwareness()
+    {
+    }
+
     public static final String CONTAINER_ENV = "container";
 
     private static boolean container = false;

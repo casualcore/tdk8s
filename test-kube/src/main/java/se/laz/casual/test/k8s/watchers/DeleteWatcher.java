@@ -8,6 +8,7 @@ package se.laz.casual.test.k8s.watchers;
 
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.WatcherException;
+import se.laz.casual.test.k8s.TestKubeException;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -22,25 +23,17 @@ public class DeleteWatcher<T> implements Watcher<T>
     @Override
     public void eventReceived( Action action, T resource )
     {
-        switch( action )
+        if( action == Action.DELETED )
         {
-            case DELETED:
-                log.finest( ()-> "Deleted." );
-                deleteLatch.countDown();
-                break;
-            case MODIFIED:
-                log.finest( ()-> "Modified." );
-                break;
-            case ADDED:
-                log.finest( ()-> "Added." );
-                break;
+            log.finest( ()-> "Deleted." );
+            deleteLatch.countDown();
         }
     }
 
     @Override
     public void onClose( WatcherException cause )
     {
-
+        throw new TestKubeException( "Watch closed exceptional.", cause );
     }
 
     public void waitUntilDeleted()
@@ -52,7 +45,7 @@ public class DeleteWatcher<T> implements Watcher<T>
         catch( InterruptedException e )
         {
             Thread.currentThread().interrupt();
-            throw new RuntimeException( e );
+            throw new TestKubeException( e );
         }
     }
 
@@ -65,7 +58,7 @@ public class DeleteWatcher<T> implements Watcher<T>
         catch( InterruptedException e )
         {
             Thread.currentThread().interrupt();
-            throw new RuntimeException( e );
+            throw new TestKubeException( e );
         }
     }
 }

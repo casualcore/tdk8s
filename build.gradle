@@ -44,21 +44,14 @@ subprojects{
   apply plugin: 'java-library'
   apply from: "$rootProject.projectDir/publish.gradle"
   test {
-    finalizedBy jacocoTestReport
-    useJUnitPlatform()
-      testLogging {
-        events "passed", "skipped", "failed"
-      }
-    }
+      finalizedBy jacocoTestReport
+      jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED', '--add-opens=java.base/java.util=ALL-UNNAMED'
+  }
 
   jacocoTestReport {
     reports {
       xml.required = true
       csv.required = false
     }
-  }
-
-  test{
-    jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED', '--add-opens=java.base/java.util=ALL-UNNAMED'
   }
 }

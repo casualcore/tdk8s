@@ -12,9 +12,10 @@ import java.util.Objects;
 
 public abstract class AbstractResourceStore<T> implements ResourceStore<T>
 {
+    public static final String NAME_IS_NULL = "Name is null.";
     protected final Map<String, T> resources;
 
-    public AbstractResourceStore()
+    protected AbstractResourceStore()
     {
         resources = new HashMap<>();
     }
@@ -22,7 +23,7 @@ public abstract class AbstractResourceStore<T> implements ResourceStore<T>
     @Override
     public T get( String name )
     {
-        Objects.requireNonNull( name, "Name is null." );
+        Objects.requireNonNull( name, NAME_IS_NULL );
 
         if( !resources.containsKey( name ) )
         {
@@ -39,7 +40,7 @@ public abstract class AbstractResourceStore<T> implements ResourceStore<T>
     @Override
     public void put( String name, T value )
     {
-        Objects.requireNonNull( name, "Name is null." );
+        Objects.requireNonNull( name, NAME_IS_NULL );
         Objects.requireNonNull( value, "Value is null." );
 
         resources.put( name, value );
@@ -56,7 +57,7 @@ public abstract class AbstractResourceStore<T> implements ResourceStore<T>
     @Override
     public T remove( String name )
     {
-        Objects.requireNonNull( name, "Name is null." );
+        Objects.requireNonNull( name, NAME_IS_NULL );
 
         T resource = resources.remove( name );
         if( resource == null )

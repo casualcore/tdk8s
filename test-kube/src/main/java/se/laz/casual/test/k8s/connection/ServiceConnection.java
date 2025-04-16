@@ -41,5 +41,6 @@ public class ServiceConnection implements KubeConnection
     @Override
     public void close()
     {
+        //Do nothing.
     }
 }
