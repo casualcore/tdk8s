@@ -32,6 +32,14 @@ public interface ResourceStore<T>
     Map<String,T> getAll();
 
     /**
+     * Checks if a resource with the given name is stored.
+     *
+     * @param name of the resource.
+     * @return if contained in the store or not.
+     */
+    boolean contains( String name );
+
+    /**
      * Store the resource with the provided name.
      *
      * @param name of the resource, used for retrieval later.

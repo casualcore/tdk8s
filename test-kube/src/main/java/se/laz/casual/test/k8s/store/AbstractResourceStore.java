@@ -38,6 +38,14 @@ public abstract class AbstractResourceStore<T> implements ResourceStore<T>
     }
 
     @Override
+    public boolean contains( String name )
+    {
+        Objects.requireNonNull( name, NAME_IS_NULL );
+
+        return resources.containsKey( name );
+    }
+
+    @Override
     public void put( String name, T value )
     {
         Objects.requireNonNull( name, NAME_IS_NULL );

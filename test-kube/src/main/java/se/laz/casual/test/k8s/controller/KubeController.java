@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class KubeController
 {
-    private final TestKube testKube;
+    private final ResourceLookupController resourceLookupController;
     private final ProvisioningController provisioningController;
     private final ConnectionController connectionController;
     private final ExecController execController;
@@ -24,12 +24,12 @@ public class KubeController
 
     public KubeController( TestKube testKube )
     {
-        this.testKube = testKube;
-        this.provisioningController = new ProvisioningController( testKube );
-        this.connectionController = new ConnectionController( testKube );
-        this.execController = new ExecController( testKube );
-        this.logController = new LogController( testKube );
-        this.fileTransferController = new FileTransferController( testKube );
+        this.resourceLookupController = new ResourceLookupController( testKube.getClient(), testKube.getResourcesStore() );
+        this.provisioningController = new ProvisioningController( testKube.getClient(), testKube.getResourcesStore(), testKube.getLabel() );
+        this.connectionController = new ConnectionController( resourceLookupController );
+        this.execController = new ExecController( resourceLookupController );
+        this.logController = new LogController( resourceLookupController );
+        this.fileTransferController = new FileTransferController( resourceLookupController );
     }
 
     // Provisioning Controller

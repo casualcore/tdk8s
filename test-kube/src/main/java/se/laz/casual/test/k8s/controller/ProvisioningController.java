@@ -8,8 +8,9 @@ package se.laz.casual.test.k8s.controller;
 
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watch;
-import se.laz.casual.test.k8s.TestKube;
+import se.laz.casual.test.k8s.store.ResourcesStore;
 import se.laz.casual.test.k8s.watchers.DeleteWatcher;
 
 import java.util.ArrayList;
@@ -27,11 +28,15 @@ public class ProvisioningController
     private final List<Watch> watches = new ArrayList<>();
     private final List<DeleteWatcher<?>> deleteWatchers = new ArrayList<>();
 
-    private final TestKube testKube;
+    private final KubernetesClient client;
+    private final ResourcesStore resourcesStore;
+    private final String labelValue;
 
-    public ProvisioningController( TestKube testKube )
+    public ProvisioningController( KubernetesClient client, ResourcesStore resourcesStore, String labelValue )
     {
-        this.testKube = testKube;
+        this.client = client;
+        this.resourcesStore = resourcesStore;
+        this.labelValue = labelValue;
     }
 
     public void init()
@@ -42,34 +47,34 @@ public class ProvisioningController
 
     public void initAsync()
     {
-        for( Map.Entry<String, Pod> entry : testKube.getPods().entrySet() )
+        for( Map.Entry<String, Pod> entry : resourcesStore.getPods().entrySet() )
         {
             String name = entry.getKey();
             Pod p = entry.getValue();
             Map<String,String> labels = p.getMetadata().getLabels();
-            labels.put( RESOURCE_LABEL_NAME, testKube.getLabel() );
+            labels.put( RESOURCE_LABEL_NAME, labelValue );
             Pod updated = p.edit().editMetadata().withLabels( labels ).endMetadata().build();
-            updated = testKube.getClient().pods().resource( updated ).serverSideApply();
-            testKube.getResourcesStore().putPod( name, updated );
+            updated = client.pods().resource( updated ).serverSideApply();
+            resourcesStore.putPod( name, updated );
         }
 
-        for( Map.Entry<String, Service> entry : testKube.getServices().entrySet() )
+        for( Map.Entry<String, Service> entry : resourcesStore.getServices().entrySet() )
         {
             String name = entry.getKey();
             Service s = entry.getValue();
             Map<String,String> labels = s.getMetadata().getLabels();
-            labels.put( RESOURCE_LABEL_NAME, testKube.getLabel() );
+            labels.put( RESOURCE_LABEL_NAME, labelValue );
             Service updated = s.edit().editMetadata().withLabels( labels ).endMetadata().build();
-            updated = testKube.getClient().services().resource( updated ).serverSideApply();
-            testKube.getResourcesStore().putService( name, updated );
+            updated = client.services().resource( updated ).serverSideApply();
+            resourcesStore.putService( name, updated );
         }
     }
 
     public void waitUntilReady()
     {
-        for( Pod p: testKube.getPods().values() )
+        for( Pod p: resourcesStore.getPods().values() )
         {
-            testKube.getClient().pods().resource( p ).waitUntilReady( 1, TimeUnit.MINUTES );
+            client.pods().resource( p ).waitUntilReady( 1, TimeUnit.MINUTES );
         }
     }
 
@@ -81,25 +86,25 @@ public class ProvisioningController
 
     public void destroyAsync()
     {
-        for( Pod p: testKube.getClient().pods().withLabel( RESOURCE_LABEL_NAME, testKube.getLabel() ).list().getItems() )
+        for( Pod p: client.pods().withLabel( RESOURCE_LABEL_NAME, labelValue ).list().getItems() )
         {
             DeleteWatcher<Pod> podWatcher = new DeleteWatcher<>();
-            Watch watch = testKube.getClient().pods().resource( p ).watch( podWatcher );
+            Watch watch = client.pods().resource( p ).watch( podWatcher );
 
             watches.add( watch );
             deleteWatchers.add( podWatcher );
 
-            testKube.getClient().pods().resource( p ).delete();
+            client.pods().resource( p ).delete();
         }
-        for( Service s: testKube.getClient().services().withLabel( RESOURCE_LABEL_NAME, testKube.getLabel() ).list().getItems() )
+        for( Service s: client.services().withLabel( RESOURCE_LABEL_NAME, labelValue ).list().getItems() )
         {
             DeleteWatcher<Service> serviceWatcher = new DeleteWatcher<>();
-            Watch watch = testKube.getClient().services().resource( s ).watch( serviceWatcher );
+            Watch watch = client.services().resource( s ).watch( serviceWatcher );
 
             watches.add( watch );
             deleteWatchers.add( serviceWatcher );
 
-            testKube.getClient().services().resource( s ).delete();
+            client.services().resource( s ).delete();
         }
     }
 

@@ -45,6 +45,36 @@ class AbstractResourceStoreTest extends Specification
         thrown NullPointerException
     }
 
+    def "Put, check contains."()
+    {
+        given:
+        instance.put( "some", "value" )
+        instance.put( "another", "interest" )
+
+        when:
+        boolean actual = instance.contains( name )
+
+        then:
+        actual == expected
+
+        where:
+        name      || expected
+        "some"    || true
+        "another" || true
+        ""        || false
+        "bob"     || false
+        "value"   || false
+    }
+
+    def "Check contains, null, throws NullPointerException."()
+    {
+        when:
+        instance.contains( null )
+
+        then:
+        thrown NullPointerException
+    }
+
     def "Put and retrieve all, retrieved."()
     {
         given:

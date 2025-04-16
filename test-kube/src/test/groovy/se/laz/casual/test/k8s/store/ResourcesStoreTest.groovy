@@ -96,6 +96,8 @@ class ResourcesStoreTest extends Specification
         then:
         instance.getPods() == [(podName1): pod1]
         instance.getPod( podName1 ) == pod1
+        instance.containsPod( podName1 )
+        !instance.containsPod( podName2 )
 
         when:
         instance.putPod( podName2, pod2 )
@@ -104,6 +106,8 @@ class ResourcesStoreTest extends Specification
         instance.getPods() == [(podName1): pod1, (podName2): pod2]
         instance.getPod( podName1 ) == pod1
         instance.getPod( podName2 ) == pod2
+        instance.containsPod( podName1 )
+        instance.containsPod( podName2 )
 
         when:
         instance.putPod( podName1, pod2 )
@@ -113,12 +117,17 @@ class ResourcesStoreTest extends Specification
         instance.getPods() == [(podName1): pod2, (podName2): pod1]
         instance.getPod( podName1 ) == pod2
         instance.getPod( podName2 ) == pod1
+        instance.containsPod( podName1 )
+        instance.containsPod( podName2 )
 
         when:
         instance.removePod( podName1 )
 
         then:
         instance.getPods() == [(podName2): pod1 ]
+        !instance.containsPod( podName1 )
+        instance.containsPod( podName2 )
+
     }
 
     def "Retrieve non existent service, throws ResourceNotFoundException"()
@@ -147,6 +156,8 @@ class ResourcesStoreTest extends Specification
         then:
         instance.getServices() == [(serviceName1): service1]
         instance.getService( serviceName1 ) == service1
+        instance.containsService( serviceName1 )
+        !instance.containsService( serviceName2 )
 
         when:
         instance.putService( serviceName2, service2 )
@@ -155,6 +166,8 @@ class ResourcesStoreTest extends Specification
         instance.getServices() == [(serviceName1): service1, (serviceName2): service2]
         instance.getService( serviceName1 ) == service1
         instance.getService( serviceName2 ) == service2
+        instance.containsService( serviceName1 )
+        instance.containsService( serviceName2 )
 
         when:
         instance.putService( serviceName1, service2 )
@@ -164,12 +177,16 @@ class ResourcesStoreTest extends Specification
         instance.getServices() == [(serviceName1): service2, (serviceName2): service1]
         instance.getService( serviceName1 ) == service2
         instance.getService( serviceName2 ) == service1
+        instance.containsService( serviceName1 )
+        instance.containsService( serviceName2 )
 
         when:
         instance.removeService( serviceName1 )
 
         then:
         instance.getServices() == [(serviceName2): service1 ]
+        !instance.containsService( serviceName1 )
+        instance.containsService( serviceName2 )
     }
 
     def "Put all pods."()

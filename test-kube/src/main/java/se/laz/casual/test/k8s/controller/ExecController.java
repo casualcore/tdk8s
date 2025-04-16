@@ -6,40 +6,32 @@
 
 package se.laz.casual.test.k8s.controller;
 
-import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.client.ResourceNotFoundException;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.fabric8.kubernetes.client.dsl.PodResource;
-import se.laz.casual.test.k8s.TestKube;
 import se.laz.casual.test.k8s.exec.ExecResult;
 
 import java.io.ByteArrayOutputStream;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Execute commands against a running pod.
+ */
 public class ExecController
 {
-    private final TestKube testKube;
+    private final ResourceLookupController lookupController;
 
-    public ExecController( TestKube testKube )
+    public ExecController( ResourceLookupController lookupController )
     {
-        this.testKube = testKube;
+        this.lookupController = lookupController;
     }
 
     public ExecResult executeCommand( String pod, String... command )
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        PodResource podResource = null;
-
-        if( this.testKube.getResourcesStore().getPods().containsKey( pod ) )
-        {
-            Pod p = this.testKube.getResourcesStore().getPod( pod );
-            podResource = this.testKube.getClient().pods().resource( p );
-        }
-
-        if( podResource == null )
-        {
-            podResource = testKube.getClient().pods().withName( pod );
-        }
+        PodResource podResource = lookupController.getPodResource( pod )
+                .orElseThrow( ()-> new ResourceNotFoundException( "Resource not found: " + pod ) );
 
         try( ExecWatch watch = podResource.writingOutput( out ).writingError( out )
                 .exec( command ) )

@@ -6,9 +6,7 @@
 
 package se.laz.casual.test.k8s.controller;
 
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.dsl.PodResource;
-import se.laz.casual.test.k8s.TestKube;
 import se.laz.casual.test.k8s.store.ResourceNotFoundException;
 
 import java.nio.file.Path;
@@ -18,11 +16,11 @@ import java.nio.file.Path;
  */
 public class FileTransferController
 {
-    private final TestKube testKube;
+    private final ResourceLookupController lookupController;
 
-    public FileTransferController( TestKube testKube )
+    public FileTransferController( ResourceLookupController lookupController )
     {
-        this.testKube = testKube;
+        this.lookupController = lookupController;
     }
 
     public boolean download( String pod, String source, Path destination )
@@ -41,23 +39,7 @@ public class FileTransferController
 
     private PodResource getPodResource( String pod )
     {
-        Pod p = null;
-
-        if( this.testKube.getResourcesStore().getPods().containsKey( pod ) )
-        {
-            p = this.testKube.getResourcesStore().getPod( pod );
-        }
-
-        if( p == null )
-        {
-            p = this.testKube.getClient().pods().withName( pod ).get();
-        }
-
-        if( p == null )
-        {
-            throw new ResourceNotFoundException( "Unable to find pod " + pod );
-        }
-
-        return this.testKube.getClient().pods().resource( p );
+        return lookupController.getPodResource( pod )
+                .orElseThrow( ()-> new ResourceNotFoundException( "Unable to find pod " + pod ) );
     }
 }

@@ -6,20 +6,17 @@
 
 package se.laz.casual.test.k8s.controller;
 
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.dsl.PodResource;
-import se.laz.casual.test.k8s.TestKube;
 import se.laz.casual.test.k8s.store.ResourceNotFoundException;
 
 public class LogController
 {
-    private final TestKube testKube;
+    private final ResourceLookupController lookupController;
 
-    public LogController( TestKube testKube )
+    public LogController( ResourceLookupController lookupController )
     {
-        this.testKube = testKube;
+        this.lookupController = lookupController;
     }
-
 
     public String getLog( String pod )
     {
@@ -44,23 +41,7 @@ public class LogController
 
     private PodResource getPodResource( String pod )
     {
-        Pod p = null;
-
-        if( this.testKube.getResourcesStore().getPods().containsKey( pod ) )
-        {
-            p = this.testKube.getResourcesStore().getPod( pod );
-        }
-
-        if( p == null )
-        {
-            p = this.testKube.getClient().pods().withName( pod ).get();
-        }
-
-        if( p == null )
-        {
-            throw new ResourceNotFoundException( "Unable to find pod " + pod );
-        }
-
-        return this.testKube.getClient().pods().resource( p );
+        return lookupController.getPodResource( pod )
+                .orElseThrow( ()-> new ResourceNotFoundException( "Unable to find pod " + pod ) );
     }
 }

@@ -48,6 +48,17 @@ public class ResourcesStore
     }
 
     /**
+     * Check if the pod with name is stored.
+     *
+     * @param name of the pod.
+     * @return if it is stored.
+     */
+    public boolean containsPod( String name )
+    {
+        return this.podStore.contains( name );
+    }
+
+    /**
      * Store a pod by name.
      * @param name of the pod to store.
      * @param pod to store.
@@ -99,6 +110,17 @@ public class ResourcesStore
     public Map<String,Service> getServices( )
     {
         return this.serviceStore.getAll();
+    }
+
+    /**
+     * Check if the service with name is stored.
+     *
+     * @param name of the service.
+     * @return if it is stored.
+     */
+    public boolean containsService( String name )
+    {
+        return this.serviceStore.contains( name );
     }
 
     /**
