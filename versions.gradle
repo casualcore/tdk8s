@@ -9,11 +9,9 @@ group = 'se.laz.casual'
 version = '0.0.1-beta-SNAPSHOT'
 
 ext.libs = [
-
   objenesis: 'org.objenesis:objenesis:3.4',
-  microprofile_config: 'org.eclipse.microprofile.config:microprofile-config-api:1.4',
-  // test
 
+  // test
   system_lambda: 'com.github.stefanbirkner:system-lambda:1.2.1',
   // for spock
   groovy_bom: 'org.apache.groovy:groovy-bom:4.0.5',
