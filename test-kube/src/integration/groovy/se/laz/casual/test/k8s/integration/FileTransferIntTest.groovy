@@ -22,7 +22,7 @@ class FileTransferIntTest extends Specification
     @Shared
     KubernetesClient client = new KubernetesClientBuilder().build()
     @Shared
-    String id = FileTransferIntTest.class.getSimpleName(  )
+    String id = FileTransferIntTest.class.getSimpleName()
     @Shared
     TestKube instance
     @Shared
@@ -31,35 +31,35 @@ class FileTransferIntTest extends Specification
     def setupSpec()
     {
 
-        List<Pod> pods = client.pods(  ).withLabel( "TestKube", id ).list().getItems(  )
+        List<Pod> pods = client.pods().withLabel( "TestKube", id ).list().getItems()
 
-        assert pods.size(  ) == 0
+        assert pods.size() == 0
 
         instance = TestKube.newBuilder()
                 .label( id )
                 .addPod( podName, NginxResources.SIMPLE_NGINX_POD )
                 .build()
 
-        instance.init(  )
+        instance.init()
 
     }
 
     def cleanupSpec()
     {
-        instance.destroy(  )
+        instance.destroy()
 
-        List<Pod> pods = client.pods(  ).withLabel( "TestKube", id ).list().getItems(  )
+        List<Pod> pods = client.pods().withLabel( "TestKube", id ).list().getItems()
 
-        assert pods.size(  ) == 0
+        assert pods.size() == 0
     }
 
-    def "Retrieve file from the pod."()
+    def "Download file from the running pod."()
     {
         given:
         Path p = Files.createTempFile( "FileTransferIntTest", "txt" )
 
         when:
-        boolean successful = client.pods( ).withName( podName ).file( "/docker-entrypoint.sh" ).copy( p )
+        boolean successful = instance.getController().download( podName, "/docker-entrypoint.sh", p )
 
         String actual = new String( Files.readAllBytes( p ) )
 
@@ -69,7 +69,7 @@ class FileTransferIntTest extends Specification
         actual.startsWith( "#!/bin/sh" )
 
         cleanup:
-        p.toFile(  ).delete(  )
+        p.toFile().delete()
     }
 
     def "Upload file to the pod."()
@@ -80,7 +80,7 @@ class FileTransferIntTest extends Specification
         assert f.exists(  )
 
         when:
-        boolean successful = client.pods().withName( podName ).file( "/tmp/test.txt").upload( f.toPath(  ) )
+        boolean successful = instance.getController().upload( podName, "/tmp/test.txt", f.toPath(  ) )
 
         then:
         successful

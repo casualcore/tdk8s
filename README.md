@@ -21,6 +21,7 @@ TODO: build status badges etc
 * [Advanced Usage](#advanced-usages)
   * [Execute Commands](#execute-commands)
   * [Retrieve Log Files](#retrieve-log-files)
+  * [Transfer Files](#transfer-files)
   * [`port-forward`](#connect-via-port-forward) 
   * [Asynchronous Provisioning](#asynchronous-provisioning)
   * [k8s Resources](#k8s-resources)
@@ -260,6 +261,21 @@ String lastTen = instance.getController().getLogTail( podName, 10 );
 ZoneDateTime afterInit = ZonedDateTime.now();
 String since = afterInit.format( DateTimeFormatter.ISO_OFFSET_DATE_TIME );
 String sinceLog = instance.getController().getLogSince( podName, since );
+```
+
+### Transfer Files
+
+If you need to transfer files from a running pod you can use the following `KubeController` methods:
+
+* `download` - download a file from the pod to local file system.
+* `upload` - upload a local file system file to the pod file system.
+
+Both methods return boolean success value once complete.
+
+Examples:
+```java
+boolean downloadSuccess = instance.getController().download( podName, "/tmp/podfile", localDstFile.toPath() );
+boolean uploadSuccess = instance.getController().upload( podName, "./localfile.txt", podFile.toPath() );
 ```
 
 ### Connect via `port-forward`

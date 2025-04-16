@@ -10,6 +10,7 @@ import se.laz.casual.test.k8s.TestKube;
 import se.laz.casual.test.k8s.connection.KubeConnection;
 import se.laz.casual.test.k8s.exec.ExecResult;
 
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
 public class KubeController
@@ -19,6 +20,7 @@ public class KubeController
     private final ConnectionController connectionController;
     private final ExecController execController;
     private final LogController logController;
+    private final FileTransferController fileTransferController;
 
     public KubeController( TestKube testKube )
     {
@@ -27,6 +29,7 @@ public class KubeController
         this.connectionController = new ConnectionController( testKube );
         this.execController = new ExecController( testKube );
         this.logController = new LogController( testKube );
+        this.fileTransferController = new FileTransferController( testKube );
     }
 
     // Provisioning Controller
@@ -100,5 +103,17 @@ public class KubeController
     public String getLogSince( String pod, String sinceTime )
     {
         return this.logController.getLogSince( pod, sinceTime );
+    }
+
+    // File Transfer Controller
+
+    public boolean download( String pod, String source, Path destination )
+    {
+        return this.fileTransferController.download( pod, source, destination );
+    }
+
+    public boolean upload( String pod, String source, Path destination )
+    {
+        return this.fileTransferController.upload( pod, source, destination );
     }
 }
