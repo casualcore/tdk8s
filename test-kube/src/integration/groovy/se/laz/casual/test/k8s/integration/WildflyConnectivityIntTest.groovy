@@ -19,6 +19,8 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
+import static se.laz.casual.test.k8s.TestKube.RESOURCE_LABEL_NAME
+
 class WildflyConnectivityIntTest extends Specification
 {
     @Shared
@@ -35,8 +37,8 @@ class WildflyConnectivityIntTest extends Specification
     def setupSpec()
     {
 
-        assert client.pods(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 0
-        assert client.services(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 0
+        assert client.pods(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
+        assert client.services(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
 
         instance = TestKube.newBuilder()
                 .label( id )
@@ -53,8 +55,8 @@ class WildflyConnectivityIntTest extends Specification
     {
         instance.destroy(  )
 
-        assert client.pods(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 0
-        assert client.services(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 0
+        assert client.pods(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
+        assert client.services(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
     }
 
     def "Connection to pod, port 9990 using port forward."()

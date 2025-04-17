@@ -17,6 +17,8 @@ import spock.lang.Specification
 import java.nio.file.Files
 import java.nio.file.Path
 
+import static se.laz.casual.test.k8s.TestKube.RESOURCE_LABEL_NAME
+
 class FileTransferIntTest extends Specification
 {
     @Shared
@@ -31,7 +33,7 @@ class FileTransferIntTest extends Specification
     def setupSpec()
     {
 
-        List<Pod> pods = client.pods().withLabel( "TestKube", id ).list().getItems()
+        List<Pod> pods = client.pods().withLabel( RESOURCE_LABEL_NAME, id ).list().getItems()
 
         assert pods.size() == 0
 
@@ -48,7 +50,7 @@ class FileTransferIntTest extends Specification
     {
         instance.destroy()
 
-        List<Pod> pods = client.pods().withLabel( "TestKube", id ).list().getItems()
+        List<Pod> pods = client.pods().withLabel( RESOURCE_LABEL_NAME, id ).list().getItems()
 
         assert pods.size() == 0
     }

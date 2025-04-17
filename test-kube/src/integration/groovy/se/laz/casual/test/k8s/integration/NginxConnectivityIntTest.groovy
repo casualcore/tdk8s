@@ -19,6 +19,8 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
+import static se.laz.casual.test.k8s.TestKube.RESOURCE_LABEL_NAME
+
 class NginxConnectivityIntTest extends Specification
 {
     @Shared
@@ -35,8 +37,8 @@ class NginxConnectivityIntTest extends Specification
     def setupSpec()
     {
 
-        assert client.pods(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 0
-        assert client.services(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 0
+        assert client.pods(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
+        assert client.services(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
 
         instance = TestKube.newBuilder()
                 .label( id )
@@ -53,8 +55,8 @@ class NginxConnectivityIntTest extends Specification
     {
         instance.destroy(  )
 
-        assert client.pods(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 0
-        assert client.services(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 0
+        assert client.pods(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
+        assert client.services(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
     }
 
     def "Connect to pod, port 80, using port forward."()

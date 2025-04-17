@@ -18,13 +18,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static se.laz.casual.test.k8s.TestKube.RESOURCE_LABEL_NAME;
+
 /**
  * Controller responsible for provisioning and destruction of
  * resources within the TestKube.
  */
 public class ProvisioningController
 {
-    public static final String RESOURCE_LABEL_NAME = "TestKube";
     private final List<Watch> watches = new ArrayList<>();
     private final List<DeleteWatcher<?>> deleteWatchers = new ArrayList<>();
 

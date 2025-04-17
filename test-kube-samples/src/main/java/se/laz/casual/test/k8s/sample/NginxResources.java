@@ -73,4 +73,42 @@ public final class NginxResources
             .withType("LoadBalancer" )
             .endSpec()
             .build();
+
+    public static final Map<String, String> SELECTOR2 = Map.of( "app", "nginx2" );
+
+    public static final String SIMPLE_NGINX_POD_NAME2 = "nginx-test2";
+
+    public static final Pod SIMPLE_NGINX_POD2 = new PodBuilder()
+            .withNewMetadata()
+            .withName( SIMPLE_NGINX_POD_NAME2 )
+            .addToLabels( SELECTOR2 )
+            .endMetadata()
+            .withNewSpec()
+            .addNewContainer()
+            .withName( "nginx" )
+            .withImage( "nginx:1.27.4" )
+            .addNewPort().withContainerPort( 80 ).endPort()
+            .withNewReadinessProbe()
+            .withNewTcpSocket()
+            .withNewPort()
+            .withValue( 80 )
+            .endPort()
+            .endTcpSocket()
+            .endReadinessProbe()
+            .endContainer()
+            .endSpec()
+            .build();
+
+    public static final String SIMPLE_NGINX_SERVICE_NAME2 = "nginx-service2";
+
+    public static final Service SIMPLE_NGINX_SERVICE2 = new ServiceBuilder()
+            .withNewMetadata()
+            .withName( SIMPLE_NGINX_SERVICE_NAME2 )
+            .endMetadata()
+            .withNewSpec()
+            .addToSelector( SELECTOR2 )
+            .addNewPort().withName( "http" ).withPort( 80 ).endPort()
+            .endSpec()
+            .build();
+
 }

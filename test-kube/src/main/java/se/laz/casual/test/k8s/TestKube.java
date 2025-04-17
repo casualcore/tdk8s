@@ -46,6 +46,7 @@ import java.util.UUID;
  */
 public class TestKube
 {
+    public static final String RESOURCE_LABEL_NAME = "tdk8s";
     private final KubernetesClient client;
     private final String label;
     private final ResourcesStore resourcesStore;
@@ -105,6 +106,21 @@ public class TestKube
         return kubeController;
     }
 
+    public void init()
+    {
+        this.kubeController.init();
+    }
+
+    public void destroy()
+    {
+        this.kubeController.destroy();
+    }
+
+    public KubeConnection getConnection( String resource, int targetPort )
+    {
+        return this.kubeController.getConnection( resource, targetPort );
+    }
+
     @Override
     public String toString()
     {
@@ -116,24 +132,9 @@ public class TestKube
                 '}';
     }
 
-    public void init()
-    {
-        this.kubeController.init();
-    }
-
-    public void destroy()
-    {
-        this.kubeController.destroy();
-    }
-
     public static Builder newBuilder()
     {
         return new Builder();
-    }
-
-    public KubeConnection getConnection( String resource, int targetPort )
-    {
-        return this.kubeController.getConnection( resource, targetPort );
     }
 
     public static final class Builder

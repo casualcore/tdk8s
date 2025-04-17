@@ -17,6 +17,8 @@ import spock.lang.Specification
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
+import static se.laz.casual.test.k8s.TestKube.RESOURCE_LABEL_NAME
+
 class LoggingIntTest extends Specification
 {
     @Shared
@@ -36,7 +38,7 @@ class LoggingIntTest extends Specification
     def setupSpec()
     {
 
-        List<Pod> pods = client.pods(  ).withLabel( "TestKube", id ).list().getItems(  )
+        List<Pod> pods = client.pods(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  )
 
         assert pods.size(  ) == 0
 
@@ -54,7 +56,7 @@ class LoggingIntTest extends Specification
     {
         instance.destroy(  )
 
-        List<Pod> pods = client.pods(  ).withLabel( "TestKube", id ).list().getItems(  )
+        List<Pod> pods = client.pods(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  )
 
         assert pods.size(  ) == 0
     }

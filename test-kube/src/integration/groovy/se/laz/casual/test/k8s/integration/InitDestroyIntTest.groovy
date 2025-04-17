@@ -15,6 +15,8 @@ import se.laz.casual.test.k8s.sample.NginxResources
 import spock.lang.Shared
 import spock.lang.Specification
 
+import static se.laz.casual.test.k8s.TestKube.RESOURCE_LABEL_NAME
+
 class InitDestroyIntTest extends Specification
 {
     @Shared
@@ -26,14 +28,14 @@ class InitDestroyIntTest extends Specification
 
     def setupSpec()
     {
-        assert client.pods(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 0
-        assert client.services(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 0
+        assert client.pods(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
+        assert client.services(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
     }
 
     def cleanupSpec()
     {
-        assert client.pods(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 0
-        assert client.services(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 0
+        assert client.pods(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
+        assert client.services(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
     }
 
     def "Create TestKube with a single pod resource."()
@@ -50,13 +52,13 @@ class InitDestroyIntTest extends Specification
         instance.init()
 
         then:
-        client.pods(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 1
+        client.pods(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 1
 
         when:
         instance.destroy()
 
         then:
-        client.pods(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 0
+        client.pods(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
     }
 
     def "Create TestKube with a single pod resource async."()
@@ -73,25 +75,25 @@ class InitDestroyIntTest extends Specification
         instance.getController().initAsync(  )
 
         then:
-        client.pods(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 1
+        client.pods(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 1
 
         when:
         instance.getController(  ).waitUntilReady(  )
 
         then:
-        client.pods(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 1
+        client.pods(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 1
 
         when:
         instance.getController().destroyAsync(  )
 
         then:
-        client.pods(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 1
+        client.pods(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 1
 
         when:
         instance.getController().waitUntilDestroyed(  )
 
         then:
-        client.pods(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 0
+        client.pods(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
     }
 
     def "Create and destroy single service."()
@@ -107,12 +109,12 @@ class InitDestroyIntTest extends Specification
         instance.init(  )
 
         then:
-        client.services(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 1
+        client.services(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 1
 
         when:
         instance.destroy(  )
 
         then:
-        client.services(  ).withLabel( "TestKube", id ).list().getItems(  ).size(  ) == 0
+        client.services(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
     }
 }
