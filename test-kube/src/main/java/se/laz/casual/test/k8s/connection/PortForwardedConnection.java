@@ -15,7 +15,7 @@ import java.io.IOException;
  */
 public class PortForwardedConnection implements KubeConnection
 {
-    private LocalPortForward localPortForward;
+    private final LocalPortForward localPortForward;
 
     public PortForwardedConnection( LocalPortForward localPortForward )
     {

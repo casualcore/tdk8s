@@ -15,14 +15,11 @@ import se.laz.casual.test.k8s.connection.ConnectionException;
 import se.laz.casual.test.k8s.connection.KubeConnection;
 import se.laz.casual.test.k8s.connection.PortForwardedConnection;
 import se.laz.casual.test.k8s.connection.ServiceConnection;
-import se.laz.casual.test.k8s.runtime.ContainerAwareness;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
-import static se.laz.casual.test.k8s.connection.NetworkChecker.canConnect;
 
 /**
  * Controller responsible for handling connection requests to resources in the TestKube.
@@ -34,10 +31,14 @@ public class ConnectionController
     private final List<KubeConnection> connections = new ArrayList<>();
 
     private final ResourceLookupController lookupController;
+    private final NetworkController networkController;
+    private final RuntimeController runtimeController;
 
-    public ConnectionController( ResourceLookupController lookupController )
+    public ConnectionController( ResourceLookupController lookupController, NetworkController networkController, RuntimeController runtimeController )
     {
         this.lookupController = lookupController;
+        this.networkController = networkController;
+        this.runtimeController = runtimeController;
     }
 
     public KubeConnection getConnection( String resource, int targetPort )
@@ -48,17 +49,17 @@ public class ConnectionController
         Service s = sr.get();
 
         // Check if client can connect to the service.
-        if( canConnect( s.getMetadata().getName(), targetPort ) )
+        if( networkController.canConnect( s.getMetadata().getName(), targetPort ) )
         {
             return new ServiceConnection( s.getMetadata().getName(), targetPort );
         }
 
         // Fix for running from outside a container / cluster.
-        if( !ContainerAwareness.inContainer() )
+        if( !runtimeController.inContainer() )
         {
             log.info( ()->"Running outside of a container, attempting to connect externally." );
             // Check if the service should be externally accessible.
-            if( s.getSpec().getType().equals( "LoadBalancer" ) )
+            if( s.getSpec().getType() != null && s.getSpec().getType().equals( "LoadBalancer" ) )
             {
                 // Attempt to access service externally.
                 String externalIp = s.getStatus().getLoadBalancer().getIngress().get( 0 ).getIp();
@@ -68,7 +69,7 @@ public class ConnectionController
                         .map( ServicePort::getPort )
                         .orElse( -1 );
                 log.info( ()-> "External IP: " + externalIp + ". External Port: " + externalPort );
-                if( externalPort != -1 && canConnect( externalIp, externalPort ) )
+                if( externalPort != -1 && networkController.canConnect( externalIp, externalPort ) )
                 {
                     log.info( ()->"Connection available externally." );
                     return new ServiceConnection( externalIp, externalPort );

@@ -16,6 +16,8 @@ import java.util.concurrent.CompletableFuture;
 public class KubeController
 {
     private final ResourceLookupController resourceLookupController;
+    private final NetworkController networkController;
+    private final RuntimeController runtimeController;
     private final ProvisioningController provisioningController;
     private final ConnectionController connectionController;
     private final ExecController execController;
@@ -26,7 +28,9 @@ public class KubeController
     {
         this.resourceLookupController = new ResourceLookupController( testKube.getClient(), testKube.getResourcesStore() );
         this.provisioningController = new ProvisioningController( testKube.getClient(), testKube.getResourcesStore(), testKube.getLabel() );
-        this.connectionController = new ConnectionController( resourceLookupController );
+        this.networkController = new NetworkController();
+        this.runtimeController = new RuntimeController();
+        this.connectionController = new ConnectionController( resourceLookupController, networkController, runtimeController );
         this.execController = new ExecController( resourceLookupController );
         this.logController = new LogController( resourceLookupController );
         this.fileTransferController = new FileTransferController( resourceLookupController );
