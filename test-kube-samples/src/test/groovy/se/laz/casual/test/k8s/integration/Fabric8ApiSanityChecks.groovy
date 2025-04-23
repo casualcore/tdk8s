@@ -8,20 +8,31 @@ package se.laz.casual.test.k8s.integration
 
 import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.api.model.Service
+import se.laz.casual.test.k8s.sample.AlpineResources
+import se.laz.casual.test.k8s.sample.NginxResources
 import se.laz.casual.test.k8s.sample.WildflyResources
 import spock.lang.Specification
 
-class Fabric8EqualityChecks extends Specification
+class Fabric8ApiSanityChecks extends Specification
 {
-    def setup()
-    {
-
-    }
-
     def "Pod objects equal."()
     {
         expect:
         WildflyResources.SIMPLE_WILDFLY_POD == WildflyResources.SIMPLE_WILDFLY_POD
+        NginxResources.SIMPLE_NGINX_POD == NginxResources.SIMPLE_NGINX_POD
+        NginxResources.SIMPLE_NGINX_POD2 == NginxResources.SIMPLE_NGINX_POD2
+        AlpineResources.SIMPLE_ALPINE_POD == AlpineResources.SIMPLE_ALPINE_POD
+
+        WildflyResources.SIMPLE_WILDFLY_POD != NginxResources.SIMPLE_NGINX_POD
+        NginxResources.SIMPLE_NGINX_POD != AlpineResources.SIMPLE_ALPINE_POD
+        NginxResources.SIMPLE_NGINX_POD != NginxResources.SIMPLE_NGINX_POD2
+
+        WildflyResources.SIMPLE_WILDFLY_POD.hashCode(  ) == WildflyResources.SIMPLE_WILDFLY_POD.hashCode(  )
+        NginxResources.SIMPLE_NGINX_POD.hashCode(  ) == NginxResources.SIMPLE_NGINX_POD.hashCode(  )
+        AlpineResources.SIMPLE_ALPINE_POD.hashCode(  ) == AlpineResources.SIMPLE_ALPINE_POD.hashCode(  )
+
+        WildflyResources.SIMPLE_WILDFLY_POD.hashCode(  ) != NginxResources.SIMPLE_NGINX_POD.hashCode(  )
+        NginxResources.SIMPLE_NGINX_POD.hashCode(  ) != AlpineResources.SIMPLE_ALPINE_POD.hashCode(  )
     }
 
     def "Pod objects edited, create new, original not effected."()
@@ -56,6 +67,18 @@ class Fabric8EqualityChecks extends Specification
         expect:
         WildflyResources.SIMPLE_WILDFLY_SERVICE == WildflyResources.SIMPLE_WILDFLY_SERVICE
         WildflyResources.EXTERNAL_WILDFLY_SERVICE == WildflyResources.EXTERNAL_WILDFLY_SERVICE
+        NginxResources.SIMPLE_NGINX_SERVICE == NginxResources.SIMPLE_NGINX_SERVICE
+        NginxResources.SIMPLE_NGINX_SERVICE2 == NginxResources.SIMPLE_NGINX_SERVICE2
+        NginxResources.EXTERNAL_NGINX_SERVICE == NginxResources.EXTERNAL_NGINX_SERVICE
+
+        WildflyResources.SIMPLE_WILDFLY_SERVICE.hashCode(  ) == WildflyResources.SIMPLE_WILDFLY_SERVICE.hashCode(  )
+        NginxResources.SIMPLE_NGINX_SERVICE.hashCode(  ) == NginxResources.SIMPLE_NGINX_SERVICE.hashCode(  )
+
+        WildflyResources.SIMPLE_WILDFLY_SERVICE != NginxResources.SIMPLE_NGINX_SERVICE
+        WildflyResources.EXTERNAL_WILDFLY_SERVICE != NginxResources.EXTERNAL_NGINX_SERVICE
+
+        WildflyResources.SIMPLE_WILDFLY_SERVICE.hashCode(  ) != NginxResources.SIMPLE_NGINX_SERVICE.hashCode(  )
+        WildflyResources.EXTERNAL_WILDFLY_SERVICE.hashCode(  ) != NginxResources.EXTERNAL_NGINX_SERVICE.hashCode(  )
     }
 
     def "Service edited, creates new, original not effected."()

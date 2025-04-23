@@ -32,15 +32,18 @@ class ExecResultTest extends Specification
         when:
         ExecResult instance2 = ExecResult.newBuilder( instance ).build()
         ExecResult instance3 = ExecResult.newBuilder( instance ).exitCode( 1 ).build()
+        ExecResult instance4 = ExecResult.newBuilder( instance ).output( "other" ).build(  )
 
         then:
-        instance == instance
+        instance.equals( instance )
         instance == instance2
         instance != instance3
+        instance != instance4
         instance.hashCode(  ) == instance.hashCode(  )
         instance.hashCode(  ) == instance2.hashCode(  )
         instance3.hashCode(  ) !=  instance.hashCode(  )
         !instance.equals( "string" )
+        !instance.equals( null )
     }
 
     def "Check toString"()

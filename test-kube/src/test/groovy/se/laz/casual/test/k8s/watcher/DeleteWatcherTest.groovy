@@ -8,11 +8,17 @@ package se.laz.casual.test.k8s.watcher
 
 import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.client.Watcher
+import io.fabric8.kubernetes.client.WatcherException
+import se.laz.casual.test.k8s.TestKubeException
 import se.laz.casual.test.k8s.watchers.DeleteWatcher
 import spock.lang.Specification
 
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
 class DeleteWatcherTest extends Specification
@@ -31,6 +37,7 @@ class DeleteWatcherTest extends Specification
 
         when:
         CompletableFuture<Void> future = CompletableFuture.supplyAsync( ()->{ instance.waitUntilDeleted(); complete.countDown(  ) } )
+        instance.eventReceived( Watcher.Action.ADDED, Mock( Pod ) )
         complete.await( 1, TimeUnit.MILLISECONDS )
 
         then:
@@ -88,6 +95,64 @@ class DeleteWatcherTest extends Specification
 
         then:
         result
+    }
+
+    def "Watch closed exceptionally, throws TestKubeException."()
+    {
+        given:
+        WatcherException t = new WatcherException( "Fake" )
+
+        when:
+        instance.onClose( t )
+
+        then:
+        TestKubeException actual = thrown()
+        actual.getCause(  ) == t
+    }
+
+    def "Wait for delete, interrupted."()
+    {
+        given:
+        ExecutorService executor = Executors.newSingleThreadExecutor()
+        CountDownLatch start = new CountDownLatch( 1 )
+
+        when:
+        Future<?> task = executor.submit( ()-> {
+            start.countDown(  )
+            if( timeout == null )
+            {
+                instance.waitUntilDeleted()
+            }
+            else
+            {
+                instance.waitUntilDeleted( timeout, unit )
+            }
+        })
+        start.await()
+        executor.shutdownNow(  )
+        assert executor.awaitTermination( 1, TimeUnit.SECONDS )
+        unwrapFuture( task )
+
+        then:
+        thrown TestKubeException
+
+        where:
+        timeout | unit
+        null    | null
+        5       | TimeUnit.SECONDS
+    }
+
+
+    <T>T unwrapFuture( Future<T> future )
+    {
+        try
+        {
+            return future.get()
+        }
+        catch( ExecutionException e )
+        {
+            throw e.getCause(  )
+        }
     }
 
 }

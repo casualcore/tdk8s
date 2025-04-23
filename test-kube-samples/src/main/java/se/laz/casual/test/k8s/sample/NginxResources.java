@@ -20,7 +20,7 @@ public final class NginxResources
     {
     }
 
-    public static final Map<String, String> SELECTOR = Map.of( "app", "nginx" );
+    public static final Map<String, String> SELECTOR = Map.of( "app", "nginx-test-app" );
 
     public static final String SIMPLE_NGINX_POD_NAME = "nginx-test";
 
@@ -74,7 +74,7 @@ public final class NginxResources
             .endSpec()
             .build();
 
-    public static final Map<String, String> SELECTOR2 = Map.of( "app", "nginx2" );
+    public static final Map<String, String> SELECTOR2 = Map.of( "app", "nginx-test-app-2" );
 
     public static final String SIMPLE_NGINX_POD_NAME2 = "nginx-test2";
 
