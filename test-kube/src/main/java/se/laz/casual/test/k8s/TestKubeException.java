@@ -10,11 +10,6 @@ public class TestKubeException extends RuntimeException
 {
     private static final long serialVersionUID = 1L;
 
-    public TestKubeException()
-    {
-        super();
-    }
-
     public TestKubeException( String message )
     {
         super( message );

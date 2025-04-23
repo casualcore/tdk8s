@@ -17,8 +17,6 @@ import se.laz.casual.test.k8s.connection.PortForwardedConnection;
 import se.laz.casual.test.k8s.connection.ServiceConnection;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -27,8 +25,6 @@ import java.util.logging.Logger;
 public class ConnectionController
 {
     Logger log = Logger.getLogger( ConnectionController.class.getName());
-
-    private final List<KubeConnection> connections = new ArrayList<>();
 
     private final ResourceLookupController lookupController;
     private final NetworkController networkController;
@@ -98,10 +94,7 @@ public class ConnectionController
     {
         LocalPortForward portForward = createPortForward( resource, port );
 
-        PortForwardedConnection connection = new PortForwardedConnection( portForward );
-        connections.add( connection );
-
-        return connection;
+        return new PortForwardedConnection( portForward );
     }
 
     private LocalPortForward createPortForward( PortForwardable resource, int port )

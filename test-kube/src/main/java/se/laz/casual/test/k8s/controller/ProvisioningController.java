@@ -10,6 +10,8 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watch;
+import io.fabric8.kubernetes.client.dsl.PodResource;
+import io.fabric8.kubernetes.client.dsl.ServiceResource;
 import se.laz.casual.test.k8s.store.ResourcesStore;
 import se.laz.casual.test.k8s.watchers.DeleteWatcher;
 
@@ -87,25 +89,27 @@ public class ProvisioningController
 
     public void destroyAsync()
     {
-        for( Pod p: client.pods().withLabel( RESOURCE_LABEL_NAME, labelValue ).list().getItems() )
+        for( Pod p: resourcesStore.getPods().values() )
         {
             DeleteWatcher<Pod> podWatcher = new DeleteWatcher<>();
-            Watch watch = client.pods().resource( p ).watch( podWatcher );
+            PodResource resource = client.pods().resource( p );
+            Watch watch = resource.watch( podWatcher );
 
             watches.add( watch );
             deleteWatchers.add( podWatcher );
 
-            client.pods().resource( p ).delete();
+            resource.delete();
         }
-        for( Service s: client.services().withLabel( RESOURCE_LABEL_NAME, labelValue ).list().getItems() )
+        for( Service s: resourcesStore.getServices().values() )
         {
             DeleteWatcher<Service> serviceWatcher = new DeleteWatcher<>();
-            Watch watch = client.services().resource( s ).watch( serviceWatcher );
+            ServiceResource<Service> resource = client.services().resource( s );
+            Watch watch = resource.watch( serviceWatcher );
 
             watches.add( watch );
             deleteWatchers.add( serviceWatcher );
 
-            client.services().resource( s ).delete();
+            resource.delete();
         }
     }
 
@@ -115,9 +119,11 @@ public class ProvisioningController
         {
             deleteWatcher.waitUntilDeleted();
         }
+        deleteWatchers.clear();
         for( Watch watch: watches )
         {
             watch.close();
         }
+        watches.clear();
     }
 }
