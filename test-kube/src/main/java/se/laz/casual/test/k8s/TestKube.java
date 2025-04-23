@@ -58,11 +58,8 @@ public class TestKube
         this.client = builder.client;
         this.label = builder.label;
 
-        this.resourcesStore = new ResourcesStore();
-        this.resourcesStore.putPods( builder.pods );
-        this.resourcesStore.putServices( builder.services );
-
-        this.kubeController = new KubeController( this );
+        this.resourcesStore = builder.resourcesStore;
+        this.kubeController = builder.kubeController;
     }
 
     public KubernetesClient getClient()
@@ -143,6 +140,8 @@ public class TestKube
         private String label = UUID.randomUUID().toString();
         private Map<String,Pod> pods = new HashMap<>();
         private Map<String,Service> services = new HashMap<>();
+        private KubeController kubeController;
+        private ResourcesStore resourcesStore;
 
         public Builder client( KubernetesClient client )
         {
@@ -168,11 +167,30 @@ public class TestKube
             return this;
         }
 
+        Builder kubeController( KubeController kubeController )
+        {
+            this.kubeController = kubeController;
+            return this;
+        }
+
         public TestKube build()
         {
             if( this.client == null )
             {
                 this.client = new KubernetesClientBuilder().build();
+            }
+
+            this.resourcesStore = new ResourcesStore();
+            this.resourcesStore.putPods( pods );
+            this.resourcesStore.putServices( services );
+
+            if( this.kubeController == null )
+            {
+                this.kubeController = KubeController.newBuilder()
+                        .client( this.client )
+                        .label( this.label )
+                        .resourcesStore( this.resourcesStore )
+                        .build();
             }
             return new TestKube( this );
         }

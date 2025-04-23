@@ -12,6 +12,7 @@ import io.fabric8.kubernetes.api.model.Service
 import io.fabric8.kubernetes.api.model.ServiceBuilder
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientBuilder
+import se.laz.casual.test.k8s.controller.KubeController
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -78,6 +79,7 @@ class TestKubeTest extends Specification
 
         then:
         instance.getLabel() == label
+        instance.toString(  ).contains( label )
     }
 
     def "Create TestKube with a single pod resource."()
@@ -105,5 +107,52 @@ class TestKubeTest extends Specification
     {
         given:
         instance = TestKube.newBuilder(  ).addPod( podName, pod ).build()
+    }
+
+    def "ResourcesStore accessible."()
+    {
+        expect:
+        instance.getResourcesStore(  )  != null
+    }
+
+    def "KubeController accessible."()
+    {
+        expect:
+        instance.getController(  ) != null
+    }
+
+    def "Init and destroy TestKube invokes controller."()
+    {
+        given:
+        KubeController kc = Mock()
+        instance = TestKube.newBuilder().kubeController( kc ).build(  )
+
+        when:
+        instance.init(  )
+
+        then:
+        1* kc.init(  )
+
+        when:
+        instance.destroy(  )
+
+        then:
+        1* kc.destroy(  )
+    }
+
+    def "Get connection delegated to contorller."()
+    {
+        given:
+        String name = "my-service"
+        int port = 8080
+
+        KubeController kc = Mock()
+        instance = TestKube.newBuilder().kubeController( kc ).build(  )
+
+        when:
+        instance.getConnection( name, port )
+
+        then:
+        1* kc.getConnection( name, port )
     }
 }
