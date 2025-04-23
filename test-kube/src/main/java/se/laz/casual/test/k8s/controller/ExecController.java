@@ -6,10 +6,10 @@
 
 package se.laz.casual.test.k8s.controller;
 
-import io.fabric8.kubernetes.client.ResourceNotFoundException;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.fabric8.kubernetes.client.dsl.PodResource;
 import se.laz.casual.test.k8s.exec.ExecResult;
+import se.laz.casual.test.k8s.store.ResourceNotFoundException;
 
 import java.io.ByteArrayOutputStream;
 import java.util.concurrent.CompletableFuture;
