@@ -9,6 +9,7 @@ package se.laz.casual.test.tdk8s.store;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AbstractResourceStore<T> implements ResourceStore<T>
 {
@@ -17,7 +18,7 @@ public abstract class AbstractResourceStore<T> implements ResourceStore<T>
 
     protected AbstractResourceStore()
     {
-        resources = new HashMap<>();
+        resources = new ConcurrentHashMap<>();
     }
 
     @Override
