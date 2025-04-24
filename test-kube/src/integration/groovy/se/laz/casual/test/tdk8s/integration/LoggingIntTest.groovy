@@ -32,8 +32,6 @@ class LoggingIntTest extends Specification
 
     @Shared
     ZonedDateTime now = ZonedDateTime.now()
-    @Shared
-    ZonedDateTime afterInit
 
     def setupSpec()
     {
@@ -48,8 +46,6 @@ class LoggingIntTest extends Specification
                 .build()
 
         instance.init(  )
-        afterInit = ZonedDateTime.now()
-
     }
 
     def cleanupSpec()
@@ -84,8 +80,11 @@ class LoggingIntTest extends Specification
         fullLog.endsWith( actual )
     }
 
-    def "Retreive logs since date."()
+    def "Retrieve logs since date."()
     {
+        given:
+        ZonedDateTime afterInit = ZonedDateTime.now()
+
         when:
         String fullLog = instance.getController().getLog( podName )
         String fromNowLog = instance.getController().getLogSince( podName, now.format( DateTimeFormatter.ISO_OFFSET_DATE_TIME ) )
