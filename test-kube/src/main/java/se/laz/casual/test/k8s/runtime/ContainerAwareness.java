@@ -40,7 +40,7 @@ public class ContainerAwareness
         container = containerEnv != null && !containerEnv.isEmpty();
     }
 
-    public static boolean inContainer()
+    public static boolean isInsideContainer()
     {
         return container;
     }

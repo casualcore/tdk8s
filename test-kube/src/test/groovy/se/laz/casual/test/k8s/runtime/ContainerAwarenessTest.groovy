@@ -19,7 +19,7 @@ class ContainerAwarenessTest extends Specification
         }
 
         then:
-        ContainerAwareness.inContainer() == expected
+        ContainerAwareness.isInsideContainer() == expected
 
         where:
         value    || expected

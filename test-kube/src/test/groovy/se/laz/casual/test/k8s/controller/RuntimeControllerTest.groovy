@@ -16,7 +16,7 @@ class RuntimeControllerTest extends Specification
     def "Is this running in a container or not."()
     {
         given:
-        RuntimeController instance = new RuntimeController()
+        RuntimeControllerImpl instance = new RuntimeControllerImpl()
 
         when:
         SystemLambda.withEnvironmentVariable( ContainerAwareness.CONTAINER_ENV, value ).execute {
@@ -24,7 +24,7 @@ class RuntimeControllerTest extends Specification
         }
 
         then:
-        instance.inContainer() == expected
+        instance.isInsideContainer() == expected
 
         where:
         value    || expected

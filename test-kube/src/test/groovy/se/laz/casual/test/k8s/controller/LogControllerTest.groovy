@@ -18,13 +18,13 @@ import java.time.format.DateTimeFormatter
 class LogControllerTest extends Specification
 {
 
-    ResourceLookupController lookup = Mock(ResourceLookupController)
+    ResourceLookupController lookup = Mock()
 
     LogController instance
 
     def setup()
     {
-        instance = new LogController( lookup )
+        instance = new LogControllerImpl( lookup )
     }
 
     def "Retrieve full log."()

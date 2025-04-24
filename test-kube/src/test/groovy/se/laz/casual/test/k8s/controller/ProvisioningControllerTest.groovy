@@ -31,7 +31,7 @@ class ProvisioningControllerTest extends Specification
     String podName = "my-pod"
     String serviceName = "my-service"
 
-    ProvisioningController instance
+    ProvisioningControllerImpl instance
 
     Pod initialPod = new PodBuilder(  ).withNewMetadata(  ).withName( podName ).endMetadata(  ).build(  )
     Pod expectedPod = initialPod.edit(  ).editMetadata(  )
@@ -47,7 +47,7 @@ class ProvisioningControllerTest extends Specification
 
     def setup()
     {
-        instance = new ProvisioningController( client, store, label )
+        instance = new ProvisioningControllerImpl( client, store, label )
     }
 
     def "init applies pods and services in store with label applied and updates store, waits until pods ready."()

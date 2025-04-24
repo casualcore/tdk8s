@@ -14,7 +14,7 @@ import se.laz.casual.test.k8s.store.ResourcesStore;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
-public class KubeController
+public class KubeController implements ProvisioningController, ConnectionController, ExecController, LogController, FileTransferController
 {
     private final ProvisioningController provisioningController;
     private final ConnectionController connectionController;
@@ -33,31 +33,37 @@ public class KubeController
 
     // Provisioning Controller
 
+    @Override
     public void init()
     {
         provisioningController.init();
     }
 
+    @Override
     public void initAsync()
     {
         provisioningController.initAsync();
     }
 
+    @Override
     public void waitUntilReady()
     {
         provisioningController.waitUntilReady();
     }
 
+    @Override
     public void destroy()
     {
         provisioningController.destroy();
     }
 
+    @Override
     public void destroyAsync()
     {
         provisioningController.destroyAsync();
     }
 
+    @Override
     public void waitUntilDestroyed()
     {
         provisioningController.waitUntilDestroyed();
@@ -65,23 +71,27 @@ public class KubeController
 
     // ConnectionController
 
-    public KubeConnection getConnection( String resource, int targetPort )
+    @Override
+    public KubeConnection getConnection( String service, int targetPort )
     {
-        return connectionController.getConnection( resource, targetPort );
+        return connectionController.getConnection( service, targetPort );
     }
 
-    public KubeConnection getPortForwardConnection( String resource, int port )
+    @Override
+    public KubeConnection getPortForwardConnection( String resource, int targetPort )
     {
-        return connectionController.getPortForwardConnection( resource, port );
+        return connectionController.getPortForwardConnection( resource, targetPort );
     }
 
     // Execution Controller
 
+    @Override
     public ExecResult executeCommand( String pod, String... command )
     {
         return this.execController.executeCommand( pod, command );
     }
 
+    @Override
     public CompletableFuture<ExecResult> executeCommandAsync( String pod, String... command )
     {
         return this.execController.executeCommandAsync( pod, command );
@@ -89,16 +99,19 @@ public class KubeController
 
     // Log Controller
 
+    @Override
     public String getLog( String pod )
     {
         return this.logController.getLog( pod );
     }
 
+    @Override
     public String getLogTail( String pod, int lines )
     {
         return this.logController.getLogTail( pod, lines );
     }
 
+    @Override
     public String getLogSince( String pod, String sinceTime )
     {
         return this.logController.getLogSince( pod, sinceTime );
@@ -106,11 +119,13 @@ public class KubeController
 
     // File Transfer Controller
 
+    @Override
     public boolean download( String pod, String source, Path destination )
     {
         return this.fileTransferController.download( pod, source, destination );
     }
 
+    @Override
     public boolean upload( String pod, String source, Path destination )
     {
         return this.fileTransferController.upload( pod, source, destination );
@@ -210,24 +225,24 @@ public class KubeController
 
         private void initRuntimeController()
         {
-            this.runtimeController = new RuntimeController();
+            this.runtimeController = new RuntimeControllerImpl();
         }
 
         private void initNetworkController()
         {
-            this.networkController = new NetworkController();
+            this.networkController = new NetworkControllerImpl();
         }
 
         private void initResourceLookupController()
         {
-            this.resourceLookupController = new ResourceLookupController( client, store );
+            this.resourceLookupController = new ResourceLookupControllerImpl( client, store );
         }
 
         private void initProvisioningController()
         {
             if( this.provisioningController == null )
             {
-                this.provisioningController = new ProvisioningController( client, store, label );
+                this.provisioningController = new ProvisioningControllerImpl( client, store, label );
             }
         }
 
@@ -235,7 +250,7 @@ public class KubeController
         {
             if( this.connectionController == null )
             {
-                this.connectionController = new ConnectionController( resourceLookupController, networkController, runtimeController );
+                this.connectionController = new ConnectionControllerImpl( resourceLookupController, networkController, runtimeController );
             }
         }
 
@@ -243,7 +258,7 @@ public class KubeController
         {
             if( this.execController == null )
             {
-                this.execController = new ExecController( resourceLookupController );
+                this.execController = new ExecControllerImpl( resourceLookupController );
             }
         }
 
@@ -251,7 +266,7 @@ public class KubeController
         {
             if( this.logController == null )
             {
-                this.logController = new LogController( resourceLookupController );
+                this.logController = new LogControllerImpl( resourceLookupController );
             }
         }
 
@@ -259,7 +274,7 @@ public class KubeController
         {
             if( this.fileTransferController == null )
             {
-                this.fileTransferController = new FileTransferController( resourceLookupController );
+                this.fileTransferController = new FileTransferControllerImpl( resourceLookupController );
             }
         }
     }

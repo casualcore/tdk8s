@@ -15,7 +15,7 @@ class NetworkControllerTest extends Specification
 
     def setup()
     {
-        instance = new NetworkController()
+        instance = new NetworkControllerImpl()
     }
 
     def "Check connection."()

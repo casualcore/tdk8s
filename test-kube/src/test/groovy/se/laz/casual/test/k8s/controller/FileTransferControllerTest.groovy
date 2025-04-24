@@ -26,7 +26,7 @@ class FileTransferControllerTest extends Specification
 
     def setup()
     {
-        instance = new FileTransferController( rlc )
+        instance = new FileTransferControllerImpl( rlc )
     }
 
     def "Download file."()

@@ -6,12 +6,15 @@
 
 package se.laz.casual.test.k8s.controller;
 
-import se.laz.casual.test.k8s.connection.NetworkChecker;
-
-public class NetworkController
+public interface NetworkController
 {
-    public boolean canConnect( String host, int port )
-    {
-        return NetworkChecker.canConnect( host, port );
-    }
+    /**
+     * Checks if it is possible to connect to the given
+     * host and port.
+     *
+     * @param host to which to connect.
+     * @param port on which to connect.
+     * @return if connection was possible.
+     */
+    boolean canConnect( String host, int port );
 }

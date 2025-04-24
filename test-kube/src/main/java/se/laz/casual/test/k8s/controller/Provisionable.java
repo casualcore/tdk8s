@@ -6,13 +6,15 @@
 
 package se.laz.casual.test.k8s.controller;
 
-public interface RuntimeController
+public interface Provisionable
 {
     /**
-     * Determine if the process is currently running within
-     * a container.
-     *
-     * @return is inside a container.
+     * Initialises the managed resources and wait until they are ready.
      */
-    boolean isInsideContainer();
+    void init();
+
+    /**
+     * Deletes the managed resources and wait until they are deleted.
+     */
+    void destroy();
 }

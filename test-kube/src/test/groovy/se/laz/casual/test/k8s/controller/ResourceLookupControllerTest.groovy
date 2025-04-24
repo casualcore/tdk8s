@@ -26,7 +26,7 @@ class ResourceLookupControllerTest extends Specification
 
     def setup()
     {
-        instance = new ResourceLookupController( client, store )
+        instance = new ResourceLookupControllerImpl( client, store )
     }
 
     def "Get pod, present in store."()

@@ -28,7 +28,7 @@ class ExecControllerTest extends Specification
 
     def setup()
     {
-        instance = new ExecController( rlc )
+        instance = new ExecControllerImpl( rlc )
     }
 
     def "Execute command, sync."()

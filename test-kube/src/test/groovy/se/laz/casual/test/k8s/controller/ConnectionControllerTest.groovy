@@ -30,7 +30,7 @@ class ConnectionControllerTest extends Specification
 
     def setup()
     {
-        instance = new ConnectionController( rc, nc, runc )
+        instance = new ConnectionControllerImpl( rc, nc, runc )
     }
 
     def "Get connection service is available."()
@@ -49,7 +49,7 @@ class ConnectionControllerTest extends Specification
         connection.getType(  ) == KubeConnectionType.SERVICE
         connection.getHostName(  ) == service.getMetadata(  ).getName(  )
         connection.getPort(  ) == port
-        0* runc.inContainer(  )
+        0* runc.isInsideContainer(  )
 
         cleanup:
         connection.close(  )
@@ -76,7 +76,7 @@ class ConnectionControllerTest extends Specification
         1* rc.getServiceResource( serviceName ) >> Optional.of( resource )
         1* resource.get() >> service
         1* nc.canConnect( serviceName, port ) >> false
-        1* runc.inContainer(  ) >> false
+        1* runc.isInsideContainer(  ) >> false
         1* nc.canConnect( ip,  externalPort ) >> true
 
         when:
@@ -109,7 +109,7 @@ class ConnectionControllerTest extends Specification
         1* rc.getServiceResource( serviceName ) >> Optional.of( resource )
         1* resource.get() >> service
         1* nc.canConnect( serviceName, targetPort ) >> false
-        1* runc.inContainer(  ) >> false
+        1* runc.isInsideContainer(  ) >> false
         externalCheck* nc.canConnect( ip, externalPort )
 
 
@@ -146,7 +146,7 @@ class ConnectionControllerTest extends Specification
         1* rc.getServiceResource( serviceName ) >> Optional.of( resource )
         1* resource.get() >> service
         1* nc.canConnect( serviceName, port ) >> false
-        1* runc.inContainer(  ) >> false
+        1* runc.isInsideContainer(  ) >> false
         LocalPortForward lpf = Mock()
         1* resource.portForward( port, InetAddress.getLoopbackAddress(  ), 0 ) >> lpf
 
@@ -174,7 +174,7 @@ class ConnectionControllerTest extends Specification
         1* rc.getServiceResource( serviceName ) >> Optional.of( resource )
         1* resource.get() >> service
         1* nc.canConnect( serviceName, port ) >> false
-        1* runc.inContainer(  ) >> true
+        1* runc.isInsideContainer(  ) >> true
 
         when:
         instance.getConnection( serviceName, port )

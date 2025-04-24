@@ -6,46 +6,33 @@
 
 package se.laz.casual.test.k8s.controller;
 
-import io.fabric8.kubernetes.client.dsl.ExecWatch;
-import io.fabric8.kubernetes.client.dsl.PodResource;
 import se.laz.casual.test.k8s.exec.ExecResult;
-import se.laz.casual.test.k8s.store.ResourceNotFoundException;
 
-import java.io.ByteArrayOutputStream;
 import java.util.concurrent.CompletableFuture;
 
-/**
- * Execute commands against a running pod.
- */
-public class ExecController
+public interface ExecController
 {
-    private final ResourceLookupController lookupController;
+    /**
+     * Executes the provided command on the named pod and wait until completed.
+     * </br>
+     * The name can be either the alias for the managed resource or
+     * the actual underlying name of the resource inside the cluster.
+     *
+     * @param pod on which to run the command.
+     * @param command the command to run.
+     * @return the result of running the command.
+     */
+    ExecResult executeCommand( String pod, String... command );
 
-    public ExecController( ResourceLookupController lookupController )
-    {
-        this.lookupController = lookupController;
-    }
-
-    public ExecResult executeCommand( String pod, String... command )
-    {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-        PodResource podResource = lookupController.getPodResource( pod )
-                .orElseThrow( ()-> new ResourceNotFoundException( "Resource not found: " + pod ) );
-
-        try( ExecWatch watch = podResource.writingOutput( out ).writingError( out )
-                .exec( command ) )
-        {
-            Integer exitCode = watch.exitCode().join();
-            return ExecResult.newBuilder()
-                    .exitCode( exitCode )
-                    .output( out.toString() )
-                    .build();
-        }
-    }
-
-    public CompletableFuture<ExecResult> executeCommandAsync( String pod, String... command )
-    {
-        return CompletableFuture.supplyAsync( ()-> executeCommand( pod, command ) );
-    }
+    /**
+     * Executes the provided command on the named pod without waiting for the result.
+     * </br>
+     * The name can be either the alias for the managed resource or
+     * the actual underlying name of the resource inside the cluster.
+     *
+     * @param pod on which to run the command.
+     * @param command the command to run.
+     * @return the result of the running command as a future.
+     */
+    CompletableFuture<ExecResult> executeCommandAsync( String pod, String... command );
 }

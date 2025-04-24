@@ -6,40 +6,35 @@
 
 package se.laz.casual.test.k8s.controller;
 
-import io.fabric8.kubernetes.client.dsl.PodResource;
-import se.laz.casual.test.k8s.store.ResourceNotFoundException;
-
 import java.nio.file.Path;
 
-/**
- * Controller responsible for handling file transfers.
- */
-public class FileTransferController
+public interface FileTransferController
 {
-    private final ResourceLookupController lookupController;
+    /**
+     * Downloads from the pod named the source specified in the pod, to
+     * the destination specified on the local filesystem.
+     * </br>
+     * The name can be either the alias for the managed resource or
+     * the actual underlying name of the resource inside the cluster.
+     *
+     * @param pod from which to download.
+     * @param source file on the pod to download.
+     * @param destination file on the local filesystem to save the download.
+     * @return if the operation was successful.
+     */
+    boolean download( String pod, String source, Path destination );
 
-    public FileTransferController( ResourceLookupController lookupController )
-    {
-        this.lookupController = lookupController;
-    }
-
-    public boolean download( String pod, String source, Path destination )
-    {
-        PodResource resource = getPodResource( pod );
-
-        return resource.file( source ).copy( destination );
-    }
-
-    public boolean upload( String pod, String source, Path destination )
-    {
-        PodResource resource = getPodResource( pod );
-
-        return resource.file( source ).upload( destination );
-    }
-
-    private PodResource getPodResource( String pod )
-    {
-        return lookupController.getPodResource( pod )
-                .orElseThrow( ()-> new ResourceNotFoundException( "Unable to find pod " + pod ) );
-    }
+    /**
+     * Uploads to the pod named the source specific on the local filesystem, to
+     * the destination specified in the pod.
+     * </br>
+     * The name can be either the alias for the managed resource or
+     * the actual underlying name of the resource inside the cluster.
+     *
+     * @param pod to which to upload.
+     * @param source file on the local filesystem to upload.
+     * @param destination file on the pod to save the upload.
+     * @return if the operation was successful.
+     */
+    boolean upload( String pod, String source, Path destination );
 }
