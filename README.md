@@ -387,7 +387,7 @@ If you wish to have different groups of resources for more granular control over
 multiple `TestKube` instances, for example with some initialised before all tests (Spock `setupSpec`, Junit `@BeforeClass`)
 and others initialised and destroyed before each test (Spock `setup`, Junit `@Before`) or even within the test itself.
 
-For a working example of this see the [MultiTestKube Integration Test](./test-kube/src/integration/groovy/se/laz/casual/test/k8s/integration/MultiTestKubesIntTest.groovy). 
+For a working example of this see the [MultiTestKube Integration Test](./test-kube/src/integration/groovy/se/laz/casual/test/tdk8s/integration/MultiTestKubesIntTest.groovy). 
 
 NOTE: Be aware that the time taken to provision resources is dependent upon container image sizes, their readiness requirements and
 available `k8s` compute resources. Therefore, you can quickly end up with very **slow tests executions** if you are not careful.
