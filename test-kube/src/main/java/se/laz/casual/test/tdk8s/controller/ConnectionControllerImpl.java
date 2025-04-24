@@ -56,7 +56,8 @@ public class ConnectionControllerImpl implements ConnectionController
         {
             log.info( ()->"Running outside of a container, attempting to connect externally." );
             // Check if the service should be externally accessible.
-            if( s.getSpec().getType() != null && s.getSpec().getType().equals( "LoadBalancer" ) )
+            if( s.getSpec().getType() != null && s.getSpec().getType().equals( "LoadBalancer" ) &&
+                    !s.getStatus().getLoadBalancer().getIngress().isEmpty() )
             {
                 // Attempt to access service externally.
                 String externalIp = s.getStatus().getLoadBalancer().getIngress().get( 0 ).getIp();

@@ -132,6 +132,36 @@ class ConnectionControllerTest extends Specification
 
     }
 
+    def "Get connection service is available, not accessible, outside container no external ip, return port-forward."()
+    {
+        given:
+        serviceName = WildflyResources.EXTERNAL_WILDFLY_SERVICE_NAME
+        Service service = WildflyResources.EXTERNAL_WILDFLY_SERVICE.edit(  )
+                .editStatus(  )
+                .editOrNewLoadBalancer(  )
+                .endLoadBalancer(  )
+                .endStatus(  )
+                .build(  )
+
+        ServiceResource<Service> resource = Mock()
+        1* rc.getServiceResource( serviceName ) >> Optional.of( resource )
+        1* resource.get() >> service
+        1* nc.canConnect( serviceName, port ) >> false
+        1* runc.isInsideContainer(  ) >> false
+
+
+        LocalPortForward lpf = Mock()
+        1* resource.portForward( port, InetAddress.getLoopbackAddress(  ), 0 ) >> lpf
+
+        when:
+        KubeConnection connection = instance.getConnection( serviceName, port )
+        connection.close()
+
+        then:
+        connection.getType(  ) == KubeConnectionType.PORT_FORWARDED
+        1* lpf.close(  )
+    }
+
     def "Get connection service is available not externally, run outside container, return port-forward."()
     {
         given:
