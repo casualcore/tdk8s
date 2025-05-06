@@ -31,7 +31,7 @@ class LoggingIntTest extends Specification
     String podName = NginxResources.SIMPLE_NGINX_POD_NAME
 
     @Shared
-    ZonedDateTime now = ZonedDateTime.now()
+    ZonedDateTime start = ZonedDateTime.now()
 
     def setupSpec()
     {
@@ -82,18 +82,16 @@ class LoggingIntTest extends Specification
 
     def "Retrieve logs since date."()
     {
-        given:
-        ZonedDateTime afterInit = ZonedDateTime.now()
-
         when:
         String fullLog = instance.getController().getLog( podName )
-        String fromNowLog = instance.getController().getLogSince( podName, now.format( DateTimeFormatter.ISO_OFFSET_DATE_TIME ) )
-        String afterInitLog = instance.getController().getLogSince( podName, afterInit.format( DateTimeFormatter.ISO_OFFSET_DATE_TIME ))
+        String fromStartLog = instance.getController().getLogSince( podName, start.format( DateTimeFormatter.ISO_OFFSET_DATE_TIME ) )
+        ZonedDateTime after = ZonedDateTime.now()
+        String afterLog = instance.getController().getLogSince( podName, after.format( DateTimeFormatter.ISO_OFFSET_DATE_TIME ))
 
         then:
         fullLog != ""
         fullLog.containsIgnoreCase( "nginx" )
-        fullLog == fromNowLog
-        afterInitLog != fromNowLog
+        fullLog == fromStartLog
+        afterLog != fromStartLog
     }
 }
