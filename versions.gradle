@@ -9,9 +9,13 @@ group = 'se.laz.casual'
 version = '0.0.1-beta-SNAPSHOT'
 
 ext.libs = [
-  objenesis: 'org.objenesis:objenesis:3.4',
+  fabric8: 'io.fabric8:kubernetes-client:7.1.0',
+  apache_commons_compress: 'org.apache.commons:commons-compress:1.27.1',
+
 
   // test
+  slf4j_nop: 'org.slf4j:slf4j-nop:2.0.17',
+  objenesis: 'org.objenesis:objenesis:3.4',
   system_lambda: 'com.github.stefanbirkner:system-lambda:1.2.1',
   // for spock
   groovy_bom: 'org.apache.groovy:groovy-bom:4.0.5',

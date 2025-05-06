@@ -13,9 +13,10 @@ plugins {
 defaultTasks 'build'
 
 dependencies {
-    api 'io.fabric8:kubernetes-client:7.1.0'
-    testRuntime 'org.apache.commons:commons-compress:1.27.1'
-    testRuntime "org.slf4j:slf4j-nop:2.0.17"
+    api libs.fabric8
+
+    testRuntime libs.apache_commons_compress
+    testRuntime libs.slf4j_nop
 
     testImplementation libs.system_lambda
     testImplementation project(":test-kube-samples")
