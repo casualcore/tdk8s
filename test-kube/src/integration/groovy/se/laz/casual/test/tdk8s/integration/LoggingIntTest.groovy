@@ -85,7 +85,7 @@ class LoggingIntTest extends Specification
         when:
         String fullLog = instance.getController().getLog( podName )
         String fromStartLog = instance.getController().getLogSince( podName, start.format( DateTimeFormatter.ISO_OFFSET_DATE_TIME ) )
-        ZonedDateTime after = ZonedDateTime.now()
+        ZonedDateTime after = ZonedDateTime.now().plusSeconds( 1 ) // log time granularity is seconds.
         String afterLog = instance.getController().getLogSince( podName, after.format( DateTimeFormatter.ISO_OFFSET_DATE_TIME ))
 
         then:
