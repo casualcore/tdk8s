@@ -33,7 +33,7 @@ class NginxInternalConnectivityIntTest extends Specification
 
         instance = TestKube.newBuilder()
                 .label( id )
-                .addPod( NginxResources.SIMPLE_NGINX_POD_NAME, NginxResources.SIMPLE_NGINX_POD )
+                //.addPod( NginxResources.SIMPLE_NGINX_POD_NAME, NginxResources.SIMPLE_NGINX_POD )
                 .addPod( NginxResources.SIMPLE_NGINX_POD_NAME2, NginxResources.SIMPLE_NGINX_POD2 )
                 .addService( NginxResources.SIMPLE_NGINX_SERVICE_NAME, NginxResources.SIMPLE_NGINX_SERVICE )
                 .build()
