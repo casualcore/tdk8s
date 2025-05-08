@@ -52,6 +52,17 @@ public class ProvisioningControllerImpl implements ProvisioningController
     @Override
     public void initAsync()
     {
+
+//        try
+//        {
+//            Thread.sleep( 5000L );
+//        }
+//        catch( InterruptedException e )
+//        {
+//            Thread.currentThread().interrupt();
+//            throw new RuntimeException( e );
+//        }
+
         for( Map.Entry<String, Pod> entry : resourcesStore.getPods().entrySet() )
         {
             String name = entry.getKey();
@@ -78,6 +89,11 @@ public class ProvisioningControllerImpl implements ProvisioningController
     @Override
     public void waitUntilReady()
     {
+        for( Service s: resourcesStore.getServices().values() )
+        {
+            client.services().resource( s ).waitUntilReady(1, TimeUnit.MINUTES );
+        }
+
         for( Pod p: resourcesStore.getPods().values() )
         {
             client.pods().resource( p ).waitUntilReady( 1, TimeUnit.MINUTES );
