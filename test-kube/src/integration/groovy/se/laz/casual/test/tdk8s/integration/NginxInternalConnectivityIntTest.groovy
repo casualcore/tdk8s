@@ -24,6 +24,8 @@ class NginxInternalConnectivityIntTest extends Specification
     String id = NginxInternalConnectivityIntTest.class.getSimpleName(  )
     @Shared
     TestKube instance
+    @Shared
+    TestKube instance2
 
     def setupSpec()
     {
@@ -34,16 +36,25 @@ class NginxInternalConnectivityIntTest extends Specification
         instance = TestKube.newBuilder()
                 .label( id )
                 .addPod( NginxResources.SIMPLE_NGINX_POD_NAME, NginxResources.SIMPLE_NGINX_POD )
-                .addPod( NginxResources.SIMPLE_NGINX_POD_NAME2, NginxResources.SIMPLE_NGINX_POD2 )
+                //.addPod( NginxResources.SIMPLE_NGINX_POD_NAME2, NginxResources.SIMPLE_NGINX_POD2 )
                 .addService( NginxResources.SIMPLE_NGINX_SERVICE_NAME, NginxResources.SIMPLE_NGINX_SERVICE )
                 .build()
 
-        instance.init(  )
+        instance2 = TestKube.newBuilder()
+                .label( id + 2 )
+                //.addPod( NginxResources.SIMPLE_NGINX_POD_NAME, NginxResources.SIMPLE_NGINX_POD )
+                .addPod( NginxResources.SIMPLE_NGINX_POD_NAME2, NginxResources.SIMPLE_NGINX_POD2 )
+                //.addService( NginxResources.SIMPLE_NGINX_SERVICE_NAME, NginxResources.SIMPLE_NGINX_SERVICE )
+                .build()
+
+        instance.init( )
+        instance2.init( )
 
     }
 
     def cleanupSpec()
     {
+        instance2.destroy(  )
         instance.destroy(  )
 
         //assert client.pods(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
@@ -57,7 +68,7 @@ class NginxInternalConnectivityIntTest extends Specification
         String[] command = ["sh", "-c", "curl -iv http://" + NginxResources.SIMPLE_NGINX_SERVICE_NAME +":"+80 ]
 
         when:
-        ExecResult actual = instance.getController(  ).executeCommandAsync( NginxResources.SIMPLE_NGINX_POD_NAME2, command )
+        ExecResult actual = instance2.getController(  ).executeCommandAsync( NginxResources.SIMPLE_NGINX_POD_NAME2, command )
                 .get( 60, TimeUnit.SECONDS)
 
         then:
