@@ -14,6 +14,8 @@ import se.laz.casual.test.tdk8s.sample.NginxResources
 import spock.lang.Shared
 import spock.lang.Specification
 
+import java.util.concurrent.TimeUnit
+
 import static se.laz.casual.test.tdk8s.TestKube.RESOURCE_LABEL_NAME
 
 class NginxInternalConnectivityIntTest extends Specification
@@ -57,11 +59,11 @@ class NginxInternalConnectivityIntTest extends Specification
         String[] command = ["sh", "-c", "curl -iv http://" + NginxResources.SIMPLE_NGINX_SERVICE_NAME +":"+80 ]
 
         when:
-        ExecResult actual = instance.getController(  ).executeCommand( NginxResources.SIMPLE_NGINX_POD_NAME2, command )
+        ExecResult actual = instance.getController(  ).executeCommandAsync( NginxResources.SIMPLE_NGINX_POD_NAME2, command )
+                .get( 1, TimeUnit.SECONDS)
 
         then:
         actual.getExitCode(  ) == 0
         actual.getOutput(  ).contains("HTTP/1.1 200 OK"  )
-
     }
 }
