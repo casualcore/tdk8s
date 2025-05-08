@@ -52,17 +52,6 @@ public class ProvisioningControllerImpl implements ProvisioningController
     @Override
     public void initAsync()
     {
-
-//        try
-//        {
-//            Thread.sleep( 5000L );
-//        }
-//        catch( InterruptedException e )
-//        {
-//            Thread.currentThread().interrupt();
-//            throw new RuntimeException( e );
-//        }
-
         for( Map.Entry<String, Pod> entry : resourcesStore.getPods().entrySet() )
         {
             String name = entry.getKey();
@@ -72,6 +61,16 @@ public class ProvisioningControllerImpl implements ProvisioningController
             Pod updated = p.edit().editMetadata().withLabels( labels ).endMetadata().build();
             updated = client.pods().resource( updated ).serverSideApply();
             resourcesStore.putPod( name, updated );
+        }
+
+                try
+        {
+            Thread.sleep( 5000L );
+        }
+        catch( InterruptedException e )
+        {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException( e );
         }
 
         for( Map.Entry<String, Service> entry : resourcesStore.getServices().entrySet() )

@@ -23,6 +23,7 @@ public final class NginxResources
     public static final Map<String, String> SELECTOR = Map.of( "app", "nginx-test-app" );
 
     public static final String SIMPLE_NGINX_POD_NAME = "nginx-test";
+    public static final String SIMPLE_NGINX_SERVICE_NAME = "nginx-service";
 
     public static final Pod SIMPLE_NGINX_POD = new PodBuilder()
             .withNewMetadata()
@@ -50,8 +51,6 @@ public final class NginxResources
             .endContainer()
             .endSpec()
             .build();
-
-    public static final String SIMPLE_NGINX_SERVICE_NAME = "nginx-service";
 
     public static final Service SIMPLE_NGINX_SERVICE = new ServiceBuilder()
             .withNewMetadata()
