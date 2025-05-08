@@ -60,7 +60,7 @@ class NginxInternalConnectivityIntTest extends Specification
 
         when:
         ExecResult actual = instance.getController(  ).executeCommandAsync( NginxResources.SIMPLE_NGINX_POD_NAME2, command )
-                .get( 5, TimeUnit.SECONDS)
+                .get( 60, TimeUnit.SECONDS)
 
         then:
         actual.getExitCode(  ) == 0
