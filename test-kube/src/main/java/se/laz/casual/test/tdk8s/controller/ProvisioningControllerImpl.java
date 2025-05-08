@@ -63,15 +63,15 @@ public class ProvisioningControllerImpl implements ProvisioningController
             resourcesStore.putPod( name, updated );
         }
 
-                try
-        {
-            Thread.sleep( 5000L );
-        }
-        catch( InterruptedException e )
-        {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException( e );
-        }
+//                try
+//        {
+//            Thread.sleep( 5000L );
+//        }
+//        catch( InterruptedException e )
+//        {
+//            Thread.currentThread().interrupt();
+//            throw new RuntimeException( e );
+//        }
 
         for( Map.Entry<String, Service> entry : resourcesStore.getServices().entrySet() )
         {
