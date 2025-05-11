@@ -6,6 +6,7 @@
 
 package se.laz.casual.test.tdk8s.integration
 
+import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import se.laz.casual.test.tdk8s.TestKube
@@ -24,8 +25,8 @@ class NginxInternalConnectivityIntTest extends Specification
     String id = NginxInternalConnectivityIntTest.class.getSimpleName(  )
     @Shared
     TestKube instance
-    @Shared
-    TestKube instance2
+//    @Shared
+//    TestKube instance2
 
     def setupSpec()
     {
@@ -33,28 +34,38 @@ class NginxInternalConnectivityIntTest extends Specification
         //assert client.pods(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
         //assert client.services(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
 
+        Pod updatedNginx = NginxResources.SIMPLE_NGINX_POD2.edit(  )
+                .editOrNewSpec(  )
+                    .addNewInitContainer(  )
+                        .withName( "init" )
+                        .withImage( "busybox:1.37.0-glibc" )
+                        .withCommand(  "sh", "-c", "until nc -z " + NginxResources.SIMPLE_NGINX_SERVICE_NAME + " 80 > /dev/null; do echo Waiting.; sleep 1; done;" )
+                    .endInitContainer(  )
+                .endSpec(  )
+                .build(  )
+
         instance = TestKube.newBuilder()
                 .label( id )
                 .addPod( NginxResources.SIMPLE_NGINX_POD_NAME, NginxResources.SIMPLE_NGINX_POD )
-                //.addPod( NginxResources.SIMPLE_NGINX_POD_NAME2, NginxResources.SIMPLE_NGINX_POD2 )
+                .addPod( NginxResources.SIMPLE_NGINX_POD_NAME2, updatedNginx )
                 .addService( NginxResources.SIMPLE_NGINX_SERVICE_NAME, NginxResources.SIMPLE_NGINX_SERVICE )
                 .build()
 
-        instance2 = TestKube.newBuilder()
-                .label( id + 2 )
-                //.addPod( NginxResources.SIMPLE_NGINX_POD_NAME, NginxResources.SIMPLE_NGINX_POD )
-                .addPod( NginxResources.SIMPLE_NGINX_POD_NAME2, NginxResources.SIMPLE_NGINX_POD2 )
-                //.addService( NginxResources.SIMPLE_NGINX_SERVICE_NAME, NginxResources.SIMPLE_NGINX_SERVICE )
-                .build()
+//        instance2 = TestKube.newBuilder()
+//                .label( id + 2 )
+//                //.addPod( NginxResources.SIMPLE_NGINX_POD_NAME, NginxResources.SIMPLE_NGINX_POD )
+//                .addPod( NginxResources.SIMPLE_NGINX_POD_NAME2, NginxResources.SIMPLE_NGINX_POD2 )
+//                //.addService( NginxResources.SIMPLE_NGINX_SERVICE_NAME, NginxResources.SIMPLE_NGINX_SERVICE )
+//                .build()
 
         instance.init( )
-        instance2.init( )
+        //instance2.init( )
 
     }
 
     def cleanupSpec()
     {
-        instance2.destroy(  )
+        //instance2.destroy(  )
         instance.destroy(  )
 
         //assert client.pods(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
@@ -68,7 +79,7 @@ class NginxInternalConnectivityIntTest extends Specification
         String[] command = ["sh", "-c", "curl -iv http://" + NginxResources.SIMPLE_NGINX_SERVICE_NAME +":"+80 ]
 
         when:
-        ExecResult actual = instance2.getController(  ).executeCommandAsync( NginxResources.SIMPLE_NGINX_POD_NAME2, command )
+        ExecResult actual = instance.getController(  ).executeCommandAsync( NginxResources.SIMPLE_NGINX_POD_NAME2, command )
                 .get( 60, TimeUnit.SECONDS)
 
         then:
