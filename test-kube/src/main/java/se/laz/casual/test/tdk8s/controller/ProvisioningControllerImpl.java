@@ -63,16 +63,6 @@ public class ProvisioningControllerImpl implements ProvisioningController
             resourcesStore.putPod( name, updated );
         }
 
-//                try
-//        {
-//            Thread.sleep( 5000L );
-//        }
-//        catch( InterruptedException e )
-//        {
-//            Thread.currentThread().interrupt();
-//            throw new RuntimeException( e );
-//        }
-
         for( Map.Entry<String, Service> entry : resourcesStore.getServices().entrySet() )
         {
             String name = entry.getKey();
@@ -88,11 +78,6 @@ public class ProvisioningControllerImpl implements ProvisioningController
     @Override
     public void waitUntilReady()
     {
-        for( Service s: resourcesStore.getServices().values() )
-        {
-            client.services().resource( s ).waitUntilReady(1, TimeUnit.MINUTES );
-        }
-
         for( Pod p: resourcesStore.getPods().values() )
         {
             client.pods().resource( p ).waitUntilReady( 1, TimeUnit.MINUTES );
