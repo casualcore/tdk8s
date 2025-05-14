@@ -11,6 +11,7 @@ version = '0.0.1-beta-SNAPSHOT'
 ext.libs = [
   fabric8: 'io.fabric8:kubernetes-client:7.1.0',
   apache_commons_compress: 'org.apache.commons:commons-compress:1.27.1',
+  failsafe: 'dev.failsafe:failsafe:3.3.2',
 
 
   // test

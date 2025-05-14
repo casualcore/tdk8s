@@ -14,6 +14,7 @@ import se.laz.casual.test.tdk8s.connection.KubeConnection;
 import se.laz.casual.test.tdk8s.controller.Connectable;
 import se.laz.casual.test.tdk8s.controller.KubeController;
 import se.laz.casual.test.tdk8s.controller.Provisionable;
+import se.laz.casual.test.tdk8s.probe.ProvisioningProbe;
 import se.laz.casual.test.tdk8s.store.ResourcesStore;
 
 import java.nio.file.Path;
@@ -64,7 +65,19 @@ public class TestKube implements Provisionable, Connectable
         this.label = builder.label;
 
         this.resourcesStore = builder.resourcesStore;
-        this.kubeController = builder.kubeController;
+
+        KubeController kc = builder.kubeController;
+        if( kc == null )
+        {
+            kc = KubeController.newBuilder()
+                    .testKube( this )
+                    .client( this.client )
+                    .label( this.label )
+                    .resourcesStore( this.resourcesStore )
+                    .build();
+        }
+
+        this.kubeController = kc;
     }
 
     /**
@@ -178,8 +191,9 @@ public class TestKube implements Provisionable, Connectable
     {
         private KubernetesClient client;
         private String label = UUID.randomUUID().toString();
-        private Map<String,Pod> pods = new HashMap<>();
-        private Map<String,Service> services = new HashMap<>();
+        private Map<String, Pod> pods = new HashMap<>();
+        private Map<String, Service> services = new HashMap<>();
+        private Map<String, ProvisioningProbe> initProbes = new HashMap<>();
         private KubeController kubeController;
         private ResourcesStore resourcesStore;
 
@@ -199,6 +213,7 @@ public class TestKube implements Provisionable, Connectable
         /**
          * Provide a more specific label value for managed resources, if the
          * default random UUID is not sufficient.
+         *
          * @param label for the managed resources.
          * @return the builder.
          */
@@ -215,7 +230,7 @@ public class TestKube implements Provisionable, Connectable
          * the actual name of the Pod provided.
          *
          * @param alias of the pod.
-         * @param pod to be managed.
+         * @param pod   to be managed.
          * @return the builder.
          */
         public Builder addPod( String alias, Pod pod )
@@ -230,13 +245,19 @@ public class TestKube implements Provisionable, Connectable
          * The alias provided can be used to retrieve and does not have to match
          * the actual name of the Service provided.
          *
-         * @param alias of the service.
+         * @param alias   of the service.
          * @param service to be managed.
          * @return the builder.
          */
         public Builder addService( String alias, Service service )
         {
             this.services.put( alias, service );
+            return this;
+        }
+
+        public Builder addProvisioningProbe( String alias, ProvisioningProbe probe )
+        {
+            this.initProbes.put( alias, probe );
             return this;
         }
 
@@ -256,15 +277,8 @@ public class TestKube implements Provisionable, Connectable
             this.resourcesStore = new ResourcesStore();
             this.resourcesStore.putPods( pods );
             this.resourcesStore.putServices( services );
+            this.resourcesStore.putProvisioningProbes( initProbes );
 
-            if( this.kubeController == null )
-            {
-                this.kubeController = KubeController.newBuilder()
-                        .client( this.client )
-                        .label( this.label )
-                        .resourcesStore( this.resourcesStore )
-                        .build();
-            }
             return new TestKube( this );
         }
     }

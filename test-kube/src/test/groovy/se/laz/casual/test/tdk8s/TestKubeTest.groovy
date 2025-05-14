@@ -13,6 +13,7 @@ import io.fabric8.kubernetes.api.model.ServiceBuilder
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import se.laz.casual.test.tdk8s.controller.KubeController
+import se.laz.casual.test.tdk8s.probe.ProvisioningProbe
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -154,5 +155,31 @@ class TestKubeTest extends Specification
 
         then:
         1* kc.getConnection( name, port )
+    }
+
+    def "Get init probes."()
+    {
+        expect:
+        instance.getResourcesStore().getProvisioningProbes(  ) == [:]
+    }
+
+    def "Add and get init probes."()
+    {
+        given:
+        ProvisioningProbe probe = { -> return false }
+        ProvisioningProbe probe2 = { -> return true }
+
+        Map<String,ProvisioningProbe> expected = ["probe": probe, "probe2": probe2 ]
+
+        instance = TestKube.newBuilder(  )
+                .addProvisioningProbe( "probe", probe )
+                .addProvisioningProbe( "probe2", probe2 )
+                .build()
+
+        when:
+        Map<String,ProvisioningProbe> actual = instance.getResourcesStore(  ).getProvisioningProbes()
+
+        then:
+        actual == expected
     }
 }

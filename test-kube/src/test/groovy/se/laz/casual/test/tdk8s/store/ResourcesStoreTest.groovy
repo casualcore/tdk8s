@@ -10,6 +10,7 @@ import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.api.model.PodBuilder
 import io.fabric8.kubernetes.api.model.Service
 import io.fabric8.kubernetes.api.model.ServiceBuilder
+import se.laz.casual.test.tdk8s.probe.ProvisioningProbe
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -67,6 +68,7 @@ class ResourcesStoreTest extends Specification
         expect:
         instance.getPods() == [:]
         instance.getServices() == [:]
+        instance.getProvisioningProbes() == [:]
     }
 
     def "Retrieve non existent pod, throws ResourceNotFoundException"()
@@ -211,5 +213,17 @@ class ResourcesStoreTest extends Specification
 
         then:
         instance.getServices() == services
+    }
+
+    def "Put and Get all init probes."()
+    {
+        given:
+        Map<String, ProvisioningProbe> probes = ["p1": {-> return false}, "p2": {-> return true} ]
+
+        when:
+        instance.putProvisioningProbes( probes )
+
+        then:
+        instance.getProvisioningProbes( ) == probes
     }
 }
