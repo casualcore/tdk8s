@@ -7,6 +7,7 @@
 package se.laz.casual.test.tdk8s.controller;
 
 import dev.failsafe.Failsafe;
+import dev.failsafe.FailsafeExecutor;
 import dev.failsafe.RetryPolicy;
 import dev.failsafe.Timeout;
 import se.laz.casual.test.tdk8s.TestKube;
@@ -28,24 +29,25 @@ import java.util.logging.Logger;
 public class ProvisioningProbeController
 {
     static Logger log = Logger.getLogger( ProvisioningProbeController.class.getName());
-    private final RetryPolicy<Object> retryPolicy;
-
-    private final Timeout<Object> timeoutPolicy;
+    private final FailsafeExecutor<Object> executor;
 
     private final TestKube testKube;
 
     public ProvisioningProbeController( TestKube testKube )
     {
-        this( testKube, getDefaultRetryPolicy(), getDefaultTimeoutPolicy() );
+        this( testKube, getDefaultFailsafe() );
     }
 
-    ProvisioningProbeController( TestKube testKube, RetryPolicy<Object> retryPolicy, Timeout<Object> timeoutPolicy )
+    ProvisioningProbeController( TestKube testKube, FailsafeExecutor<Object> executor )
     {
         this.testKube = testKube;
-        this.retryPolicy = retryPolicy;
-        this.timeoutPolicy = timeoutPolicy;
+        this.executor = executor;
     }
 
+    static FailsafeExecutor<Object> getDefaultFailsafe()
+    {
+        return Failsafe.with( getDefaultTimeoutPolicy() ).compose( getDefaultRetryPolicy() );
+    }
 
     static RetryPolicy<Object> getDefaultRetryPolicy()
     {
@@ -73,7 +75,7 @@ public class ProvisioningProbeController
         List<CompletableFuture<Boolean>> futures = new ArrayList<>();
         for( Map.Entry<String, ProvisioningProbe> entry : probes.entrySet() )
         {
-            CompletableFuture<Boolean> future = Failsafe.with( timeoutPolicy ).compose( retryPolicy ).getAsync( () -> {
+            CompletableFuture<Boolean> future = executor.getAsync( () -> {
                 log.info( ()-> "Running provisioning probe: " + entry.getKey() );
                 try
                 {
@@ -81,9 +83,9 @@ public class ProvisioningProbeController
                     log.info( ()-> "Provisioning probe returned " + result + " : " + entry.getKey() );
                     return result;
                 }
-                catch( Throwable t )
+                catch( Exception e )
                 {
-                    log.log( Level.WARNING, t, ()->"Provisioning probe completed exceptionally : " + entry.getKey() );
+                    log.log( Level.WARNING, e, ()->"Provisioning probe completed exceptionally : " + entry.getKey() );
                     return false;
                 }
             } );
@@ -97,7 +99,12 @@ public class ProvisioningProbeController
         {
             all.get( timeout, timeoutUnit );
         }
-        catch( InterruptedException | ExecutionException | TimeoutException e )
+        catch( InterruptedException e )
+        {
+            Thread.currentThread().interrupt();
+            throw new TestKubeException( "Provisioning probes were interrupted.", e );
+        }
+        catch( ExecutionException | TimeoutException e )
         {
             throw new TestKubeException( "Provisioning probes did not complete successfully.", e );
         }
