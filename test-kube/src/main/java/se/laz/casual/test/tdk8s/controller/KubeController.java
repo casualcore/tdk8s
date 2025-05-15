@@ -7,6 +7,7 @@
 package se.laz.casual.test.tdk8s.controller;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
+import se.laz.casual.test.tdk8s.TestKube;
 import se.laz.casual.test.tdk8s.connection.KubeConnection;
 import se.laz.casual.test.tdk8s.exec.ExecResult;
 import se.laz.casual.test.tdk8s.store.ResourcesStore;
@@ -138,6 +139,7 @@ public class KubeController implements ProvisioningController, ConnectionControl
 
     public static final class Builder
     {
+        private TestKube testKube;
         private KubernetesClient client;
         private ResourcesStore store;
         private String label;
@@ -145,6 +147,7 @@ public class KubeController implements ProvisioningController, ConnectionControl
         private ResourceLookupController resourceLookupController;
         private NetworkController networkController;
         private RuntimeController runtimeController;
+        private ProvisioningProbeController provisioningProbeController;
         private ProvisioningController provisioningController;
         private ConnectionController connectionController;
         private ExecController execController;
@@ -170,6 +173,12 @@ public class KubeController implements ProvisioningController, ConnectionControl
         public Builder label( String label )
         {
             this.label = label;
+            return this;
+        }
+
+        public Builder testKube( TestKube testKube )
+        {
+            this.testKube = testKube;
             return this;
         }
 
@@ -215,6 +224,7 @@ public class KubeController implements ProvisioningController, ConnectionControl
             initRuntimeController();
             initNetworkController();
             initResourceLookupController();
+            initProvisioningProbeController();
 
             initProvisioningController();
             initConnectionController();
@@ -238,11 +248,16 @@ public class KubeController implements ProvisioningController, ConnectionControl
             this.resourceLookupController = new ResourceLookupControllerImpl( client, store );
         }
 
+        private void initProvisioningProbeController()
+        {
+            this.provisioningProbeController = new ProvisioningProbeControllerImpl( testKube );
+        }
+
         private void initProvisioningController()
         {
             if( this.provisioningController == null )
             {
-                this.provisioningController = new ProvisioningControllerImpl( client, store, label );
+                this.provisioningController = new ProvisioningControllerImpl( provisioningProbeController, client, store, label );
             }
         }
 

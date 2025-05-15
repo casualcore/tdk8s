@@ -8,6 +8,7 @@ package se.laz.casual.test.tdk8s.store;
 
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
+import se.laz.casual.test.tdk8s.probe.ProvisioningProbe;
 
 import java.util.Map;
 
@@ -18,11 +19,13 @@ public class ResourcesStore
 {
     private final PodStore podStore;
     private final ServiceStore serviceStore;
+    private final ProvisioningProbeStore provisioningProbeStore;
 
     public ResourcesStore()
     {
         this.podStore = new PodStore();
         this.serviceStore = new ServiceStore();
+        this.provisioningProbeStore = new ProvisioningProbeStore();
     }
 
     /**
@@ -153,6 +156,26 @@ public class ResourcesStore
     public Service removeService( String name )
     {
         return this.serviceStore.remove( name );
+    }
+
+    /**
+     * Get all stored provisioning probes.
+     *
+     * @return map of provisioning probes stored.
+     */
+    public Map<String, ProvisioningProbe> getProvisioningProbes()
+    {
+        return this.provisioningProbeStore.getAll();
+    }
+
+    /**
+     * Store all provisioning probes provided.
+     *
+     * @param provisioningProbes to store.
+     */
+    public void putProvisioningProbes( Map<String, ProvisioningProbe> provisioningProbes )
+    {
+        this.provisioningProbeStore.putAll( provisioningProbes );
     }
 
 }

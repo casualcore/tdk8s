@@ -31,12 +31,14 @@ public class ProvisioningControllerImpl implements ProvisioningController
     private final List<Watch> watches = new ArrayList<>();
     private final List<DeleteWatcher<?>> deleteWatchers = new ArrayList<>();
 
+    private final ProvisioningProbeController provisioningProbeController;
     private final KubernetesClient client;
     private final ResourcesStore resourcesStore;
     private final String labelValue;
 
-    public ProvisioningControllerImpl( KubernetesClient client, ResourcesStore resourcesStore, String labelValue )
+    public ProvisioningControllerImpl( ProvisioningProbeController provisioningProbeController, KubernetesClient client, ResourcesStore resourcesStore, String labelValue )
     {
+        this.provisioningProbeController = provisioningProbeController;
         this.client = client;
         this.resourcesStore = resourcesStore;
         this.labelValue = labelValue;
@@ -82,6 +84,8 @@ public class ProvisioningControllerImpl implements ProvisioningController
         {
             client.pods().resource( p ).waitUntilReady( 1, TimeUnit.MINUTES );
         }
+
+        provisioningProbeController.runAll( resourcesStore.getProvisioningProbes(), 1, TimeUnit.MINUTES );
     }
 
     @Override

@@ -14,6 +14,7 @@ defaultTasks 'build'
 
 dependencies {
     api libs.fabric8
+    implementation libs.failsafe
 
     testRuntime libs.apache_commons_compress
     testRuntime libs.slf4j_nop

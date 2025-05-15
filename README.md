@@ -243,6 +243,7 @@ This provides the ability to:
 * transfer file to and from pods.
 * Connect via `port-forward`
 * asynchronous provisioning.
+* run custom provisioning probes.
 
 When referring to pods by name, it will initially look for the pod alias provided when added using `TestKubeBuilder#addPod`,
 this aims to remove complexity around pods with a `generatedName`. Though it will also find exact matches too if required
@@ -363,6 +364,49 @@ instance.getController().destroyAsync();
 // do your work.
 instance.getController().waitUntilDestroyed();
 ```
+
+### Custom Provisioning Probes
+
+The majority of the time, standard `k8s` readiness probes are sufficient to ensure test execution can begin.
+`tdk8s` managed `k8s` resources are waited upon until ready within the `TestKube` `init()` or `waitUntilReady()` methods.
+
+However, some `k8s` resources do not allow readiness probes. So there can be timing issues, for example with 
+newly created `Service` objects, where the IP details have not yet propagated within the cluster leading to 
+occasional initial connection refused responses, resulting in unstable repeated test execution.
+
+To prevent the need for arbitrary `sleep()`s or retries within the test code, a `ProvisioningProbe` mechanism is provided.
+These can be added to the `TestKube` as part of the builder as a lambda and are executed after the managed resources readiness probes
+have successfully returned.
+
+All probes are run during the `init()` or `waitUntilReady()` methods in parallel. Failing probes, those that return false, are retried 
+with a backoff until successful or a timeout has occurred.
+
+Probes should not result in side effects and must be able to be run multiple times in the event they do not succeed.
+They should also ideally be short running to ensure they do not delay test execution unnecessarily.
+
+Probes are all provided access to the current `TestKube` instance making it possible to utilise within the probe execution.
+
+Calling a service from within another pod using curl via the `TestKube` [execute command](#execute-commands) functionality:
+```groovy
+TestKube instance = TestKube.newBuilder()
+    .label( id )
+    .addPod( "pod1", NginxResources.SIMPLE_NGINX_POD )
+    .addPod( "pod2", NginxResources.SIMPLE_NGINX_POD2 )
+    .addService( NginxResources.SIMPLE_NGINX_SERVICE_NAME, NginxResources.SIMPLE_NGINX_SERVICE )
+    .addProvisioningProbe( "service check.", (tk)-> {
+        String[] command = ["sh", "-c", "curl -s http://" + NginxResources.SIMPLE_NGINX_SERVICE_NAME +":"+80 ]
+        ExecResult actual = tk.getController(  ).executeCommandAsync( "pod2", command )
+                .get( 5, TimeUnit.SECONDS)
+        return actual.getExitCode(  ) == 0
+    } )
+    .build()
+
+instance.init( )
+```
+
+NOTE: Care should be taken to consider where the probe is executing. When running from a local machine accessing the cluster 
+remotely it will not have the same network access as when running within the cluster for example within a CI/CD pipeline.
+Probes must be created to ensure they work in both scenarios to prevent issues.
 
 ### `k8s` Resources
 

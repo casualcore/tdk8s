@@ -17,6 +17,7 @@ import io.fabric8.kubernetes.client.dsl.MixedOperation
 import io.fabric8.kubernetes.client.dsl.PodResource
 import io.fabric8.kubernetes.client.dsl.ServiceResource
 import se.laz.casual.test.tdk8s.TestKube
+import se.laz.casual.test.tdk8s.probe.ProvisioningProbe
 import se.laz.casual.test.tdk8s.store.ResourcesStore
 import spock.lang.Specification
 
@@ -24,6 +25,8 @@ import java.util.concurrent.TimeUnit
 
 class ProvisioningControllerTest extends Specification
 {
+    TestKube testKube = Mock()
+    ProvisioningProbeController provisioningProbeController = new ProvisioningProbeControllerImpl( testKube )
     KubernetesClient client = Mock()
     String label = UUID.randomUUID(  ).toString(  )
     ResourcesStore store = new ResourcesStore()
@@ -47,7 +50,7 @@ class ProvisioningControllerTest extends Specification
 
     def setup()
     {
-        instance = new ProvisioningControllerImpl( client, store, label )
+        instance = new ProvisioningControllerImpl( provisioningProbeController, client, store, label )
     }
 
     def "init applies pods and services in store with label applied and updates store, waits until pods ready."()
@@ -92,6 +95,22 @@ class ProvisioningControllerTest extends Specification
 
         store.putPod( podName, expectedPod )
         store.putService( serviceName, expectedSvc )
+
+        when:
+        instance.waitUntilReady(  )
+
+        then:
+        noExceptionThrown(  )
+    }
+
+    def "wait until ready, with init probes."()
+    {
+        given:
+        ProvisioningProbe probe = Mock()
+        1* probe.ready( testKube ) >> false
+        1* probe.ready( testKube ) >> true
+
+        store.putProvisioningProbes( ["p": probe ] )
 
         when:
         instance.waitUntilReady(  )

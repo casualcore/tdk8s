@@ -39,7 +39,7 @@ public class NetworkChecker
         }
         catch( IOException e )
         {
-            log.finest( "Unable to connect to: " + host + ":" + port );
+            log.finest( ()-> "Unable to connect to: " + host + ":" + port );
             return false;
         }
     }
