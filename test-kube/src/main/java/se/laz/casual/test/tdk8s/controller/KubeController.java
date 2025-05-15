@@ -147,7 +147,7 @@ public class KubeController implements ProvisioningController, ConnectionControl
         private ResourceLookupController resourceLookupController;
         private NetworkController networkController;
         private RuntimeController runtimeController;
-        private ProvisioningProbeController initProbeController;
+        private ProvisioningProbeController provisioningProbeController;
         private ProvisioningController provisioningController;
         private ConnectionController connectionController;
         private ExecController execController;
@@ -250,14 +250,14 @@ public class KubeController implements ProvisioningController, ConnectionControl
 
         private void initProvisioningProbeController()
         {
-            this.initProbeController = new ProvisioningProbeController( testKube );
+            this.provisioningProbeController = new ProvisioningProbeControllerImpl( testKube );
         }
 
         private void initProvisioningController()
         {
             if( this.provisioningController == null )
             {
-                this.provisioningController = new ProvisioningControllerImpl( initProbeController, client, store, label );
+                this.provisioningController = new ProvisioningControllerImpl( provisioningProbeController, client, store, label );
             }
         }
 

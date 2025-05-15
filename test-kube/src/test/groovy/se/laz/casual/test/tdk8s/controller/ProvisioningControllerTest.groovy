@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit
 class ProvisioningControllerTest extends Specification
 {
     TestKube testKube = Mock()
-    ProvisioningProbeController provisioningProbeController = new ProvisioningProbeController( testKube )
+    ProvisioningProbeController provisioningProbeController = new ProvisioningProbeControllerImpl( testKube )
     KubernetesClient client = Mock()
     String label = UUID.randomUUID(  ).toString(  )
     ResourcesStore store = new ResourcesStore()
@@ -110,7 +110,7 @@ class ProvisioningControllerTest extends Specification
         1* probe.ready( testKube ) >> false
         1* probe.ready( testKube ) >> true
 
-        store.putProvisioningProbes( ["": probe ] )
+        store.putProvisioningProbes( ["p": probe ] )
 
         when:
         instance.waitUntilReady(  )

@@ -17,7 +17,7 @@ public interface ProvisioningProbe
      * A probe can be expected to be run multiple times until
      * it returns true.
      *
-     * @param testKube the testKube instance to probe against.
+     * @param testKube the current testKube instance to probe against.
      * @return if the provisioning probe was successful or not.
      */
     boolean ready( TestKube testKube );

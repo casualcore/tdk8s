@@ -24,7 +24,7 @@ import java.util.UUID;
 
 /**
  * Manages kubernetes resources for the purpose of test.
- * <br/>
+ * <p>
  * The ability to interact with the k8s resources during the test are also provided
  * <ul>
  *     <li>connections to resources</li>
@@ -33,22 +33,27 @@ import java.util.UUID;
  *     <li>execute command</li>
  * </ul>
  * Resources should be created at the start of tests and destroyed at the end.
- * <br/>
+ * </p>
+ * <p>
  * To allow maximum flexibility you can use the fabric8 api to define you resources.
  * These resources are then managed by the TestKube instance.
  * For more complex resource definitions it is advised to implement your own mapping
  * code which produces you own fabric8 {@link io.fabric8.kubernetes.client.dsl.Resource}
  * objects.
- * <br/>
+ * </p>
+ * <p>
  * Note: Currently only Pod and Service resources can be managed, though additional resources should be
  * added later e.g. ConfigMap, Deployment.
- * <br/>
+ * </p>
+ * <p>
  * All managed resources are labeled with a unique label, this label can be configured using the
  * builder.
- * <br/>
+ * </p>
+ * <p>
  * By default, the cluster connectivity is provided using a {@link io.fabric8.kubernetes.client.KubernetesClient}
  * with no additional configuration. If you require more complex setup, you can provide the appropriate
  * {@link io.fabric8.kubernetes.client.KubernetesClient} instance into the builder.
+ * </p>
  */
 public class TestKube implements Provisionable, Connectable
 {
@@ -133,7 +138,7 @@ public class TestKube implements Provisionable, Connectable
 
     /**
      * Gets the controller for this TestKube.
-     * <br/>
+     * <p>
      * To gain more control over the TestKube, you can access the
      * {@link KubeController} for this TestKube instance here,
      * providing you with more functionality, for example:
@@ -145,6 +150,7 @@ public class TestKube implements Provisionable, Connectable
      *     <li>{@link KubeController#download(String, String, Path)}</li>
      *     <li>{@link KubeController#upload(String, String, Path)}</li>
      * </ul>
+     * </p>
      *
      * @return controller instance for this TestKube.
      */
@@ -225,12 +231,13 @@ public class TestKube implements Provisionable, Connectable
 
         /**
          * Add a pod to be managed.
-         * <br/>
+         * <p>
          * The alias provided can be used to retrieve and does not have to match
          * the actual name of the Pod provided.
+         * </p>
          *
          * @param alias of the pod.
-         * @param pod   to be managed.
+         * @param pod to be managed.
          * @return the builder.
          */
         public Builder addPod( String alias, Pod pod )
@@ -241,11 +248,12 @@ public class TestKube implements Provisionable, Connectable
 
         /**
          * Add a service to be managed.
-         * <br/>
+         * <p>
          * The alias provided can be used to retrieve and does not have to match
          * the actual name of the Service provided.
+         * </p>
          *
-         * @param alias   of the service.
+         * @param alias of the service.
          * @param service to be managed.
          * @return the builder.
          */
@@ -255,6 +263,49 @@ public class TestKube implements Provisionable, Connectable
             return this;
         }
 
+        /**
+         * Add a custom provisioning probe to be executed at the end of the initialisation process.
+         * <p>
+         * Probes are executed repeatedly until they succeed (return true) or a timeout has occurred.
+         * Therefore, they should not result in side effect and can be executed multiple times without issue.
+         * They should also ideally be short running to ensure they do not unnecessarily delay completion
+         * of the initialisation process prior to test execution.
+         * </p>
+         * <p>
+         * <b>Note:</b> These should be avoided where possible as in most scenarios correct usage of readiness
+         * probes within the kubernetes resources should be sufficient to ensure that the managed
+         * resources are all ready.
+         * </p>
+         * <p>
+         * However, they can be useful for example when new service IP details take time to propagate
+         * within the cluster such that sleeps and retries are not required within the test code,
+         * ensuring stable, repeatable test execution.
+         * </p>
+         * The current TestKube instances is made available to the probe to utilise as necessary.
+         * For example, probe using curl from one pod through a service to another pod:
+         * <pre>
+         * {@code
+         *    builder.addProvisioningProbe( "service-check", (tk)-> {
+         *        ExecResult result = tk.getController()
+         *              .executeCommandAsync( "pod-alias", "sh", "-c", "curl -s http://<service>:<port>" )
+         *              .get( 5, TimeUnit.SECONDS );
+         *        return result.getExitCode() == 0 && result.getOutput() == expected;
+         *    });
+         * }
+         * </pre>*
+         * </p>
+         * <p>
+         * <b>Note:</b> Care should be taken to consider where the probe is executing. When running from
+         * a local machine accessing the cluster remotely it will not have the same network access as
+         * when running within the cluster for example within a CI/CD pipeline.
+         * Probes must be created to ensure they work in both scenarios to prevent issues.
+         * <br/>
+         * </p>
+         *
+         * @param alias of the probe.
+         * @param probe to be executed.
+         * @return the builder.
+         */
         public Builder addProvisioningProbe( String alias, ProvisioningProbe probe )
         {
             this.initProbes.put( alias, probe );

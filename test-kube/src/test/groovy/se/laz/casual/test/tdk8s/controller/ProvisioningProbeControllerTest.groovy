@@ -26,26 +26,26 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class ProvisioningProbeControllerTest extends Specification
 {
-    ProvisioningProbeController instance
+    ProvisioningProbeControllerImpl instance
     TestKube testKube = Mock()
 
     Executor exec = Executors.newFixedThreadPool( 2 )
 
     FailsafeExecutor<Object> failsafeExec
-    RetryPolicy<Object> retryPolicy = RetryPolicy.builder( ProvisioningProbeController.getDefaultRetryPolicy(  ).getConfig(  ) )
+    RetryPolicy<Object> retryPolicy = RetryPolicy.builder( ProvisioningProbeControllerImpl.getDefaultRetryPolicy(  ).getConfig(  ) )
             .withBackoff( 1, 2, ChronoUnit.MILLIS )
             .build(  )
 
     //RetryPolicy<Object> retryPolicy = ProvisioningProbeController.getDefaultRetryPolicy(  )
 
     //Timeout<Object> timeoutPolicy = Timeout.builder( Duration.ofSeconds( 1 ) ).withInterrupt(  ).build()
-    Timeout<Object> timeoutPolicy = ProvisioningProbeController.getDefaultTimeoutPolicy(  )
+    Timeout<Object> timeoutPolicy = ProvisioningProbeControllerImpl.getDefaultTimeoutPolicy(  )
 
 
     def setup()
     {
         failsafeExec = Failsafe.with( timeoutPolicy ).compose( retryPolicy ).with( exec )
-        instance = new ProvisioningProbeController( testKube, failsafeExec )
+        instance = new ProvisioningProbeControllerImpl( testKube, failsafeExec )
     }
 
     def cleanup()
@@ -193,7 +193,7 @@ class ProvisioningProbeControllerTest extends Specification
     {
         given:
         Executor exec = Executors.newSingleThreadExecutor()
-        instance = new ProvisioningProbeController( testKube )
+        instance = new ProvisioningProbeControllerImpl( testKube )
 
         CountDownLatch latch = new CountDownLatch( 1 )
         ProvisioningProbe probe = (t)->{
