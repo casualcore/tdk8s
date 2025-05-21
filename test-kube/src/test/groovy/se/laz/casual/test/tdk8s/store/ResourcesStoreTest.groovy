@@ -10,6 +10,8 @@ import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.api.model.PodBuilder
 import io.fabric8.kubernetes.api.model.Service
 import io.fabric8.kubernetes.api.model.ServiceBuilder
+import io.fabric8.kubernetes.api.model.apps.Deployment
+import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder
 import se.laz.casual.test.tdk8s.probe.ProvisioningProbe
 import spock.lang.Shared
 import spock.lang.Specification
@@ -37,6 +39,26 @@ class ResourcesStoreTest extends Specification
             .withName( podName2 )
             .endMetadata(  )
             .build(  )
+
+    @Shared
+    String deploymentName1 = "single-deployment-resource-1"
+
+    @Shared
+    Deployment deployment1 = new DeploymentBuilder()
+        .withNewMetadata(  )
+            .withName( deploymentName1 )
+        .endMetadata(  )
+        .build(  )
+
+    @Shared
+    String deploymentName2 = "single-deployment-resource-2"
+
+    @Shared
+    Deployment deployment2 = new DeploymentBuilder()
+        .withNewMetadata(  )
+            .withName( deploymentName2 )
+        .endMetadata(  )
+        .build(  )
 
     @Shared
     String serviceName1 = "single-service-resource-1"
@@ -67,6 +89,7 @@ class ResourcesStoreTest extends Specification
     {
         expect:
         instance.getPods() == [:]
+        instance.getDeployments() == [:]
         instance.getServices() == [:]
         instance.getProvisioningProbes() == [:]
     }
@@ -129,6 +152,67 @@ class ResourcesStoreTest extends Specification
         instance.getPods() == [(podName2): pod1 ]
         !instance.containsPod( podName1 )
         instance.containsPod( podName2 )
+
+    }
+
+    def "Retrieve non existent deployment, throws ResourceNotFoundException"()
+    {
+        when:
+        instance.getDeployment( "blah" )
+
+        then:
+        thrown ResourceNotFoundException
+    }
+
+    def "Remove non existent pod, throws ResourceNotFoundException"()
+    {
+        when:
+        instance.removeDeployment( "blah" )
+
+        then:
+        thrown ResourceNotFoundException
+    }
+
+
+    def "Add deployment, retrieve, modify, retrieve, remove."()
+    {
+        when:
+        instance.putDeployment( deploymentName1, deployment1 )
+
+        then:
+        instance.getDeployments() == [(deploymentName1): deployment1]
+        instance.getDeployment( deploymentName1 ) == deployment1
+        instance.containsDeployment( deploymentName1 )
+        !instance.containsDeployment( deploymentName2 )
+
+        when:
+        instance.putDeployment( deploymentName2, deployment2 )
+
+        then:
+        instance.getDeployments() == [(deploymentName1): deployment1, (deploymentName2): deployment2]
+        instance.getDeployment( deploymentName1 ) == deployment1
+        instance.getDeployment( deploymentName2 ) == deployment2
+        instance.containsDeployment( deploymentName1 )
+        instance.containsDeployment( deploymentName2 )
+
+        when:
+        instance.putDeployment( deploymentName1, deployment2 )
+        instance.putDeployment( deploymentName2, deployment1 )
+
+        then:
+        instance.getDeployments() == [(deploymentName1): deployment2, (deploymentName2): deployment1]
+        instance.getDeployment( deploymentName1 ) == deployment2
+        instance.getDeployment( deploymentName2 ) == deployment1
+        instance.containsDeployment( deploymentName1 )
+        instance.containsDeployment( deploymentName2 )
+
+        when:
+        instance.removeDeployment( deploymentName1 )
+
+        then:
+        instance.getDeployments() == [(deploymentName2): deployment1 ]
+        !instance.containsDeployment( deploymentName1 )
+        instance.containsDeployment( deploymentName2 )
 
     }
 
@@ -201,6 +285,18 @@ class ResourcesStoreTest extends Specification
 
         then:
         instance.getPods(  ) == pods
+    }
+
+    def "Put all deployments."()
+    {
+        given:
+        Map<String, Deployment> deployments = [(deploymentName1): deployment1, (deploymentName2): deployment2 ]
+
+        when:
+        instance.putDeployments( deployments )
+
+        then:
+        instance.getDeployments(  ) == deployments
     }
 
     def "Put all services."()

@@ -8,6 +8,7 @@ package se.laz.casual.test.tdk8s;
 
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import se.laz.casual.test.tdk8s.connection.KubeConnection;
@@ -117,6 +118,16 @@ public class TestKube implements Provisionable, Connectable
     }
 
     /**
+     * Gets the deployments managed by this TestKube.
+     *
+     * @return map of managed deployments.
+     */
+    public Map<String,Deployment> getDeployments()
+    {
+        return this.resourcesStore.getDeployments();
+    }
+
+    /**
      * Gets the services managed by this TestKube.
      *
      * @return map of managed services.
@@ -199,6 +210,7 @@ public class TestKube implements Provisionable, Connectable
         private String label = UUID.randomUUID().toString();
         private Map<String, Pod> pods = new HashMap<>();
         private Map<String, Service> services = new HashMap<>();
+        private Map<String, Deployment> deployments = new HashMap<>();
         private Map<String, ProvisioningProbe> initProbes = new HashMap<>();
         private KubeController kubeController;
         private ResourcesStore resourcesStore;
@@ -260,6 +272,22 @@ public class TestKube implements Provisionable, Connectable
         public Builder addService( String alias, Service service )
         {
             this.services.put( alias, service );
+            return this;
+        }
+
+        /**
+         * Add a deployment to be managed.
+         * <p>
+         * The alias provided can be used to retrieve and does not have to match
+         * the actual name of the Deployment provided.
+         * </p>
+         * @param alias of the deployment.
+         * @param deployment to be managed.
+         * @return the builder.
+         */
+        public Builder addDeployment( String alias, Deployment deployment )
+        {
+            this.deployments.put( alias, deployment );
             return this;
         }
 
@@ -327,6 +355,7 @@ public class TestKube implements Provisionable, Connectable
 
             this.resourcesStore = new ResourcesStore();
             this.resourcesStore.putPods( pods );
+            this.resourcesStore.putDeployments( deployments );
             this.resourcesStore.putServices( services );
             this.resourcesStore.putProvisioningProbes( initProbes );
 

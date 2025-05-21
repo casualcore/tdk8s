@@ -10,6 +10,8 @@ import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.api.model.PodBuilder
 import io.fabric8.kubernetes.api.model.Service
 import io.fabric8.kubernetes.api.model.ServiceBuilder
+import io.fabric8.kubernetes.api.model.apps.Deployment
+import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import se.laz.casual.test.tdk8s.controller.KubeController
@@ -38,6 +40,16 @@ class TestKubeTest extends Specification
             .withName( serviceName )
             .endMetadata(  )
             .build()
+
+    @Shared
+    String deploymentName = "single-deployment-resource"
+
+    @Shared
+    Deployment deployment = new DeploymentBuilder(  )
+        .withNewMetadata(  )
+            .withName( deploymentName )
+        .endMetadata(  )
+            .build(  )
 
     TestKube instance
 
@@ -104,10 +116,15 @@ class TestKubeTest extends Specification
         instance.getServices() == [(serviceName):service]
     }
 
-    def "Create TestKube with a single pod, then update pod."()
+    def "Create TestKube with a single deployment."()
     {
-        given:
-        instance = TestKube.newBuilder(  ).addPod( podName, pod ).build()
+        when:
+        instance = TestKube.newBuilder(  )
+                .addDeployment( deploymentName, deployment )
+                .build(  )
+
+        then:
+        instance.getDeployments() == [(deploymentName): deployment ]
     }
 
     def "ResourcesStore accessible."()

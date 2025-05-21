@@ -8,6 +8,7 @@ package se.laz.casual.test.tdk8s.sample
 
 import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.api.model.Service
+import io.fabric8.kubernetes.api.model.apps.Deployment
 import spock.lang.Specification
 
 class Fabric8ApiSanityChecks extends Specification
@@ -66,6 +67,7 @@ class Fabric8ApiSanityChecks extends Specification
         WildflyResources.EXTERNAL_WILDFLY_SERVICE == WildflyResources.EXTERNAL_WILDFLY_SERVICE
         NginxResources.SIMPLE_NGINX_SERVICE == NginxResources.SIMPLE_NGINX_SERVICE
         NginxResources.SIMPLE_NGINX_SERVICE2 == NginxResources.SIMPLE_NGINX_SERVICE2
+        NginxResources.SIMPLE_NGINX_SERVICE3 == NginxResources.SIMPLE_NGINX_SERVICE3
         NginxResources.EXTERNAL_NGINX_SERVICE == NginxResources.EXTERNAL_NGINX_SERVICE
 
         WildflyResources.SIMPLE_WILDFLY_SERVICE.hashCode(  ) == WildflyResources.SIMPLE_WILDFLY_SERVICE.hashCode(  )
@@ -103,6 +105,21 @@ class Fabric8ApiSanityChecks extends Specification
 
         then:
         copy == WildflyResources.EXTERNAL_WILDFLY_SERVICE
+    }
+
+    def "Deployment object equal."()
+    {
+        expect:
+        NginxResources.SIMPLE_NGINX_DEPLOYMENT == NginxResources.SIMPLE_NGINX_DEPLOYMENT
+    }
+
+    def "Deployment object edited without changes still equal."()
+    {
+        when:
+        Deployment copy = NginxResources.SIMPLE_NGINX_DEPLOYMENT.edit(  ).build(  )
+
+        then:
+        copy == NginxResources.SIMPLE_NGINX_DEPLOYMENT
     }
 
 }

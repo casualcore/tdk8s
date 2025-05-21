@@ -8,8 +8,10 @@ package se.laz.casual.test.tdk8s.controller;
 
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.PodResource;
+import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import io.fabric8.kubernetes.client.dsl.ServiceResource;
 import se.laz.casual.test.tdk8s.store.ResourcesStore;
 
@@ -51,6 +53,28 @@ public class ResourceLookupControllerImpl implements ResourceLookupController
         }
 
         return Optional.of( this.client.pods().resource( pod ) );
+    }
+
+    @Override
+    public Optional<RollableScalableResource<Deployment>> getDeploymentResource( String name )
+    {
+        Deployment deployment = null;
+        if( this.resourcesStore.containsDeployment( name ) )
+        {
+            deployment = this.resourcesStore.getDeployment( name );
+        }
+
+        if( deployment == null )
+        {
+            deployment = this.client.apps().deployments().withName( name ).get();
+        }
+
+        if( deployment == null )
+        {
+            return Optional.empty();
+        }
+
+        return Optional.of( this.client.apps().deployments().resource( deployment ) );
     }
 
     @Override

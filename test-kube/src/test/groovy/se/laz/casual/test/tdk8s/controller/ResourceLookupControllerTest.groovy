@@ -8,9 +8,12 @@ package se.laz.casual.test.tdk8s.controller
 
 import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.api.model.Service
+import io.fabric8.kubernetes.api.model.apps.Deployment
 import io.fabric8.kubernetes.client.KubernetesClient
+import io.fabric8.kubernetes.client.dsl.AppsAPIGroupDSL
 import io.fabric8.kubernetes.client.dsl.MixedOperation
 import io.fabric8.kubernetes.client.dsl.PodResource
+import io.fabric8.kubernetes.client.dsl.RollableScalableResource
 import io.fabric8.kubernetes.client.dsl.ServiceResource
 import se.laz.casual.test.tdk8s.store.ResourcesStore
 import spock.lang.Specification
@@ -69,7 +72,7 @@ class ResourceLookupControllerTest extends Specification
         actual.get(  ) == pr
     }
 
-    def "Get pod, not present in store, not present on cluster, throws ResourceNotFoundException."()
+    def "Get pod, not present in store, not present on cluster, returns empty."()
     {
         given:
         String podName = "mypod"
@@ -85,6 +88,72 @@ class ResourceLookupControllerTest extends Specification
 
         then:
         0* mixed.resource( pod )
+        actual.isEmpty(  )
+    }
+
+    def "Get deployment, present in store."()
+    {
+        given:
+        String deploymentName = "mydeployment"
+        Deployment deployment = Mock( Deployment )
+        RollableScalableResource<Deployment> dr = Mock( RollableScalableResource<Deployment> )
+        AppsAPIGroupDSL apps = Mock( AppsAPIGroupDSL )
+        1* client.apps(  ) >> apps
+        MixedOperation mixed = Mock( MixedOperation )
+
+        1* apps.deployments(  ) >> mixed
+        1* mixed.resource( deployment ) >> dr
+
+        store.putDeployment( deploymentName, deployment )
+
+        when:
+        Optional<RollableScalableResource<Deployment>> actual = instance.getDeploymentResource( deploymentName )
+
+        then:
+        actual.isPresent(  )
+        actual.get() == dr
+    }
+
+    def "Get deployment, not present in store, is present on cluster."()
+    {
+        given:
+        String deploymentName = "mydeployment"
+        Deployment deployment = Mock( Deployment )
+        RollableScalableResource<Deployment> dr = Mock( RollableScalableResource<Deployment> )
+        AppsAPIGroupDSL apps = Mock( AppsAPIGroupDSL )
+        2* client.apps(  ) >> apps
+        MixedOperation mixed = Mock( MixedOperation )
+        2* apps.deployments(  ) >> mixed
+        1* mixed.withName( deploymentName ) >> dr
+        1* dr.get(  ) >> deployment
+        1* mixed.resource( deployment ) >> dr
+
+        when:
+        Optional<RollableScalableResource<Deployment>> actual = instance.getDeploymentResource( deploymentName )
+
+        then:
+        actual.isPresent(  )
+        actual.get(  ) == dr
+    }
+
+    def "Get deployment, not present in store, not present on cluster, returns empty."()
+    {
+        given:
+        String deploymentName = "mypod"
+        Deployment deployment = Mock( Deployment )
+        RollableScalableResource<Deployment> dr = Mock( RollableScalableResource<Deployment> )
+        AppsAPIGroupDSL apps = Mock( AppsAPIGroupDSL )
+        1* client.apps() >> apps
+        MixedOperation mixed = Mock( MixedOperation )
+        1* apps.deployments(  ) >> mixed
+        1* mixed.withName( deploymentName ) >> dr
+        1* dr.get(  ) >> null
+
+        when:
+        Optional<RollableScalableResource<Deployment>> actual = instance.getDeploymentResource( deploymentName )
+
+        then:
+        0* mixed.resource( deployment )
         actual.isEmpty(  )
     }
 
@@ -128,7 +197,7 @@ class ResourceLookupControllerTest extends Specification
         actual.get() == sr
     }
 
-    def "Get service, not present in store, not present on cluster, throws ResourceNotFoundException."()
+    def "Get service, not present in store, not present on cluster, returns empty."()
     {
         given:
         String name = "mypod"

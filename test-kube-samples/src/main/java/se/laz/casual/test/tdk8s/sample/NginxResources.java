@@ -11,6 +11,8 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 
 import java.util.Map;
 
@@ -107,6 +109,54 @@ public final class NginxResources
             .endMetadata()
             .withNewSpec()
             .addToSelector( SELECTOR2 )
+            .addNewPort().withName( "http" ).withPort( 80 ).endPort()
+            .endSpec()
+            .build();
+
+    public static final Map<String, String> DEPLOYMENT_SELECTOR = Map.of( "app", "nginx-test-app3" );
+
+    public static final String SIMPLE_NGINX_DEPLOYMENT_NAME = "nginx-deployment";
+
+    public static final Deployment SIMPLE_NGINX_DEPLOYMENT = new DeploymentBuilder()
+            .withNewMetadata()
+                .withName( SIMPLE_NGINX_DEPLOYMENT_NAME )
+            .endMetadata()
+            .withNewSpec()
+            .withReplicas( 4 )
+            .withNewSelector()
+                .addToMatchLabels( DEPLOYMENT_SELECTOR )
+            .endSelector()
+            .withNewTemplate()
+                .withNewMetadata()
+                    .withName( SIMPLE_NGINX_DEPLOYMENT_NAME )
+                    .withLabels( DEPLOYMENT_SELECTOR )
+                .endMetadata()
+                .withNewSpec()
+                    .addNewContainer()
+                        .withName( "nginx" )
+                        .withImage( "nginx:1.27.4" )
+                        .addNewPort().withContainerPort( 80 ).endPort()
+                        .withNewReadinessProbe()
+                            .withNewTcpSocket()
+                                .withNewPort()
+                                    .withValue( 80 )
+                                .endPort()
+                            .endTcpSocket()
+                        .endReadinessProbe()
+                    .endContainer()
+                .endSpec()
+            .endTemplate()
+            .endSpec()
+            .build();
+
+    public static final String SIMPLE_NGINX_SERVICE_NAME3 = "nginx-service3";
+
+    public static final Service SIMPLE_NGINX_SERVICE3 = new ServiceBuilder()
+            .withNewMetadata()
+            .withName( SIMPLE_NGINX_SERVICE_NAME3 )
+            .endMetadata()
+            .withNewSpec()
+            .addToSelector( DEPLOYMENT_SELECTOR )
             .addNewPort().withName( "http" ).withPort( 80 ).endPort()
             .endSpec()
             .build();

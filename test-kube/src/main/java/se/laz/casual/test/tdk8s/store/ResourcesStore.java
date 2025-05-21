@@ -8,6 +8,7 @@ package se.laz.casual.test.tdk8s.store;
 
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import se.laz.casual.test.tdk8s.probe.ProvisioningProbe;
 
 import java.util.Map;
@@ -18,12 +19,14 @@ import java.util.Map;
 public class ResourcesStore
 {
     private final PodStore podStore;
+    private final DeploymentStore deploymentStore;
     private final ServiceStore serviceStore;
     private final ProvisioningProbeStore provisioningProbeStore;
 
     public ResourcesStore()
     {
         this.podStore = new PodStore();
+        this.deploymentStore = new DeploymentStore();
         this.serviceStore = new ServiceStore();
         this.provisioningProbeStore = new ProvisioningProbeStore();
     }
@@ -91,6 +94,71 @@ public class ResourcesStore
     public Pod removePod( String name )
     {
         return this.podStore.remove( name );
+    }
+
+    /**
+     * Get a deployment by name.
+     *
+     * @param name of the deployment.
+     * @return pod by name
+     * @throws ResourceNotFoundException if deployment not stored.
+     */
+    public Deployment getDeployment( String name )
+    {
+        return this.deploymentStore.get( name );
+    }
+
+    /**
+     * Get all stored deployments.
+     *
+     * @return map of deployments stored.
+     */
+    public Map<String,Deployment> getDeployments( )
+    {
+        return this.deploymentStore.getAll();
+    }
+
+    /**
+     * Check if the deployment with name is stored.
+     *
+     * @param name of the deployment.
+     * @return if it is stored.
+     */
+    public boolean containsDeployment( String name )
+    {
+        return this.deploymentStore.contains( name );
+    }
+
+    /**
+     * Store a deployment by name.
+     * @param name of the deployment to store.
+     * @param deployment to store.
+     */
+    public void putDeployment( String name, Deployment deployment )
+    {
+        this.deploymentStore.put( name, deployment );
+    }
+
+    /**
+     * Store all deployments provided.
+     *
+     * @param deployments to store.
+     */
+    public void putDeployments( Map<String,Deployment> deployments )
+    {
+        this.deploymentStore.putAll( deployments );
+    }
+
+    /**
+     * Remove deployment by name.
+     *
+     * @param name of deployment to remove.
+     * @return the removed deployment.
+     * @throws ResourceNotFoundException if deployment is not stored.
+     */
+    public Deployment removeDeployment( String name )
+    {
+        return this.deploymentStore.remove( name );
     }
 
     /**

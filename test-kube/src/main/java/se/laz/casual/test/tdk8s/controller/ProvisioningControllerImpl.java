@@ -8,9 +8,11 @@ package se.laz.casual.test.tdk8s.controller;
 
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.dsl.PodResource;
+import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import io.fabric8.kubernetes.client.dsl.ServiceResource;
 import se.laz.casual.test.tdk8s.store.ResourcesStore;
 import se.laz.casual.test.tdk8s.watchers.DeleteWatcher;
@@ -54,13 +56,28 @@ public class ProvisioningControllerImpl implements ProvisioningController
     @Override
     public void initAsync()
     {
+        for( Map.Entry<String, Deployment> entry : resourcesStore.getDeployments().entrySet() )
+        {
+            String name = entry.getKey();
+            Deployment d = entry.getValue();
+            Deployment updated = d.edit().editMetadata().addToLabels( RESOURCE_LABEL_NAME, labelValue ).endMetadata()
+                    .editSpec()
+                    .editTemplate()
+                    .editMetadata()
+                    .addToLabels( RESOURCE_LABEL_NAME, labelValue )
+                    .endMetadata()
+                    .endTemplate()
+                    .endSpec()
+                    .build();
+            updated = client.apps().deployments().resource( updated ).serverSideApply();
+            resourcesStore.putDeployment( name, updated );
+        }
+
         for( Map.Entry<String, Pod> entry : resourcesStore.getPods().entrySet() )
         {
             String name = entry.getKey();
             Pod p = entry.getValue();
-            Map<String,String> labels = p.getMetadata().getLabels();
-            labels.put( RESOURCE_LABEL_NAME, labelValue );
-            Pod updated = p.edit().editMetadata().withLabels( labels ).endMetadata().build();
+            Pod updated = p.edit().editMetadata().addToLabels( RESOURCE_LABEL_NAME, labelValue ).endMetadata().build();
             updated = client.pods().resource( updated ).serverSideApply();
             resourcesStore.putPod( name, updated );
         }
@@ -69,9 +86,7 @@ public class ProvisioningControllerImpl implements ProvisioningController
         {
             String name = entry.getKey();
             Service s = entry.getValue();
-            Map<String,String> labels = s.getMetadata().getLabels();
-            labels.put( RESOURCE_LABEL_NAME, labelValue );
-            Service updated = s.edit().editMetadata().withLabels( labels ).endMetadata().build();
+            Service updated = s.edit().editMetadata().addToLabels( RESOURCE_LABEL_NAME, labelValue ).endMetadata().build();
             updated = client.services().resource( updated ).serverSideApply();
             resourcesStore.putService( name, updated );
         }
@@ -80,6 +95,11 @@ public class ProvisioningControllerImpl implements ProvisioningController
     @Override
     public void waitUntilReady()
     {
+        for( Deployment d: resourcesStore.getDeployments().values() )
+        {
+            client.apps().deployments().resource( d ).waitUntilReady( 1, TimeUnit.MINUTES );
+        }
+
         for( Pod p: resourcesStore.getPods().values() )
         {
             client.pods().resource( p ).waitUntilReady( 1, TimeUnit.MINUTES );
@@ -98,27 +118,49 @@ public class ProvisioningControllerImpl implements ProvisioningController
     @Override
     public void destroyAsync()
     {
+        for( Deployment d: resourcesStore.getDeployments().values() )
+        {
+            DeleteWatcher<Deployment> deploymentWatcher = new DeleteWatcher<>();
+            RollableScalableResource<Deployment> deploymentResource = client.apps().deployments().resource( d );
+            Watch watch = deploymentResource.watch( deploymentWatcher );
+
+            watches.add( watch );
+            deleteWatchers.add( deploymentWatcher );
+
+            //Add watches for all deployment pods to delete.
+            List<Pod> podList =  client.pods().withLabelSelector( d.getSpec().getSelector() ).list().getItems();
+            for( Pod p: podList )
+            {
+                DeleteWatcher<Pod> deploymentPodWatcher = new DeleteWatcher<>();
+                Watch pWatch = client.pods().resource( p ).watch( deploymentPodWatcher );
+                watches.add( pWatch );
+                deleteWatchers.add( deploymentPodWatcher );
+            }
+
+            deploymentResource.delete();
+        }
+
         for( Pod p: resourcesStore.getPods().values() )
         {
             DeleteWatcher<Pod> podWatcher = new DeleteWatcher<>();
-            PodResource resource = client.pods().resource( p );
-            Watch watch = resource.watch( podWatcher );
+            PodResource podResource = client.pods().resource( p );
+            Watch watch = podResource.watch( podWatcher );
 
             watches.add( watch );
             deleteWatchers.add( podWatcher );
 
-            resource.delete();
+            podResource.delete();
         }
         for( Service s: resourcesStore.getServices().values() )
         {
             DeleteWatcher<Service> serviceWatcher = new DeleteWatcher<>();
-            ServiceResource<Service> resource = client.services().resource( s );
-            Watch watch = resource.watch( serviceWatcher );
+            ServiceResource<Service> serviceResource = client.services().resource( s );
+            Watch watch = serviceResource.watch( serviceWatcher );
 
             watches.add( watch );
             deleteWatchers.add( serviceWatcher );
 
-            resource.delete();
+            serviceResource.delete();
         }
     }
 
