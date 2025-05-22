@@ -6,7 +6,8 @@
 
 package se.laz.casual.test.tdk8s.integration
 
-
+import io.fabric8.kubernetes.api.model.PodList
+import io.fabric8.kubernetes.api.model.apps.Deployment
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import se.laz.casual.test.tdk8s.TestKube
@@ -92,52 +93,50 @@ class NginxDeploymentIntTest extends Specification
 //        noExceptionThrown(  )
 //    }
 
-//    def "Test scaling pods."()
-//    {
-//        given:
-//        Deployment d = instance.getDeployments(  ).get( deploymentName )
-//
-//        when:
-//        Deployment d2 = instance.getClient(  ).apps().deployments(  ).resource( d ).scale( 2 )
-//        //PodList pods = instance.getClient(  ).pods(  ).withLabelSelector( d2.getSpec(  ).getSelector(  ) ).list()
-//
-////        then:
-////        pods.getItems().size(  ) == 2
-////
-////        when:
-//        instance.init(  )
-//        pods = instance.getClient(  ).pods(  ).withLabelSelector( d.getSpec(  ).getSelector(  ) ).list()
-//
-//        then:
-//        pods.getItems().size(  ) == 4
-//
-//    }
+    def scaleAsyncTest( String name, int replicas )
+    {
+        instance.getController(  ).scaleAsync( name, replicas ).join()
+        scaleCheck( name, replicas )
+    }
 
-//    def "Test scaling pods v2."()
-//    {
-//        given:
-//        Deployment d = instance.getDeployments(  ).get( deploymentName )
-//
-//        when:
-//        Deployment d2 = NginxResources.SIMPLE_NGINX_DEPLOYMENT.edit(  )
-//                //.editMetadata(  ).removeAllFromManagedFields(d.getMetadata(  ).getManagedFields(  )  ).endMetadata(  )
-//                .editSpec(  ).withReplicas( 2 ).endSpec(  ).build(  )
-//        instance.getResourcesStore(  ).putDeployment( deploymentName, d2 )
-//        instance.init(  )
-//        PodList pods = instance.getClient(  ).pods(  ).withLabelSelector( d2.getSpec(  ).getSelector(  ) ).list()
-//
-//        then:
-//        pods.getItems(  ).size(  ) == 2
-//
-//        when:
-//        instance.getResourcesStore(  ).putDeployment( deploymentName, d )
-//        instance.init(  )
-//        pods = instance.getClient(  ).pods(  ).withLabelSelector( d.getSpec(  ).getSelector(  ) ).list()
-//
-//        then:
-//        pods.getItems().size(  ) == 4
-//
-//    }
+    def scaleTest( String name, int replicas )
+    {
+        instance.getController(  ).scale( name, replicas )
+        scaleCheck( name, replicas )
+    }
+
+    def scaleCheck( String name, int replicas )
+    {
+        Deployment deployment = instance.getResourcesStore(  ).getDeployment( name )
+        PodList pods = instance.getClient(  ).pods(  ).withLabelSelector( deployment.getSpec(  ).getSelector(  ) ).list()
+
+        assert deployment.getSpec(  ).getReplicas(  ) == replicas
+        assert pods.getItems(  ).size(  ) == replicas
+    }
+
+    def "Test scaling deployment synchronously."()
+    {
+        when:
+        scaleTest( deploymentName, 2 )
+        scaleTest( deploymentName, 2 )
+        scaleTest( deploymentName, 0 )
+        scaleTest( deploymentName, 1 )
+
+        then:
+        noExceptionThrown(  )
+    }
+
+    def "Test scaling deployment asynchronously."()
+    {
+        when:
+        scaleAsyncTest( deploymentName, 2 )
+        scaleAsyncTest( deploymentName, 2 )
+        scaleAsyncTest( deploymentName, 0 )
+        scaleAsyncTest( deploymentName, 1 )
+
+        then:
+        noExceptionThrown()
+    }
 
     def "Connect to service, port 80."()
     {

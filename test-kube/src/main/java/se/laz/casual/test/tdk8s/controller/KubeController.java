@@ -70,6 +70,18 @@ public class KubeController implements ProvisioningController, ConnectionControl
         provisioningController.waitUntilDestroyed();
     }
 
+    @Override
+    public void scale( String name, int replicas )
+    {
+        provisioningController.scale( name, replicas );
+    }
+
+    @Override
+    public CompletableFuture<Void> scaleAsync( String name, int replicas )
+    {
+        return provisioningController.scaleAsync( name, replicas );
+    }
+
     // ConnectionController
 
     @Override

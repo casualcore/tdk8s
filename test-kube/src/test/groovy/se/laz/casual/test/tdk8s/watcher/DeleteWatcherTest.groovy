@@ -51,6 +51,25 @@ class DeleteWatcherTest extends Specification
         future.isDone()
     }
 
+    def "Wait for delete multiple."()
+    {
+        given:
+        int count = 2
+        instance = new DeleteWatcher<>( count )
+        CountDownLatch complete = new CountDownLatch( 1 )
+
+        when:
+        CompletableFuture<Void> future = CompletableFuture.supplyAsync( ()->{ instance.waitUntilDeleted(); complete.countDown(  ) } )
+        for( int i=0; i<count; i++ )
+        {
+            instance.eventReceived( Watcher.Action.DELETED, Mock( Pod ) )
+        }
+        complete.await()
+
+        then:
+        future.isDone()
+    }
+
     def "Wait for delete with timeout, false."()
     {
         given:

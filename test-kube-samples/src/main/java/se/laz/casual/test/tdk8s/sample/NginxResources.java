@@ -122,7 +122,7 @@ public final class NginxResources
                 .withName( SIMPLE_NGINX_DEPLOYMENT_NAME )
             .endMetadata()
             .withNewSpec()
-            .withReplicas( 4 )
+            .withReplicas( 1 )
             .withNewSelector()
                 .addToMatchLabels( DEPLOYMENT_SELECTOR )
             .endSelector()

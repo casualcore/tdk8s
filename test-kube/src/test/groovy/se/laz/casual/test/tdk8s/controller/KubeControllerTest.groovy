@@ -56,6 +56,16 @@ class KubeControllerTest extends Specification
         instance.waitUntilDestroyed(  )
         then:
         1* pc.waitUntilDestroyed(  )
+
+        when:
+        instance.scale( "name", 1 )
+        then:
+        1* pc.scale( "name", 1 )
+
+        when:
+        instance.scaleAsync( "name", 2 )
+        then:
+        1* pc.scaleAsync( "name", 2 )
     }
 
     def "Connection controller delegates correctly."()

@@ -18,7 +18,17 @@ public class DeleteWatcher<T> implements Watcher<T>
 {
     Logger log = Logger.getLogger(DeleteWatcher.class.getName());
 
-    private final CountDownLatch deleteLatch = new CountDownLatch( 1 );
+    private final CountDownLatch deleteLatch;
+
+    public DeleteWatcher( )
+    {
+        this( 1 );
+    }
+
+    public DeleteWatcher( int count )
+    {
+        deleteLatch = new CountDownLatch( count );
+    }
 
     @Override
     public void eventReceived( Action action, T resource )

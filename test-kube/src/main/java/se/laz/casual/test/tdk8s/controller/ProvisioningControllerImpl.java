@@ -20,6 +20,7 @@ import se.laz.casual.test.tdk8s.watchers.DeleteWatcher;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static se.laz.casual.test.tdk8s.TestKube.RESOURCE_LABEL_NAME;
@@ -177,5 +178,19 @@ public class ProvisioningControllerImpl implements ProvisioningController
             watch.close();
         }
         watches.clear();
+    }
+
+    @Override
+    public void scale( String name, int replicas )
+    {
+        Deployment d = this.resourcesStore.getDeployment( name );
+        d = new DeploymentScaleController( this.client ).scale( d, replicas );
+        this.resourcesStore.putDeployment( name, d );
+    }
+
+    @Override
+    public CompletableFuture<Void> scaleAsync( String name, int replicas )
+    {
+        return CompletableFuture.runAsync( ()-> scale( name, replicas ) );
     }
 }
