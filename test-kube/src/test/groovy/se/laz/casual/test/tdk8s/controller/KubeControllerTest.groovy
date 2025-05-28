@@ -6,6 +6,11 @@
 
 package se.laz.casual.test.tdk8s.controller
 
+import se.laz.casual.test.tdk8s.controller.connection.ConnectionController
+import se.laz.casual.test.tdk8s.controller.exec.ExecController
+import se.laz.casual.test.tdk8s.controller.logging.LogController
+import se.laz.casual.test.tdk8s.controller.provisioning.ProvisioningController
+import se.laz.casual.test.tdk8s.controller.transfer.FileTransferController
 import spock.lang.Specification
 
 import java.nio.file.Path

@@ -12,9 +12,9 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import se.laz.casual.test.tdk8s.connection.KubeConnection;
-import se.laz.casual.test.tdk8s.controller.Connectable;
 import se.laz.casual.test.tdk8s.controller.KubeController;
-import se.laz.casual.test.tdk8s.controller.Provisionable;
+import se.laz.casual.test.tdk8s.controller.connection.Connectable;
+import se.laz.casual.test.tdk8s.controller.provisioning.Provisionable;
 import se.laz.casual.test.tdk8s.probe.ProvisioningProbe;
 import se.laz.casual.test.tdk8s.store.ResourcesStore;
 
