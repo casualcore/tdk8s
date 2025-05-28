@@ -24,6 +24,8 @@ TODO: build status badges etc
   * [Transfer Files](#transfer-files)
   * [`port-forward`](#connect-via-port-forward) 
   * [Asynchronous Provisioning](#asynchronous-provisioning)
+  * run [custom provisioning probes](#custom-provisioning-probes)
+  * [dynamically scale deployment](#dynamically-scale-deployments)
   * [`k8s` Resources](#k8s-resources)
 
 ## Overview
@@ -256,6 +258,7 @@ This provides the ability to:
 * Connect via [`port-forward`](#connect-via-port-forward).
 * [asynchronous provisioning](#asynchronous-provisioning).
 * run [custom provisioning probes](#custom-provisioning-probes).
+* [dynamically scale deployment](#dynamically-scale-deployments)
 
 ### Access Managed Resources
 
@@ -461,6 +464,34 @@ instance.init( )
 NOTE: Care should be taken to consider where the probe is executing. When running from a local machine accessing the cluster 
 remotely it will not have the same network access as when running within the cluster for example within a CI/CD pipeline.
 Probes must be created to ensure they work in both scenarios to prevent issues.
+
+### Dynamically Scale Deployments
+
+In the majority of test scenarios, the number of replicas configured for a `Deployment` should already be set appropriately
+when you initialise the `TestKube` with your `Deployment`. However, if you want to test scenarios related to scaling up or down
+the number of replicas, this is possible through the `KubeController`:
+
+* `scale` - scale the deployment to the number of replicas requested and wait complete.
+* `scaleAsync` - scale the deployment to the number of replicas requested, but don't wait until complete.
+
+Synchronous example:
+```java
+//scale to 0 and wait.
+instance.getController().scale( "my-deployment", 0 );
+```
+Asynchronous example:
+```java
+CompletableFuture<Void> future = instance.getController().scaleAsync( "my-deployment", 2 );
+// do your work.
+future.join();
+```
+
+When the scale operation is complete depends on the change in the number of replicas compared to the existing number of replicas:
+* unchanged - this is a no op.
+* less - it is complete one the additional replicas are terminated.
+* more - it is complete one the additional replicas are all ready.
+
+This is enforced to ensure determinism around the state of the `k8s` `SUT` after the scale operation.
 
 ### `k8s` Resources
 
