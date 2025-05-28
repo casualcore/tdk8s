@@ -15,11 +15,10 @@ import se.laz.casual.test.tdk8s.sample.NginxResources
 import spock.lang.Shared
 import spock.lang.Specification
 
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
 import static se.laz.casual.test.tdk8s.TestKube.RESOURCE_LABEL_NAME
+import static se.laz.casual.test.tdk8s.integration.Http.httpGet
 
 class MultiTestKubesIntTest extends Specification
 {
@@ -106,19 +105,5 @@ class MultiTestKubesIntTest extends Specification
         assert body != ""
         assert body.containsIgnoreCase( "nginx" )
         return true
-    }
-
-    HttpResponse<String> httpGet( KubeConnection connection )
-    {
-        String host = connection.getHostName()
-        int port = connection.getPort()
-
-        HttpClient httpClient = HttpClient.newBuilder(  ).build(  )
-        HttpRequest request = HttpRequest.newBuilder( )
-                .uri( URI.create( "http://" + host + ":" + port +"/" ) )
-                .GET( )
-                .build(  )
-
-        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 }

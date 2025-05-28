@@ -15,11 +15,10 @@ import se.laz.casual.test.tdk8s.sample.WildflyResources
 import spock.lang.Shared
 import spock.lang.Specification
 
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
 import static se.laz.casual.test.tdk8s.TestKube.RESOURCE_LABEL_NAME
+import static se.laz.casual.test.tdk8s.integration.Http.httpGet
 
 class WildflyConnectivityIntTest extends Specification
 {
@@ -171,19 +170,5 @@ class WildflyConnectivityIntTest extends Specification
         status == 200
         body != ""
         body.containsIgnoreCase( "wildfly" )
-    }
-
-    HttpResponse<String> httpGet( KubeConnection connection )
-    {
-        String host = connection.getHostName()
-        int port = connection.getPort()
-
-        HttpClient httpClient = HttpClient.newBuilder(  ).build(  )
-        HttpRequest request = HttpRequest.newBuilder( )
-                .uri( URI.create( "http://" + host + ":" + port +"/" ) )
-                .GET( )
-                .build(  )
-
-        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 }
