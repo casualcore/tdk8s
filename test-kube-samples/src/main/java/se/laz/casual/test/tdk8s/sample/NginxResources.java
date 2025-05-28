@@ -22,6 +22,9 @@ public final class NginxResources
     {
     }
 
+    public static final String NGINX_CONTAINER_NAME = "nginx";
+    public static final String NGINX_CONTAINER_IMAGE = "nginx:1.27.4";
+
     public static final Map<String, String> SELECTOR = Map.of( "app", "nginx-test-app" );
 
     public static final String SIMPLE_NGINX_POD_NAME = "nginx-test";
@@ -33,8 +36,8 @@ public final class NginxResources
             .endMetadata()
             .withNewSpec()
             .addNewContainer()
-            .withName( "nginx" )
-            .withImage( "nginx:1.27.4" )
+            .withName( NGINX_CONTAINER_NAME )
+            .withImage( NGINX_CONTAINER_IMAGE )
             .addNewPort().withContainerPort( 80 ).endPort()
             .withNewReadinessProbe()
             .withNewTcpSocket()
@@ -87,8 +90,8 @@ public final class NginxResources
             .endMetadata()
             .withNewSpec()
             .addNewContainer()
-            .withName( "nginx" )
-            .withImage( "nginx:1.27.4" )
+            .withName( NGINX_CONTAINER_NAME )
+            .withImage( NGINX_CONTAINER_IMAGE )
             .addNewPort().withContainerPort( 80 ).endPort()
             .withNewReadinessProbe()
             .withNewTcpSocket()
@@ -133,8 +136,8 @@ public final class NginxResources
                 .endMetadata()
                 .withNewSpec()
                     .addNewContainer()
-                        .withName( "nginx" )
-                        .withImage( "nginx:1.27.4" )
+                        .withName( NGINX_CONTAINER_NAME )
+                        .withImage( NGINX_CONTAINER_IMAGE )
                         .addNewPort().withContainerPort( 80 ).endPort()
                         .withNewReadinessProbe()
                             .withNewTcpSocket()

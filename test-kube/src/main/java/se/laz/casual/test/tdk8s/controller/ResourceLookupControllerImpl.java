@@ -15,6 +15,8 @@ import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import io.fabric8.kubernetes.client.dsl.ServiceResource;
 import se.laz.casual.test.tdk8s.store.ResourcesStore;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -36,6 +38,11 @@ public class ResourceLookupControllerImpl implements ResourceLookupController
     @Override
     public Optional<PodResource> getPodResource( String name )
     {
+        return getOrRetrievePod( name ).map( pod -> this.client.pods().resource( pod ) );
+    }
+
+    private Optional<Pod> getOrRetrievePod( String name )
+    {
         Pod pod = null;
         if( this.resourcesStore.containsPod( name ) )
         {
@@ -46,36 +53,74 @@ public class ResourceLookupControllerImpl implements ResourceLookupController
         {
             pod = this.client.pods().withName( name ).get();
         }
-
-        if( pod == null )
-        {
-            return Optional.empty();
-        }
-
-        return Optional.of( this.client.pods().resource( pod ) );
+        return Optional.ofNullable( pod );
     }
 
     @Override
     public Optional<RollableScalableResource<Deployment>> getDeploymentResource( String name )
     {
-        Deployment deployment = null;
-        if( this.resourcesStore.containsDeployment( name ) )
+        return getOrRetrieveDeployment( name )
+                .map( deployment-> this.client.apps().deployments().resource( deployment ) );
+    }
+
+    @Override
+    public Optional<List<PodResource>> getDeploymentPodResources( String name )
+    {
+        List<Pod> pods = null;
+        if( this.resourcesStore.containsDeploymentPods( name ) )
         {
-            deployment = this.resourcesStore.getDeployment( name );
+            pods = this.resourcesStore.getDeploymentPods( name );
         }
 
-        if( deployment == null )
+        if( pods == null )
         {
-            deployment = this.client.apps().deployments().withName( name ).get();
+            Deployment deployment = client.apps().deployments().withName( name ).get();
+            if( deployment != null )
+            {
+                pods = findDeploymentPods( deployment );
+            }
         }
 
-        if( deployment == null )
+        if( pods == null )
         {
             return Optional.empty();
         }
 
-        return Optional.of( this.client.apps().deployments().resource( deployment ) );
+        List<PodResource> podResources = new ArrayList<>();
+        for( Pod p : pods )
+        {
+            podResources.add( client.pods().resource( p ) );
+        }
+        return Optional.of( podResources );
     }
+
+    @Override
+    public Optional<List<Pod>> findDeploymentPods( String name )
+    {
+        return getOrRetrieveDeployment( name )
+                .map( this::findDeploymentPods );
+    }
+
+    private List<Pod> findDeploymentPods( Deployment deployment )
+    {
+        return this.client.pods().withLabelSelector( deployment.getSpec().getSelector() ).list().getItems();
+    }
+
+    private Optional<Deployment> getOrRetrieveDeployment( String name )
+    {
+        Deployment d = null;
+        if( this.resourcesStore.containsDeployment( name ) )
+        {
+            d = this.resourcesStore.getDeployment( name );
+        }
+
+        if( d == null )
+        {
+            d = this.client.apps().deployments().withName( name ).get();
+        }
+        return Optional.ofNullable( d );
+    }
+
 
     @Override
     public Optional<ServiceResource<Service>> getServiceResource( String name )

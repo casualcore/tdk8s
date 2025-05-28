@@ -6,12 +6,14 @@
 
 package se.laz.casual.test.tdk8s.controller;
 
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import io.fabric8.kubernetes.client.dsl.ServiceResource;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -38,6 +40,28 @@ public interface ResourceLookupController
      * @return RollableScalableResource<Deployment> of the found deployment or empty if not found.
      */
     Optional<RollableScalableResource<Deployment>> getDeploymentResource( String name );
+
+    /**
+     * Retrieve the PodResources for the deployment matching the name.
+     *
+     * @param name of the deployment alias in the store, or deployment name in the cluster.
+     * @return List of PodResources for the deployment or empty if not found.
+     */
+    Optional<List<PodResource>> getDeploymentPodResources( String name );
+
+    /**
+     * Find deployment pods for the named deployment.
+     * <p>
+     * The name can be either the alias for the managed resource or
+     * the actual underlying name of the resource inside the cluster.
+     * </p>
+     * <p>
+     * The list of pods returned is always retrieves from the cluster.
+     * </p>
+     * @param name of the deployment alias in the store, or deployment name in the cluster.
+     * @return list of the found deployment pods or empty if not found.
+     */
+    Optional<List<Pod>> findDeploymentPods( String name );
 
     /**
      * Retrieves the ServiceResource for a service matching the name.

@@ -61,6 +61,12 @@ class ResourcesStoreTest extends Specification
         .build(  )
 
     @Shared
+    List<Pod> deployment1Pods = [pod1, pod2]
+
+    @Shared
+    List<Pod> deployment2Pods = [pod1]
+
+    @Shared
     String serviceName1 = "single-service-resource-1"
 
     @Shared
@@ -164,7 +170,7 @@ class ResourcesStoreTest extends Specification
         thrown ResourceNotFoundException
     }
 
-    def "Remove non existent pod, throws ResourceNotFoundException"()
+    def "Remove non existent deployment, throws ResourceNotFoundException"()
     {
         when:
         instance.removeDeployment( "blah" )
@@ -214,6 +220,66 @@ class ResourcesStoreTest extends Specification
         !instance.containsDeployment( deploymentName1 )
         instance.containsDeployment( deploymentName2 )
 
+    }
+
+    def "Retrieve non existent deployment pods, throws ResourceNotFoundException"()
+    {
+        when:
+        instance.getDeploymentPods( "blah" )
+
+        then:
+        thrown ResourceNotFoundException
+    }
+
+    def "Remove non existent deployment pods, throws ResourceNotFoundException"()
+    {
+        when:
+        instance.removeDeploymentPods( "blah" )
+
+        then:
+        thrown ResourceNotFoundException
+    }
+
+
+    def "Add deployment pods, retrieve, modify, retrieve, remove."()
+    {
+        when:
+        instance.putDeploymentPods( deploymentName1, deployment1Pods )
+
+        then:
+        instance.getDeploymentPods() == [(deploymentName1): deployment1Pods]
+        instance.getDeploymentPods( deploymentName1 ) == deployment1Pods
+        instance.containsDeploymentPods( deploymentName1 )
+        !instance.containsDeploymentPods( deploymentName2 )
+
+        when:
+        instance.putDeploymentPods( deploymentName2, deployment2Pods )
+
+        then:
+        instance.getDeploymentPods() == [(deploymentName1): deployment1Pods, (deploymentName2): deployment2Pods]
+        instance.getDeploymentPods( deploymentName1 ) == deployment1Pods
+        instance.getDeploymentPods( deploymentName2 ) == deployment2Pods
+        instance.containsDeploymentPods( deploymentName1 )
+        instance.containsDeploymentPods( deploymentName2 )
+
+        when:
+        instance.putDeploymentPods( deploymentName1, deployment2Pods )
+        instance.putDeploymentPods( deploymentName2, deployment1Pods )
+
+        then:
+        instance.getDeploymentPods() == [(deploymentName1): deployment2Pods, (deploymentName2): deployment1Pods]
+        instance.getDeploymentPods( deploymentName1 ) == deployment2Pods
+        instance.getDeploymentPods( deploymentName2 ) == deployment1Pods
+        instance.containsDeploymentPods( deploymentName1 )
+        instance.containsDeploymentPods( deploymentName2 )
+
+        when:
+        instance.removeDeploymentPods( deploymentName1 )
+
+        then:
+        instance.getDeploymentPods() == [(deploymentName2): deployment1Pods ]
+        !instance.containsDeploymentPods( deploymentName1 )
+        instance.containsDeploymentPods( deploymentName2 )
     }
 
     def "Retrieve non existent service, throws ResourceNotFoundException"()
@@ -297,6 +363,18 @@ class ResourcesStoreTest extends Specification
 
         then:
         instance.getDeployments(  ) == deployments
+    }
+
+    def "Put all deployment pods."()
+    {
+        given:
+        Map<String, List<Pod>> deploymentPods = [(deploymentName1): deployment1Pods, (deploymentName2): deployment2Pods ]
+
+        when:
+        instance.putDeploymentPods( deploymentPods )
+
+        then:
+        instance.getDeploymentPods(  ) == deploymentPods
     }
 
     def "Put all services."()

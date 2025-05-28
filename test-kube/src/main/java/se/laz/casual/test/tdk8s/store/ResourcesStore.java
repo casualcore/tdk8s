@@ -11,6 +11,7 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import se.laz.casual.test.tdk8s.probe.ProvisioningProbe;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,6 +21,7 @@ public class ResourcesStore
 {
     private final PodStore podStore;
     private final DeploymentStore deploymentStore;
+    private final DeploymentPodsStore deploymentPodsStore;
     private final ServiceStore serviceStore;
     private final ProvisioningProbeStore provisioningProbeStore;
 
@@ -27,6 +29,7 @@ public class ResourcesStore
     {
         this.podStore = new PodStore();
         this.deploymentStore = new DeploymentStore();
+        this.deploymentPodsStore = new DeploymentPodsStore();
         this.serviceStore = new ServiceStore();
         this.provisioningProbeStore = new ProvisioningProbeStore();
     }
@@ -35,7 +38,7 @@ public class ResourcesStore
      * Get a pod by name.
      *
      * @param name of the pod.
-     * @return pod by name
+     * @return stored pod
      * @throws ResourceNotFoundException if pod not stored.
      */
     public Pod getPod( String name )
@@ -57,7 +60,7 @@ public class ResourcesStore
      * Check if the pod with name is stored.
      *
      * @param name of the pod.
-     * @return if it is stored.
+     * @return if named pod is stored.
      */
     public boolean containsPod( String name )
     {
@@ -100,7 +103,7 @@ public class ResourcesStore
      * Get a deployment by name.
      *
      * @param name of the deployment.
-     * @return pod by name
+     * @return stored deployment
      * @throws ResourceNotFoundException if deployment not stored.
      */
     public Deployment getDeployment( String name )
@@ -122,7 +125,7 @@ public class ResourcesStore
      * Check if the deployment with name is stored.
      *
      * @param name of the deployment.
-     * @return if it is stored.
+     * @return if named deployment is stored.
      */
     public boolean containsDeployment( String name )
     {
@@ -159,6 +162,72 @@ public class ResourcesStore
     public Deployment removeDeployment( String name )
     {
         return this.deploymentStore.remove( name );
+    }
+
+    /**
+     * Get deployment pods by deployment name.
+     *
+     * @param name of the deployment.
+     * @return deployment pods stored.
+     * @throws ResourceNotFoundException if deployment not stored.
+     */
+    public List<Pod> getDeploymentPods( String name )
+    {
+        return this.deploymentPodsStore.get( name );
+    }
+
+    /**
+     * Get all stored deployment pods.
+     *
+     * @return map of deployment pods stored.
+     */
+    public Map<String, List<Pod>> getDeploymentPods( )
+    {
+        return this.deploymentPodsStore.getAll();
+    }
+
+    /**
+     * Check if the pods for deployment with name is stored.
+     *
+     * @param name of the deployment.
+     * @return if deployment pods are stored.
+     */
+    public boolean containsDeploymentPods( String name )
+    {
+        return this.deploymentPodsStore.contains( name );
+    }
+
+    /**
+     * Store pods for a deployment by name.
+     *
+     * @param name of the deployment to store.
+     * @param pods to store.
+     */
+    public void putDeploymentPods( String name, List<Pod> pods )
+    {
+        this.deploymentPodsStore.put( name, pods );
+    }
+
+    /**
+     * Store all deployments pods provided.
+     *
+     * @param deploymentPods to store.
+     */
+    public void putDeploymentPods( Map<String,List<Pod>> deploymentPods )
+    {
+        this.deploymentPodsStore.putAll( deploymentPods );
+    }
+
+    /**
+     * Remove deployment pods by name.
+     *
+     * @param name of deployment to remove pods.
+     * @return the removed deployment pods.
+     * @throws ResourceNotFoundException if deployment pods are not stored.
+     */
+    public List<Pod> removeDeploymentPods( String name )
+    {
+        return this.deploymentPodsStore.remove( name );
     }
 
     /**

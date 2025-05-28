@@ -15,5 +15,5 @@ public interface ScaleOperation<T>
      * @param replicas number of replicas requested.
      * @return updated resource.
      */
-    T scale( T resource, int replicas );
+    T scale( String resource, int replicas );
 }

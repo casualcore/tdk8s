@@ -6,11 +6,15 @@
 
 package se.laz.casual.test.tdk8s.controller
 
+
 import io.fabric8.kubernetes.api.model.Pod
+import io.fabric8.kubernetes.api.model.PodList
 import io.fabric8.kubernetes.api.model.Service
 import io.fabric8.kubernetes.api.model.apps.Deployment
+import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.dsl.AppsAPIGroupDSL
+import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable
 import io.fabric8.kubernetes.client.dsl.MixedOperation
 import io.fabric8.kubernetes.client.dsl.PodResource
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource
@@ -27,6 +31,11 @@ class ResourceLookupControllerTest extends Specification
 
     ResourceLookupController instance
 
+    String name = "myobject"
+    Deployment deployment = new DeploymentBuilder().withNewMetadata(  ).withName( "test" ).endMetadata(  )
+            .withNewSpec(  ).withNewSelector().addToMatchLabels( ["app":"test"]).endSelector( ).endSpec(  )
+            .build(  )
+
     def setup()
     {
         instance = new ResourceLookupControllerImpl( client, store )
@@ -35,17 +44,13 @@ class ResourceLookupControllerTest extends Specification
     def "Get pod, present in store."()
     {
         given:
-        String podName = "mypod"
         Pod pod = Mock( Pod )
-        PodResource pr = Mock( PodResource )
-        MixedOperation mixed = Mock( MixedOperation )
-        1* client.pods(  ) >> mixed
-        1* mixed.resource( pod ) >> pr
+        PodResource pr = mockPodResource( pod )
 
-        store.putPod( podName, pod )
+        store.putPod( name, pod )
 
         when:
-        Optional<PodResource> actual = instance.getPodResource( podName )
+        Optional<PodResource> actual = instance.getPodResource( name )
 
         then:
         actual.isPresent(  )
@@ -55,17 +60,12 @@ class ResourceLookupControllerTest extends Specification
     def "Get pod, not present in store, is present on cluster."()
     {
         given:
-        String podName = "mypod"
         Pod pod = Mock( Pod )
-        PodResource pr = Mock( PodResource )
-        MixedOperation mixed = Mock( MixedOperation )
-        2* client.pods(  ) >> mixed
-        1* mixed.withName( podName ) >> pr
-        1* pr.get(  ) >> pod
-        1* mixed.resource( pod ) >> pr
+        mockPodWithNameGet( name, pod )
+        PodResource pr = mockPodResource( pod )
 
         when:
-        Optional<PodResource> actual = instance.getPodResource( podName )
+        Optional<PodResource> actual = instance.getPodResource( name )
 
         then:
         actual.isPresent(  )
@@ -75,39 +75,25 @@ class ResourceLookupControllerTest extends Specification
     def "Get pod, not present in store, not present on cluster, returns empty."()
     {
         given:
-        String podName = "mypod"
-        Pod pod = Mock( Pod )
-        PodResource pr = Mock( PodResource )
-        MixedOperation mixed = Mock( MixedOperation )
-        1* client.pods(  ) >> mixed
-        1* mixed.withName( podName ) >> pr
-        1* pr.get(  ) >> null
+        mockPodWithNameGet( name, null )
 
         when:
-        Optional<PodResource> actual = instance.getPodResource( podName )
+        Optional<PodResource> actual = instance.getPodResource( name )
 
         then:
-        0* mixed.resource( pod )
         actual.isEmpty(  )
     }
 
     def "Get deployment, present in store."()
     {
         given:
-        String deploymentName = "mydeployment"
         Deployment deployment = Mock( Deployment )
-        RollableScalableResource<Deployment> dr = Mock( RollableScalableResource<Deployment> )
-        AppsAPIGroupDSL apps = Mock( AppsAPIGroupDSL )
-        1* client.apps(  ) >> apps
-        MixedOperation mixed = Mock( MixedOperation )
+        RollableScalableResource<Deployment> dr = mockDeploymentResource( deployment )
 
-        1* apps.deployments(  ) >> mixed
-        1* mixed.resource( deployment ) >> dr
-
-        store.putDeployment( deploymentName, deployment )
+        store.putDeployment( name, deployment )
 
         when:
-        Optional<RollableScalableResource<Deployment>> actual = instance.getDeploymentResource( deploymentName )
+        Optional<RollableScalableResource<Deployment>> actual = instance.getDeploymentResource( name )
 
         then:
         actual.isPresent(  )
@@ -117,19 +103,13 @@ class ResourceLookupControllerTest extends Specification
     def "Get deployment, not present in store, is present on cluster."()
     {
         given:
-        String deploymentName = "mydeployment"
         Deployment deployment = Mock( Deployment )
-        RollableScalableResource<Deployment> dr = Mock( RollableScalableResource<Deployment> )
-        AppsAPIGroupDSL apps = Mock( AppsAPIGroupDSL )
-        2* client.apps(  ) >> apps
-        MixedOperation mixed = Mock( MixedOperation )
-        2* apps.deployments(  ) >> mixed
-        1* mixed.withName( deploymentName ) >> dr
-        1* dr.get(  ) >> deployment
-        1* mixed.resource( deployment ) >> dr
+
+        mockDeploymentWithNameGet( name, deployment )
+        RollableScalableResource<Deployment> dr = mockDeploymentResource( deployment )
 
         when:
-        Optional<RollableScalableResource<Deployment>> actual = instance.getDeploymentResource( deploymentName )
+        Optional<RollableScalableResource<Deployment>> actual = instance.getDeploymentResource( name )
 
         then:
         actual.isPresent(  )
@@ -139,33 +119,20 @@ class ResourceLookupControllerTest extends Specification
     def "Get deployment, not present in store, not present on cluster, returns empty."()
     {
         given:
-        String deploymentName = "mypod"
-        Deployment deployment = Mock( Deployment )
-        RollableScalableResource<Deployment> dr = Mock( RollableScalableResource<Deployment> )
-        AppsAPIGroupDSL apps = Mock( AppsAPIGroupDSL )
-        1* client.apps() >> apps
-        MixedOperation mixed = Mock( MixedOperation )
-        1* apps.deployments(  ) >> mixed
-        1* mixed.withName( deploymentName ) >> dr
-        1* dr.get(  ) >> null
+        mockDeploymentWithNameGet( name, null )
 
         when:
-        Optional<RollableScalableResource<Deployment>> actual = instance.getDeploymentResource( deploymentName )
+        Optional<RollableScalableResource<Deployment>> actual = instance.getDeploymentResource( name )
 
         then:
-        0* mixed.resource( deployment )
         actual.isEmpty(  )
     }
 
     def "Get service, present in store."()
     {
         given:
-        String name = "service"
         Service service = Mock( Service )
-        ServiceResource sr = Mock( ServiceResource )
-        MixedOperation mixed = Mock( MixedOperation )
-        1* client.services(  ) >> mixed
-        1* mixed.resource( service ) >> sr
+        ServiceResource sr = mockServiceResource( service )
 
         store.putService( name, service )
 
@@ -180,14 +147,9 @@ class ResourceLookupControllerTest extends Specification
     def "Get service, not present in store, is present on cluster."()
     {
         given:
-        String name = "service"
         Service service = Mock( Service )
-        ServiceResource sr = Mock( ServiceResource )
-        MixedOperation mixed = Mock( MixedOperation )
-        2* client.services(  ) >> mixed
-        1* mixed.withName( name ) >> sr
-        1* sr.get(  ) >> service
-        1* mixed.resource( service ) >> sr
+        mockServiceWithNameGet( name, service )
+        ServiceResource sr = mockServiceResource( service )
 
         when:
         Optional<ServiceResource> actual = instance.getServiceResource( name )
@@ -200,20 +162,199 @@ class ResourceLookupControllerTest extends Specification
     def "Get service, not present in store, not present on cluster, returns empty."()
     {
         given:
-        String name = "mypod"
-        Service service = Mock( Service )
-        ServiceResource sr = Mock( ServiceResource )
-        MixedOperation mixed = Mock( MixedOperation )
-        1* client.services(  ) >> mixed
-        1* mixed.withName( name ) >> sr
-        1* sr.get(  ) >> null
+        mockServiceWithNameGet( name, null )
 
         when:
         Optional<ServiceResource> actual = instance.getServiceResource( name )
 
         then:
-        0* mixed.resource( service )
         actual.isEmpty()
     }
+
+    def "Find managed deployment pods"()
+    {
+        given:
+        Pod p = Mock()
+        mockPodsWithSelector( deployment, [p] )
+        store.putDeployment( name, deployment )
+
+        when:
+        Optional<List<Pod>> actual = instance.findDeploymentPods( name )
+
+        then:
+        actual.isPresent(  )
+        actual.get(  ) == [p]
+    }
+
+    def "Find managed deployment pods, no pods"()
+    {
+        given:
+        mockPodsWithSelector( deployment, [] )
+        store.putDeployment( name, deployment )
+
+        when:
+        Optional<List<Pod>> actual = instance.findDeploymentPods( name )
+
+        then:
+        actual.isPresent(  )
+        actual.get(  ) == []
+    }
+
+    def "Find unmanaged deployment pods"()
+    {
+        given:
+        Pod p = Mock()
+
+        mockDeploymentWithNameGet( name, deployment )
+        mockPodsWithSelector( deployment, [p] )
+
+        when:
+        Optional<List<Pod>> actual = instance.findDeploymentPods( name )
+
+        then:
+        actual.isPresent(  )
+        actual.get(  ) == [p]
+    }
+
+    def "Find unmanaged deployment pods, no pods"()
+    {
+        given:
+        mockDeploymentWithNameGet( name, deployment )
+        mockPodsWithSelector( deployment, [] )
+
+        when:
+        Optional<List<Pod>> actual = instance.findDeploymentPods( name )
+
+        then:
+        actual.isPresent(  )
+        actual.get(  ) == []
+    }
+
+    def "Get managed deployment pod resources"()
+    {
+        given:
+        Pod pod = Mock()
+        store.putDeploymentPods( name, [pod] )
+        PodResource resource = mockPodResource(pod )
+        List<PodResource> expected = [resource]
+
+        when:
+        Optional<List<PodResource>> actual = instance.getDeploymentPodResources( name )
+
+        then:
+        actual.isPresent(  )
+        actual.get() == expected
+    }
+
+    def "Get unmanaged deployment pods resources"()
+    {
+        given:
+        Pod pod = Mock()
+        mockDeploymentWithNameGet( name, deployment )
+        mockPodsWithSelector( deployment, [pod] )
+        PodResource resource = mockPodResource( pod )
+        List<PodResource> expected = [resource]
+
+        when:
+        Optional<List<PodResource>> actual = instance.getDeploymentPodResources( name )
+
+        then:
+        actual.isPresent(  )
+        actual.get() == expected
+    }
+
+    def "Get deployment pods, deployment doesn't exist."()
+    {
+        given:
+        mockDeploymentWithNameGet( name, null )
+
+        when:
+        Optional<List<PodResource>> actual = instance.getDeploymentPodResources( name )
+
+        then:
+        actual.isEmpty(  )
+    }
+
+    MixedOperation mockClientPods( )
+    {
+        MixedOperation mo = Mock()
+        1* client.pods(  ) >> mo
+        return mo
+    }
+
+    PodResource mockPodResource( Pod pod )
+    {
+        MixedOperation mo = mockClientPods(  )
+        PodResource resource = Mock()
+        1* mo.resource( pod ) >> resource
+        return resource
+    }
+
+    void mockPodWithNameGet( String name, Pod pod )
+    {
+        MixedOperation mo = mockClientPods()
+        PodResource resource = Mock()
+        1* resource.get(  ) >> pod
+        1* mo.withName( name ) >> resource
+    }
+
+    MixedOperation mockClientDeployments( )
+    {
+        AppsAPIGroupDSL apps = Mock()
+        1* client.apps(  ) >> apps
+        MixedOperation mo = Mock()
+        1* apps.deployments(  ) >> mo
+        return mo
+    }
+
+    RollableScalableResource<Deployment> mockDeploymentResource( Deployment deployment )
+    {
+        MixedOperation mo = mockClientDeployments(  )
+        RollableScalableResource<Deployment> resource = Mock()
+        1* mo.resource( deployment ) >> resource
+        return resource
+    }
+
+    void mockDeploymentWithNameGet( String name, Deployment deployment )
+    {
+        MixedOperation mo = mockClientDeployments(  )
+        RollableScalableResource<Deployment> resource = Mock()
+        1* resource.get() >> deployment
+        1* mo.withName( name ) >> resource
+    }
+
+    void mockPodsWithSelector( Deployment d, List<Pod> pods )
+    {
+        MixedOperation mo = mockClientPods(  )
+        FilterWatchListDeletable fwld = Mock()
+        1* mo.withLabelSelector( d.getSpec(  ).getSelector(  ) ) >> fwld
+        PodList podList = Mock()
+        1* fwld.list() >> podList
+        1* podList.getItems(  ) >> pods
+    }
+
+    MixedOperation mockClientServices( )
+    {
+        MixedOperation mo = Mock()
+        1* client.services(  ) >> mo
+        return mo
+    }
+
+    ServiceResource mockServiceResource( Service service )
+    {
+        MixedOperation mo = mockClientServices(  )
+        ServiceResource resource = Mock()
+        1* mo.resource( service ) >> resource
+        return resource
+    }
+
+    void mockServiceWithNameGet( String name, Service service )
+    {
+        MixedOperation mo = mockClientServices(  )
+        ServiceResource<Service> resource = Mock()
+        1* resource.get() >> service
+        1* mo.withName( name ) >> resource
+    }
+
 
 }

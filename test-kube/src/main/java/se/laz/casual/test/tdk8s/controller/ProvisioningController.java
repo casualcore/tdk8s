@@ -8,28 +8,8 @@ package se.laz.casual.test.tdk8s.controller;
 
 import java.util.concurrent.CompletableFuture;
 
-public interface ProvisioningController extends Provisionable
+public interface ProvisioningController extends Provisionable, ProvisionableAsync
 {
-    /**
-     * Initialises the managed resources without waiting until they are ready.
-     */
-    void initAsync();
-
-    /**
-     * Wait for the managed resource to become ready.
-     */
-    void waitUntilReady();
-
-    /**
-     * Deletes the managed resources without waiting until they are deleted.
-     */
-    void destroyAsync();
-
-    /**
-     * Wait for the managed resources to be deleted.
-     */
-    void waitUntilDestroyed();
-
     /**
      * Scale the named resource to the requested number of replicas and wait
      * until complete.
