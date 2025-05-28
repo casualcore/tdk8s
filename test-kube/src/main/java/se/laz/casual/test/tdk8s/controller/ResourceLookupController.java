@@ -47,7 +47,7 @@ public interface ResourceLookupController
      * @param name of the deployment alias in the store, or deployment name in the cluster.
      * @return List of PodResources for the deployment or empty if not found.
      */
-    Optional<List<PodResource>> getDeploymentPodResources( String name );
+    List<PodResource> getDeploymentPodResources( String name );
 
     /**
      * Find deployment pods for the named deployment.
@@ -61,7 +61,7 @@ public interface ResourceLookupController
      * @param name of the deployment alias in the store, or deployment name in the cluster.
      * @return list of the found deployment pods or empty if not found.
      */
-    Optional<List<Pod>> findDeploymentPods( String name );
+    List<Pod> findDeploymentPods( String name );
 
     /**
      * Retrieves the ServiceResource for a service matching the name.
@@ -73,4 +73,16 @@ public interface ResourceLookupController
      * @return ServiceResource of the found service or empty if not found.
      */
     Optional<ServiceResource<Service>> getServiceResource( String name );
+
+    /**
+     * Find a pod matching the podAlias provided.
+     * <br/>
+     * Initially check for managed or unmanaged pods matching.
+     * Then check for managed or unmanaged deployments.
+     * If deployment match has multiple replicas, the first is returned at random.
+     *
+     * @param name pod alias for pod to retrieve.
+     * @return PodResource of the found pod or empty if not found.
+     */
+    Optional<PodResource> findPodResource( String name );
 }

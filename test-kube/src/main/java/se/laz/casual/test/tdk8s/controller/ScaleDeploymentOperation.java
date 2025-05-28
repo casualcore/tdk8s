@@ -59,8 +59,7 @@ public class ScaleDeploymentOperation implements ScaleOperation<Deployment>
         if( currentReplicas > replicas )
         {
 
-            List<PodResource> pods = this.lookupController.getDeploymentPodResources( name )
-                    .orElseThrow( ()-> new ResourceNotFoundException( "Pods for deployment not found." ) );
+            List<PodResource> pods = this.lookupController.getDeploymentPodResources( name );
             if( pods.size() != currentReplicas )
             {
                 throw new TestKubeException( "Unexpected number of current replicas found: " + pods.size() + ", expected: " + currentReplicas );

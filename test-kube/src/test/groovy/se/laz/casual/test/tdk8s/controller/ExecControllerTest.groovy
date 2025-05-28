@@ -55,7 +55,7 @@ class ExecControllerTest extends Specification
     def "Execute command, sync, pod not found."()
     {
         given:
-        1* rlc.getPodResource( name ) >> Optional.empty(  )
+        1* rlc.findPodResource( name ) >> Optional.empty(  )
 
         when:
         instance.executeCommand( name, command )
@@ -88,7 +88,7 @@ class ExecControllerTest extends Specification
     def "Execute command, sync, pod not found."()
     {
         given:
-        1* rlc.getPodResource( name ) >> Optional.empty(  )
+        1* rlc.findPodResource( name ) >> Optional.empty(  )
 
         when:
         try
@@ -107,7 +107,7 @@ class ExecControllerTest extends Specification
     void initialiseMocks( String output, Integer exit, ExecWatch watch )
     {
         PodResource resource = Mock()
-        1* rlc.getPodResource( name ) >> Optional.of( resource )
+        1* rlc.findPodResource( name ) >> Optional.of( resource )
         TtyExecErrorable tee = Mock()
         1* resource.writingOutput( _ ) >> { OutputStream out ->
             out.write( output.getBytes() )

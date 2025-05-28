@@ -16,8 +16,10 @@ import io.fabric8.kubernetes.client.dsl.ServiceResource;
 import se.laz.casual.test.tdk8s.store.ResourcesStore;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 /**
  * Lookup resources by name, checking the store cache, then cluster.
@@ -26,6 +28,8 @@ import java.util.Optional;
  */
 public class ResourceLookupControllerImpl implements ResourceLookupController
 {
+    Logger log = Logger.getLogger( ResourceLookupControllerImpl.class.getName());
+
     private final KubernetesClient client;
     private final ResourcesStore resourcesStore;
 
@@ -64,7 +68,7 @@ public class ResourceLookupControllerImpl implements ResourceLookupController
     }
 
     @Override
-    public Optional<List<PodResource>> getDeploymentPodResources( String name )
+    public List<PodResource> getDeploymentPodResources( String name )
     {
         List<Pod> pods = null;
         if( this.resourcesStore.containsDeploymentPods( name ) )
@@ -83,7 +87,7 @@ public class ResourceLookupControllerImpl implements ResourceLookupController
 
         if( pods == null )
         {
-            return Optional.empty();
+            return Collections.emptyList();
         }
 
         List<PodResource> podResources = new ArrayList<>();
@@ -91,14 +95,18 @@ public class ResourceLookupControllerImpl implements ResourceLookupController
         {
             podResources.add( client.pods().resource( p ) );
         }
-        return Optional.of( podResources );
+        return podResources;
     }
 
     @Override
-    public Optional<List<Pod>> findDeploymentPods( String name )
+    public List<Pod> findDeploymentPods( String name )
     {
-        return getOrRetrieveDeployment( name )
-                .map( this::findDeploymentPods );
+        Optional<Deployment> deployment = getOrRetrieveDeployment( name );
+        if( deployment.isPresent() )
+        {
+            return findDeploymentPods( deployment.get() );
+        }
+        return Collections.emptyList();
     }
 
     private List<Pod> findDeploymentPods( Deployment deployment )
@@ -121,7 +129,6 @@ public class ResourceLookupControllerImpl implements ResourceLookupController
         return Optional.ofNullable( d );
     }
 
-
     @Override
     public Optional<ServiceResource<Service>> getServiceResource( String name )
     {
@@ -142,5 +149,26 @@ public class ResourceLookupControllerImpl implements ResourceLookupController
         }
 
         return Optional.of( this.client.services().resource( service ) );
+    }
+
+    @Override
+    public Optional<PodResource> findPodResource( String name )
+    {
+        return getPodResource( name ).or( () -> getFirstDeploymentPodResource( name ) );
+    }
+
+    private Optional<PodResource> getFirstDeploymentPodResource( String name )
+    {
+        List<PodResource> podList = getDeploymentPodResources( name );
+        PodResource podResource = null;
+        if( !podList.isEmpty() )
+        {
+            podResource = podList.get( 0 );
+        }
+        if( podList.size() > 1 )
+        {
+            log.warning( ()-> "Retrieved first pod from a deployment with multiple replicas." );
+        }
+        return Optional.ofNullable( podResource );
     }
 }

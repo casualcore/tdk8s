@@ -33,7 +33,7 @@ class LogControllerTest extends Specification
         String name = "podName"
         String expected = "this is the lovely log."
         PodResource pr = Mock(PodResource)
-        1* lookup.getPodResource( name ) >> Optional.ofNullable( pr )
+        1* lookup.findPodResource( name ) >> Optional.ofNullable( pr )
         1* pr.getLog(  ) >> expected
 
 
@@ -51,7 +51,7 @@ class LogControllerTest extends Specification
         int lines = 10
         String expected = "this is the lovely log."
         PodResource pr = Mock(PodResource)
-        1* lookup.getPodResource( name ) >> Optional.ofNullable( pr )
+        1* lookup.findPodResource( name ) >> Optional.ofNullable( pr )
         PrettyLoggable pl = Mock( PrettyLoggable)
         1* pr.tailingLines( lines ) >> pl
         1* pl.getLog(  ) >> expected
@@ -71,7 +71,7 @@ class LogControllerTest extends Specification
         String since = ZonedDateTime.now().format( DateTimeFormatter.ISO_OFFSET_DATE_TIME )
         String expected = "this is the lovely log."
         PodResource pr = Mock(PodResource)
-        1* lookup.getPodResource( name ) >> Optional.ofNullable( pr )
+        1* lookup.findPodResource( name ) >> Optional.ofNullable( pr )
         TailPrettyLoggable tpl = Mock( TailPrettyLoggable)
         1* pr.sinceTime( since ) >> tpl
         1* tpl.getLog(  ) >> expected
@@ -88,7 +88,7 @@ class LogControllerTest extends Specification
         given:
         String name = "podName"
 
-        1* lookup.getPodResource( name ) >> Optional.empty(  )
+        1* lookup.findPodResource( name ) >> Optional.empty(  )
 
         when:
         instance.getLog( name )
@@ -102,7 +102,7 @@ class LogControllerTest extends Specification
         given:
         String name = "podName"
 
-        1* lookup.getPodResource( name ) >> Optional.empty(  )
+        1* lookup.findPodResource( name ) >> Optional.empty(  )
 
         when:
         instance.getLogTail( name, 10 )
@@ -116,7 +116,7 @@ class LogControllerTest extends Specification
         given:
         String name = "podName"
 
-        1* lookup.getPodResource( name ) >> Optional.empty(  )
+        1* lookup.findPodResource( name ) >> Optional.empty(  )
 
         when:
         instance.getLogSince( name, ZonedDateTime.now().format( DateTimeFormatter.ISO_OFFSET_DATE_TIME ) )

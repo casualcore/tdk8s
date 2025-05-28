@@ -9,8 +9,8 @@ package se.laz.casual.test.tdk8s.controller;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
-import se.laz.casual.test.tdk8s.TestKubeException;
 import se.laz.casual.test.tdk8s.store.ResourcesStore;
 import se.laz.casual.test.tdk8s.watchers.DeleteResourceWatcher;
 import se.laz.casual.test.tdk8s.watchers.DeleteWatcher;
@@ -80,8 +80,9 @@ public class ProvisioningDeploymentController implements ScaleOperation<Deployme
             deleteResourceWatchers.add( new DeleteResourceWatcher<>( new DeleteWatcher<>(), deploymentResource ) );
 
             //Add watches for all deployment pods to delete.
-            lookupController.getDeploymentPodResources( entry.getKey() )
-                    .ifPresent( podList -> deleteResourceWatchers.add( new DeleteResourceWatcher<>( new DeleteWatcher<>(), podList ) ) );
+            List<PodResource> podList = lookupController.getDeploymentPodResources( entry.getKey() );
+            deleteResourceWatchers.add( new DeleteResourceWatcher<>( new DeleteWatcher<>(podList.size()), podList ) );
+
             deploymentResource.delete();
         }
     }
@@ -111,8 +112,7 @@ public class ProvisioningDeploymentController implements ScaleOperation<Deployme
 
     private void updateStoredDeploymentPods( String name )
     {
-        List<Pod> pods = lookupController.findDeploymentPods( name )
-                .orElseThrow( ()-> new TestKubeException( "Unable to find deployments pods." ) );
+        List<Pod> pods = lookupController.findDeploymentPods( name );
         resourcesStore.putDeploymentPods( name, pods );
     }
 }

@@ -31,7 +31,7 @@ public class ExecControllerImpl implements ExecController
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        PodResource podResource = lookupController.getPodResource( pod )
+        PodResource podResource = lookupController.findPodResource( pod )
                 .orElseThrow( () -> new ResourceNotFoundException( "Resource not found: " + pod ) );
 
         try( ExecWatch watch = podResource.writingOutput( out ).writingError( out )

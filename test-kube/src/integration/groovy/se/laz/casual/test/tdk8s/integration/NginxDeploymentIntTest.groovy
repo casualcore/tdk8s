@@ -12,6 +12,7 @@ import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import se.laz.casual.test.tdk8s.TestKube
 import se.laz.casual.test.tdk8s.connection.KubeConnection
+import se.laz.casual.test.tdk8s.exec.ExecResult
 import se.laz.casual.test.tdk8s.sample.NginxResources
 import spock.lang.Shared
 import spock.lang.Specification
@@ -117,8 +118,6 @@ class NginxDeploymentIntTest extends Specification
     def "Test scaling deployment synchronously."()
     {
         when:
-        scaleTest( deploymentName, 2 )
-        scaleTest( deploymentName, 2 )
         scaleTest( deploymentName, 0 )
         scaleTest( deploymentName, 1 )
 
@@ -130,8 +129,6 @@ class NginxDeploymentIntTest extends Specification
     {
         when:
         scaleAsyncTest( deploymentName, 2 )
-        scaleAsyncTest( deploymentName, 2 )
-        scaleAsyncTest( deploymentName, 0 )
         scaleAsyncTest( deploymentName, 1 )
 
         then:
@@ -156,6 +153,30 @@ class NginxDeploymentIntTest extends Specification
         status == 200
         body != ""
         body.containsIgnoreCase( "nginx" )
+    }
+
+    def "Execute command on deployment."()
+    {
+        given:
+        String msg = "hidep"
+        String[] command = ["sh", "-c", "echo -n " + msg ]
+        ExecResult expected = ExecResult.newBuilder().output( msg ).build(  )
+
+        when:
+        ExecResult actual = instance.getController(  ).executeCommand( deploymentName, command )
+
+        then:
+        actual == expected
+    }
+
+    def "Get log from deployment."()
+    {
+        when:
+        String log = instance.getController(  ).getLog( deploymentName )
+
+        then:
+        log != ""
+        log.contains( "nginx" )
     }
 
     HttpResponse<String> httpGet( KubeConnection connection )

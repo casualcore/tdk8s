@@ -33,7 +33,7 @@ class FileTransferControllerTest extends Specification
     {
         given:
         PodResource resource = Mock()
-        1* rlc.getPodResource( name ) >> Optional.of( resource )
+        1* rlc.findPodResource( name ) >> Optional.of( resource )
         CopyOrReadable cor = Mock( )
         1* resource.file( src ) >> cor
         1* cor.copy( dest ) >> success
@@ -54,7 +54,7 @@ class FileTransferControllerTest extends Specification
     {
         given:
 
-        1* rlc.getPodResource( name ) >> Optional.empty(  )
+        1* rlc.findPodResource( name ) >> Optional.empty(  )
 
         when:
         instance.download( name, src, dest )
@@ -67,7 +67,7 @@ class FileTransferControllerTest extends Specification
     {
         given:
         PodResource resource = Mock()
-        1* rlc.getPodResource( name ) >> Optional.of( resource )
+        1* rlc.findPodResource( name ) >> Optional.of( resource )
         CopyOrReadable cor = Mock( )
         1* resource.file( src ) >> cor
         1* cor.upload( dest ) >> success
@@ -88,7 +88,7 @@ class FileTransferControllerTest extends Specification
     {
         given:
 
-        1* rlc.getPodResource( name ) >> Optional.empty(  )
+        1* rlc.findPodResource( name ) >> Optional.empty(  )
 
         when:
         instance.upload( name, src, dest )

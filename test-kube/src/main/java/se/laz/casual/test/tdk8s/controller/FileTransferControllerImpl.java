@@ -41,7 +41,7 @@ public class FileTransferControllerImpl implements FileTransferController
 
     private PodResource getPodResource( String pod )
     {
-        return lookupController.getPodResource( pod )
+        return lookupController.findPodResource( pod )
                 .orElseThrow( ()-> new ResourceNotFoundException( "Unable to find pod " + pod ) );
     }
 }
