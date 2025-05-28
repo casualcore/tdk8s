@@ -6,6 +6,7 @@
 
 package se.laz.casual.test.tdk8s.integration
 
+import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.api.model.PodList
 import io.fabric8.kubernetes.api.model.apps.Deployment
 import io.fabric8.kubernetes.client.KubernetesClient
@@ -61,38 +62,44 @@ class NginxDeploymentIntTest extends Specification
         assert client.services(  ).withLabel( RESOURCE_LABEL_NAME, id ).list().getItems(  ).size(  ) == 0
     }
 
-//    def "Connect to deployment, port 80, using port forward."()
-//    {
-//        given:
-//        int status
-//        String body
-//
-//        when:
-//        try( KubeConnection connection = instance.getController().getPortForwardConnection( deploymentName, 80 ) )
-//        {
-//            HttpResponse<String> response = httpGet( connection )
-//            status = response.statusCode(  )
-//            body = response.body()
-//        }
-//
-//        then:
-//        status == 200
-//        body != ""
-//        body.containsIgnoreCase( "nginx" )
-//    }
+    def "Connect to deployment, port 80, using port forward."()
+    {
+        given:
+        int status
+        String body
 
-//    def "Test retrieving all pods."()
-//    {
-//        given:
-//        Deployment d = instance.getDeployments(  ).get( deploymentName )
-//
-//        when:
-//        PodList pods = instance.getClient(  ).pods(  ).withLabelSelector( d.getSpec(  ).getSelector(  ) ).list()
-//
-//        then:
-//        pods.getItems().size(  ) == 2
-//        noExceptionThrown(  )
-//    }
+        when:
+        try( KubeConnection connection = instance.getController().getPortForwardConnection( deploymentName, 80 ) )
+        {
+            HttpResponse<String> response = httpGet( connection )
+            status = response.statusCode(  )
+            body = response.body()
+        }
+
+        then:
+        status == 200
+        body != ""
+        body.containsIgnoreCase( "nginx" )
+    }
+
+    def "Test retrieving all pods."()
+    {
+        given:
+        Deployment d = instance.getDeployments(  ).get( deploymentName )
+
+        when:
+        List<Pod> pods = instance.getClient(  ).pods(  ).withLabelSelector( d.getSpec(  ).getSelector(  ) ).list().getItems(  )
+
+        then:
+        pods.size(  ) == 1
+
+        when:
+        List<Pod> storedPods = instance.getResourcesStore(  ).getDeploymentPods( deploymentName )
+
+        then:
+        storedPods.size(  ) == 1
+        pods == storedPods
+    }
 
     def scaleAsyncTest( String name, int replicas )
     {

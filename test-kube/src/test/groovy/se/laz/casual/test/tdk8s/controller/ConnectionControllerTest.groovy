@@ -253,7 +253,7 @@ class ConnectionControllerTest extends Specification
 
         PodResource resource = Mock()
         1* rc.getServiceResource( name ) >> Optional.empty(  )
-        1* rc.getPodResource( name ) >> Optional.of( resource )
+        1* rc.findPodResource( name ) >> Optional.of( resource )
         LocalPortForward lpf = Mock()
         1* resource.portForward( port, InetAddress.getLoopbackAddress(  ), 0 ) >> lpf
 
@@ -276,7 +276,7 @@ class ConnectionControllerTest extends Specification
         String name = "blah"
 
         1* rc.getServiceResource( name ) >> Optional.empty(  )
-        1* rc.getPodResource( name ) >> Optional.empty(  )
+        1* rc.findPodResource( name ) >> Optional.empty(  )
 
         when:
         instance.getPortForwardConnection( name, port )

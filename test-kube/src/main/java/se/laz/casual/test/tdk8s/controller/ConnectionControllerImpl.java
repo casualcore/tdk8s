@@ -88,7 +88,7 @@ public class ConnectionControllerImpl implements ConnectionController
     {
         return lookupController.getServiceResource( resource )
                 .map( serviceServiceResource -> createPortForwardConnection( serviceServiceResource, targetPort ) )
-                .orElseGet( () -> lookupController.getPodResource( resource )
+                .orElseGet( () -> lookupController.findPodResource( resource )
                 .map( pr -> createPortForwardConnection( pr, targetPort ) )
                 .orElseThrow( () -> new ConnectionException( "Resource unavailable: " + resource ) ) );
     }
