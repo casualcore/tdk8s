@@ -8,6 +8,9 @@ package se.laz.casual.test.tdk8s.store;
 
 import se.laz.casual.test.tdk8s.probe.ProvisioningProbe;
 
+/**
+ * Store for Provisioning Probes.
+ */
 public class ProvisioningProbeStore extends AbstractResourceStore<ProvisioningProbe>
 {
 

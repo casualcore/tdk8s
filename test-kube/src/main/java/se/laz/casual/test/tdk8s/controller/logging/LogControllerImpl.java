@@ -20,32 +20,32 @@ public class LogControllerImpl implements LogController
     }
 
     @Override
-    public String getLog( String pod )
+    public String getLog( String resource )
     {
-        PodResource resource = getPodResource( pod );
+        PodResource pod = getPodResource( resource );
 
-        return resource.getLog();
+        return pod.getLog();
     }
 
     @Override
-    public String getLogTail( String pod, int lines )
+    public String getLogTail( String resource, int lines )
     {
-        PodResource resource = getPodResource( pod );
+        PodResource pod = getPodResource( resource );
 
-        return resource.tailingLines( lines ).getLog();
+        return pod.tailingLines( lines ).getLog();
     }
 
     @Override
-    public String getLogSince( String pod, String sinceTime )
+    public String getLogSince( String resource, String sinceTime )
     {
-        PodResource resource = getPodResource( pod );
+        PodResource pod = getPodResource( resource );
 
-        return resource.sinceTime( sinceTime ).getLog();
+        return pod.sinceTime( sinceTime ).getLog();
     }
 
-    private PodResource getPodResource( String pod )
+    private PodResource getPodResource( String resource )
     {
-        return lookupController.findPodResource( pod )
-                .orElseThrow( () -> new ResourceNotFoundException( "Unable to find pod " + pod ) );
+        return lookupController.findFirstPodForResource( resource )
+                .orElseThrow( () -> new ResourceNotFoundException( "Unable to find Pod for resource: " + resource ) );
     }
 }

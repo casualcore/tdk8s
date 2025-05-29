@@ -8,6 +8,9 @@ package se.laz.casual.test.tdk8s.store;
 
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 
+/**
+ * Store for Deployments.
+ */
 public class DeploymentStore extends AbstractResourceStore<Deployment>
 {
 

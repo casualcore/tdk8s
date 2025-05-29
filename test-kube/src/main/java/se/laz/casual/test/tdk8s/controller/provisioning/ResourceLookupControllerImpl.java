@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 /**
- * Lookup resources by name, checking the store cache, then cluster.
+ * Get resources by name, checking the resource store cache, then cluster.
  * Return the resource instance of the found type, allowing for operations
  * to be performed.
  */
@@ -40,7 +40,7 @@ public class ResourceLookupControllerImpl implements ResourceLookupController
     }
 
     @Override
-    public Optional<PodResource> getPodResource( String name )
+    public Optional<PodResource> getPodAsResource( String name )
     {
         return getOrRetrievePod( name ).map( pod -> this.client.pods().resource( pod ) );
     }
@@ -61,19 +61,19 @@ public class ResourceLookupControllerImpl implements ResourceLookupController
     }
 
     @Override
-    public Optional<RollableScalableResource<Deployment>> getDeploymentResource( String name )
+    public Optional<RollableScalableResource<Deployment>> getDeploymentAsResource( String name )
     {
         return getOrRetrieveDeployment( name )
                 .map( deployment-> this.client.apps().deployments().resource( deployment ) );
     }
 
     @Override
-    public List<PodResource> getDeploymentPodResources( String name )
+    public List<PodResource> getPodsForDeploymentAsResources( String name )
     {
         List<Pod> pods = null;
-        if( this.resourcesStore.containsDeploymentPods( name ) )
+        if( this.resourcesStore.containsPodsForDeployment( name ) )
         {
-            pods = this.resourcesStore.getDeploymentPods( name );
+            pods = this.resourcesStore.getPodsForDeployment( name );
         }
 
         if( pods == null )
@@ -99,7 +99,7 @@ public class ResourceLookupControllerImpl implements ResourceLookupController
     }
 
     @Override
-    public List<Pod> findDeploymentPods( String name )
+    public List<Pod> retrievePodsForDeployment( String name )
     {
         Optional<Deployment> deployment = getOrRetrieveDeployment( name );
         if( deployment.isPresent() )
@@ -130,7 +130,7 @@ public class ResourceLookupControllerImpl implements ResourceLookupController
     }
 
     @Override
-    public Optional<ServiceResource<Service>> getServiceResource( String name )
+    public Optional<ServiceResource<Service>> getServiceAsResource( String name )
     {
         Service service = null;
         if( this.resourcesStore.containsService( name ) )
@@ -152,14 +152,14 @@ public class ResourceLookupControllerImpl implements ResourceLookupController
     }
 
     @Override
-    public Optional<PodResource> findPodResource( String name )
+    public Optional<PodResource> findFirstPodForResource( String resource )
     {
-        return getPodResource( name ).or( () -> getFirstDeploymentPodResource( name ) );
+        return getPodAsResource( resource ).or( () -> getFirstDeploymentPodResource( resource ) );
     }
 
     private Optional<PodResource> getFirstDeploymentPodResource( String name )
     {
-        List<PodResource> podList = getDeploymentPodResources( name );
+        List<PodResource> podList = getPodsForDeploymentAsResources( name );
         PodResource podResource = null;
         if( !podList.isEmpty() )
         {

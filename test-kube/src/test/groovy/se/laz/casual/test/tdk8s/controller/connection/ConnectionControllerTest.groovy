@@ -40,7 +40,7 @@ class ConnectionControllerTest extends Specification
         given:
         Service service = WildflyResources.SIMPLE_WILDFLY_SERVICE
         ServiceResource<Service> resource = Mock()
-        1* rc.getServiceResource( serviceName ) >> Optional.of( resource )
+        1* rc.getServiceAsResource( serviceName ) >> Optional.of( resource )
         1* resource.get() >> service
         1* nc.canConnect( serviceName, port ) >> true
 
@@ -75,7 +75,7 @@ class ConnectionControllerTest extends Specification
         .build(  )
 
         ServiceResource<Service> resource = Mock()
-        1* rc.getServiceResource( serviceName ) >> Optional.of( resource )
+        1* rc.getServiceAsResource( serviceName ) >> Optional.of( resource )
         1* resource.get() >> service
         1* nc.canConnect( serviceName, port ) >> false
         1* runc.isInsideContainer(  ) >> false
@@ -108,7 +108,7 @@ class ConnectionControllerTest extends Specification
                 .build(  )
 
         ServiceResource<Service> resource = Mock()
-        1* rc.getServiceResource( serviceName ) >> Optional.of( resource )
+        1* rc.getServiceAsResource( serviceName ) >> Optional.of( resource )
         1* resource.get() >> service
         1* nc.canConnect( serviceName, targetPort ) >> false
         1* runc.isInsideContainer(  ) >> false
@@ -146,7 +146,7 @@ class ConnectionControllerTest extends Specification
                 .build(  )
 
         ServiceResource<Service> resource = Mock()
-        1* rc.getServiceResource( serviceName ) >> Optional.of( resource )
+        1* rc.getServiceAsResource( serviceName ) >> Optional.of( resource )
         1* resource.get() >> service
         1* nc.canConnect( serviceName, port ) >> false
         1* runc.isInsideContainer(  ) >> false
@@ -175,7 +175,7 @@ class ConnectionControllerTest extends Specification
 
 
         ServiceResource<Service> resource = Mock()
-        1* rc.getServiceResource( serviceName ) >> Optional.of( resource )
+        1* rc.getServiceAsResource( serviceName ) >> Optional.of( resource )
         1* resource.get() >> service
         1* nc.canConnect( serviceName, port ) >> false
         1* runc.isInsideContainer(  ) >> false
@@ -203,7 +203,7 @@ class ConnectionControllerTest extends Specification
         Service service = WildflyResources.SIMPLE_WILDFLY_SERVICE
 
         ServiceResource<Service> resource = Mock()
-        1* rc.getServiceResource( serviceName ) >> Optional.of( resource )
+        1* rc.getServiceAsResource( serviceName ) >> Optional.of( resource )
         1* resource.get() >> service
         1* nc.canConnect( serviceName, port ) >> false
         1* runc.isInsideContainer(  ) >> true
@@ -218,7 +218,7 @@ class ConnectionControllerTest extends Specification
     def "Get connection service not found, throws ConnectionException."()
     {
         given:
-        1* rc.getServiceResource( serviceName ) >> Optional.empty(  )
+        1* rc.getServiceAsResource( serviceName ) >> Optional.empty(  )
 
         when:
         instance.getConnection( serviceName, port )
@@ -231,7 +231,7 @@ class ConnectionControllerTest extends Specification
     {
         given:
         ServiceResource<Service> resource = Mock()
-        1* rc.getServiceResource( serviceName ) >> Optional.of( resource )
+        1* rc.getServiceAsResource( serviceName ) >> Optional.of( resource )
         LocalPortForward lpf = Mock()
         1* resource.portForward( port, InetAddress.getLoopbackAddress(  ), 0 ) >> lpf
 
@@ -254,8 +254,8 @@ class ConnectionControllerTest extends Specification
         String name = WildflyResources.SIMPLE_WILDFLY_POD_NAME
 
         PodResource resource = Mock()
-        1* rc.getServiceResource( name ) >> Optional.empty(  )
-        1* rc.findPodResource( name ) >> Optional.of( resource )
+        1* rc.getServiceAsResource( name ) >> Optional.empty(  )
+        1* rc.findFirstPodForResource( name ) >> Optional.of( resource )
         LocalPortForward lpf = Mock()
         1* resource.portForward( port, InetAddress.getLoopbackAddress(  ), 0 ) >> lpf
 
@@ -277,8 +277,8 @@ class ConnectionControllerTest extends Specification
         given:
         String name = "blah"
 
-        1* rc.getServiceResource( name ) >> Optional.empty(  )
-        1* rc.findPodResource( name ) >> Optional.empty(  )
+        1* rc.getServiceAsResource( name ) >> Optional.empty(  )
+        1* rc.findFirstPodForResource( name ) >> Optional.empty(  )
 
         when:
         instance.getPortForwardConnection( name, port )

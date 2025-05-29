@@ -28,12 +28,12 @@ public class ExecControllerImpl implements ExecController
     }
 
     @Override
-    public ExecResult executeCommand( String pod, String... command )
+    public ExecResult executeCommand( String resource, String... command )
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        PodResource podResource = lookupController.findPodResource( pod )
-                .orElseThrow( () -> new ResourceNotFoundException( "Resource not found: " + pod ) );
+        PodResource podResource = lookupController.findFirstPodForResource( resource )
+                .orElseThrow( () -> new ResourceNotFoundException( "Unable to find Pod for resource: " + resource ) );
 
         try( ExecWatch watch = podResource.writingOutput( out ).writingError( out )
                 .exec( command ) )
@@ -47,8 +47,8 @@ public class ExecControllerImpl implements ExecController
     }
 
     @Override
-    public CompletableFuture<ExecResult> executeCommandAsync( String pod, String... command )
+    public CompletableFuture<ExecResult> executeCommandAsync( String resource, String... command )
     {
-        return CompletableFuture.supplyAsync( () -> executeCommand( pod, command ) );
+        return CompletableFuture.supplyAsync( () -> executeCommand( resource, command ) );
     }
 }

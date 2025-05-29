@@ -102,7 +102,7 @@ class ProvisioningControllerTest extends Specification
         then:
         store.getPod( podName  ) == expectedPod
         store.getDeployment( deploymentName ) == expectedDeployment
-        store.getDeploymentPods( deploymentName ) == [expectedPod]
+        store.getPodsForDeployment( deploymentName ) == [expectedPod]
         store.getService( serviceName ) == expectedSvc
     }
 
@@ -165,7 +165,7 @@ class ProvisioningControllerTest extends Specification
         given:
         store.putPod( podName, expectedPod )
         store.putDeployment( deploymentName, expectedDeployment )
-        store.putDeploymentPods( deploymentName, [expectedPod] )
+        store.putPodsForDeployment( deploymentName, [expectedPod] )
         store.putService( serviceName, expectedSvc )
 
         mockDeleteDeployment( expectedDeployment )
@@ -185,7 +185,7 @@ class ProvisioningControllerTest extends Specification
         given:
         store.putPod( podName, expectedPod )
         store.putDeployment( deploymentName, expectedDeployment )
-        store.putDeploymentPods( deploymentName, [expectedPod] )
+        store.putPodsForDeployment( deploymentName, [expectedPod] )
         store.putService( serviceName, expectedSvc )
 
         mockDeleteDeployment( expectedDeployment )
@@ -209,77 +209,77 @@ class ProvisioningControllerTest extends Specification
     def "scale from 1 to 0."()
     {
         given:
-        store.putDeploymentPods( deploymentName, [expectedPod] )
+        store.putPodsForDeployment( deploymentName, [expectedPod] )
         store.putDeployment( deploymentName, expectedDeployment )
         RollableScalableResource<Deployment> resource = Mock()
-        1* lookupController.getDeploymentResource( deploymentName ) >> Optional.ofNullable( resource )
+        1* lookupController.getDeploymentAsResource( deploymentName ) >> Optional.ofNullable( resource )
         1* resource.get() >> expectedDeployment
         PodResource podResource = Mock()
-        1* lookupController.getDeploymentPodResources( deploymentName ) >> [podResource]
+        1* lookupController.getPodsForDeploymentAsResources( deploymentName ) >> [podResource]
         mockWatchDeletePodResource( podResource, expectedPod )
 
         1* resource.scale( 0 )
         1* resource.waitUntilReady( 1, TimeUnit.MINUTES ) >> expectedDeployment
-        1* lookupController.findDeploymentPods( deploymentName ) >> []
+        1* lookupController.retrievePodsForDeployment( deploymentName ) >> []
 
         when:
         instance.scale( deploymentName, 0 )
 
         then:
-        store.getDeploymentPods( deploymentName ) == []
+        store.getPodsForDeployment( deploymentName ) == []
     }
 
     def "scale async from 1 to 0."()
     {
         given:
-        store.putDeploymentPods( deploymentName, [expectedPod] )
+        store.putPodsForDeployment( deploymentName, [expectedPod] )
         store.putDeployment( deploymentName, expectedDeployment )
         RollableScalableResource<Deployment> resource = Mock()
-        1* lookupController.getDeploymentResource( deploymentName ) >> Optional.ofNullable( resource )
+        1* lookupController.getDeploymentAsResource( deploymentName ) >> Optional.ofNullable( resource )
         1* resource.get() >> expectedDeployment
         PodResource podResource = Mock()
-        1* lookupController.getDeploymentPodResources( deploymentName ) >> [podResource]
+        1* lookupController.getPodsForDeploymentAsResources( deploymentName ) >> [podResource]
         mockWatchDeletePodResource( podResource, expectedPod )
 
         1* resource.scale( 0 )
         1* resource.waitUntilReady( 1, TimeUnit.MINUTES ) >> expectedDeployment
-        1* lookupController.findDeploymentPods( deploymentName ) >> []
+        1* lookupController.retrievePodsForDeployment( deploymentName ) >> []
 
         when:
         instance.scaleAsync( deploymentName, 0 ).join(  )
 
         then:
-        store.getDeploymentPods( deploymentName ) == []
+        store.getPodsForDeployment( deploymentName ) == []
     }
 
     def "scale from 1 to 2."()
     {
         given:
-        store.putDeploymentPods( deploymentName, [expectedPod] )
+        store.putPodsForDeployment( deploymentName, [expectedPod] )
         store.putDeployment( deploymentName, expectedDeployment )
         RollableScalableResource<Deployment> resource = Mock()
-        1* lookupController.getDeploymentResource( deploymentName ) >> Optional.ofNullable( resource )
+        1* lookupController.getDeploymentAsResource( deploymentName ) >> Optional.ofNullable( resource )
         1* resource.get() >> expectedDeployment
 
         1* resource.scale( 2 )
         1* resource.waitUntilReady( 1, TimeUnit.MINUTES ) >> expectedDeployment
-        1* lookupController.findDeploymentPods( deploymentName ) >> [expectedPod, expectedPod]
+        1* lookupController.retrievePodsForDeployment( deploymentName ) >> [expectedPod, expectedPod]
 
         when:
         instance.scale( deploymentName, 2 )
 
         then:
-        store.getDeploymentPods( deploymentName ) == [expectedPod, expectedPod]
+        store.getPodsForDeployment( deploymentName ) == [expectedPod, expectedPod]
     }
 
     def "scale no change."()
     {
-        store.putDeploymentPods( deploymentName, [expectedPod] )
+        store.putPodsForDeployment( deploymentName, [expectedPod] )
         store.putDeployment( deploymentName, expectedDeployment )
         RollableScalableResource<Deployment> resource = Mock()
-        1* lookupController.getDeploymentResource( deploymentName ) >> Optional.ofNullable( resource )
+        1* lookupController.getDeploymentAsResource( deploymentName ) >> Optional.ofNullable( resource )
         1* resource.get() >> expectedDeployment
-        1* lookupController.findDeploymentPods( deploymentName ) >> [expectedPod]
+        1* lookupController.retrievePodsForDeployment( deploymentName ) >> [expectedPod]
 
         when:
         instance.scale( deploymentName, 1 )
@@ -287,13 +287,13 @@ class ProvisioningControllerTest extends Specification
         then:
         0* resource.scale_
         store.getDeployment( deploymentName ) == expectedDeployment
-        store.getDeploymentPods( deploymentName ) == [expectedPod]
+        store.getPodsForDeployment( deploymentName ) == [expectedPod]
     }
 
     def "scale deployment doesn't exist throws exception."()
     {
         given:
-        1* lookupController.getDeploymentResource(deploymentName  ) >> Optional.empty(  )
+        1* lookupController.getDeploymentAsResource(deploymentName  ) >> Optional.empty(  )
 
         when:
         instance.scale( deploymentName, 2 )
@@ -304,26 +304,26 @@ class ProvisioningControllerTest extends Specification
 
     def "scale, unexpected state for number of replicas, throws exception."()
     {
-        store.putDeploymentPods( deploymentName, [expectedPod] )
+        store.putPodsForDeployment( deploymentName, [expectedPod] )
         store.putDeployment( deploymentName, expectedDeployment )
         RollableScalableResource<Deployment> resource = Mock()
-        1* lookupController.getDeploymentResource( deploymentName ) >> Optional.ofNullable( resource )
+        1* lookupController.getDeploymentAsResource( deploymentName ) >> Optional.ofNullable( resource )
         1* resource.get() >> expectedDeployment
-        1* lookupController.getDeploymentPodResources( deploymentName ) >> [expectedPod, expectedPod]
+        1* lookupController.getPodsForDeploymentAsResources( deploymentName ) >> [expectedPod, expectedPod]
 
         when:
         instance.scale( deploymentName, 0 )
 
         then:
         thrown TestKubeException
-        store.getDeploymentPods( deploymentName ) == [expectedPod]
+        store.getPodsForDeployment( deploymentName ) == [expectedPod]
     }
 
     def "scale unmanaged deployment."()
     {
         given:
         RollableScalableResource<Deployment> resource = Mock()
-        1* lookupController.getDeploymentResource( deploymentName ) >> Optional.ofNullable( resource )
+        1* lookupController.getDeploymentAsResource( deploymentName ) >> Optional.ofNullable( resource )
         1* resource.get() >> expectedDeployment
 
         when:
@@ -331,7 +331,7 @@ class ProvisioningControllerTest extends Specification
 
         then:
         !store.containsDeployment( deploymentName )
-        !store.containsDeploymentPods( deploymentName )
+        !store.containsPodsForDeployment( deploymentName )
     }
 
 
@@ -394,7 +394,7 @@ class ProvisioningControllerTest extends Specification
 
     void mockFindDeploymentPods( String name, List<Pod> pods )
     {
-        1* lookupController.findDeploymentPods( name ) >> pods
+        1* lookupController.retrievePodsForDeployment( name ) >> pods
     }
 
     void mockCreateService( Service service )
@@ -466,7 +466,7 @@ class ProvisioningControllerTest extends Specification
             mockWatchDeletePodResource( podResource, pod )
         }
 
-        1* lookupController.getDeploymentPodResources( name ) >> podResources
+        1* lookupController.getPodsForDeploymentAsResources( name ) >> podResources
     }
 
     void mockDeleteService( Service service )

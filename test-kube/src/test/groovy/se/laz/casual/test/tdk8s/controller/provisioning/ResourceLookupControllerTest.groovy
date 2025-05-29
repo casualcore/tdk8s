@@ -50,7 +50,7 @@ class ResourceLookupControllerTest extends Specification
         store.putPod( name, pod )
 
         when:
-        Optional<PodResource> actual = instance.getPodResource( name )
+        Optional<PodResource> actual = instance.getPodAsResource( name )
 
         then:
         actual.isPresent(  )
@@ -65,7 +65,7 @@ class ResourceLookupControllerTest extends Specification
         PodResource pr = mockPodResource( pod )
 
         when:
-        Optional<PodResource> actual = instance.getPodResource( name )
+        Optional<PodResource> actual = instance.getPodAsResource( name )
 
         then:
         actual.isPresent(  )
@@ -78,7 +78,7 @@ class ResourceLookupControllerTest extends Specification
         mockPodWithNameGet( name, null )
 
         when:
-        Optional<PodResource> actual = instance.getPodResource( name )
+        Optional<PodResource> actual = instance.getPodAsResource( name )
 
         then:
         actual.isEmpty(  )
@@ -93,7 +93,7 @@ class ResourceLookupControllerTest extends Specification
         store.putDeployment( name, deployment )
 
         when:
-        Optional<RollableScalableResource<Deployment>> actual = instance.getDeploymentResource( name )
+        Optional<RollableScalableResource<Deployment>> actual = instance.getDeploymentAsResource( name )
 
         then:
         actual.isPresent(  )
@@ -109,7 +109,7 @@ class ResourceLookupControllerTest extends Specification
         RollableScalableResource<Deployment> dr = mockDeploymentResource( deployment )
 
         when:
-        Optional<RollableScalableResource<Deployment>> actual = instance.getDeploymentResource( name )
+        Optional<RollableScalableResource<Deployment>> actual = instance.getDeploymentAsResource( name )
 
         then:
         actual.isPresent(  )
@@ -122,7 +122,7 @@ class ResourceLookupControllerTest extends Specification
         mockDeploymentWithNameGet( name, null )
 
         when:
-        Optional<RollableScalableResource<Deployment>> actual = instance.getDeploymentResource( name )
+        Optional<RollableScalableResource<Deployment>> actual = instance.getDeploymentAsResource( name )
 
         then:
         actual.isEmpty(  )
@@ -137,7 +137,7 @@ class ResourceLookupControllerTest extends Specification
         store.putService( name, service )
 
         when:
-        Optional<ServiceResource> actual = instance.getServiceResource( name )
+        Optional<ServiceResource> actual = instance.getServiceAsResource( name )
 
         then:
         actual.isPresent(  )
@@ -152,7 +152,7 @@ class ResourceLookupControllerTest extends Specification
         ServiceResource sr = mockServiceResource( service )
 
         when:
-        Optional<ServiceResource> actual = instance.getServiceResource( name )
+        Optional<ServiceResource> actual = instance.getServiceAsResource( name )
 
         then:
         actual.isPresent(  )
@@ -165,13 +165,13 @@ class ResourceLookupControllerTest extends Specification
         mockServiceWithNameGet( name, null )
 
         when:
-        Optional<ServiceResource> actual = instance.getServiceResource( name )
+        Optional<ServiceResource> actual = instance.getServiceAsResource( name )
 
         then:
         actual.isEmpty()
     }
 
-    def "Find managed deployment pods"()
+    def "Retrieve pods for deployment, managed, with pods."()
     {
         given:
         Pod p = Mock()
@@ -179,26 +179,26 @@ class ResourceLookupControllerTest extends Specification
         store.putDeployment( name, deployment )
 
         when:
-        List<Pod> actual = instance.findDeploymentPods( name )
+        List<Pod> actual = instance.retrievePodsForDeployment( name )
 
         then:
         actual == [p]
     }
 
-    def "Find managed deployment pods, no pods"()
+    def "Retrieve pods for deployment, managed, no pods."()
     {
         given:
         mockPodsWithSelector( deployment, [] )
         store.putDeployment( name, deployment )
 
         when:
-        List<Pod> actual = instance.findDeploymentPods( name )
+        List<Pod> actual = instance.retrievePodsForDeployment( name )
 
         then:
         actual == []
     }
 
-    def "Find unmanaged deployment pods"()
+    def "Retrieve pods for deployment, unmanaged, with pods."()
     {
         given:
         Pod p = Mock()
@@ -207,32 +207,32 @@ class ResourceLookupControllerTest extends Specification
         mockPodsWithSelector( deployment, [p] )
 
         when:
-        List<Pod> actual = instance.findDeploymentPods( name )
+        List<Pod> actual = instance.retrievePodsForDeployment( name )
 
         then:
         actual == [p]
     }
 
-    def "Find unmanaged deployment pods, no pods"()
+    def "Retrieve pods for deployment, unmanaged, no pods."()
     {
         given:
         mockDeploymentWithNameGet( name, deployment )
         mockPodsWithSelector( deployment, [] )
 
         when:
-        List<Pod> actual = instance.findDeploymentPods( name )
+        List<Pod> actual = instance.retrievePodsForDeployment( name )
 
         then:
         actual == []
     }
 
-    def "Find deployment pods, no deployments, no pods."()
+    def "Retrieve pods for deployment, no deployment, no pods."()
     {
         given:
         mockDeploymentWithNameGet( name, null )
 
         when:
-        List<Pod> actual = instance.findDeploymentPods( name )
+        List<Pod> actual = instance.retrievePodsForDeployment( name )
 
         then:
         actual == []
@@ -242,12 +242,12 @@ class ResourceLookupControllerTest extends Specification
     {
         given:
         Pod pod = Mock()
-        store.putDeploymentPods( name, [pod] )
+        store.putPodsForDeployment( name, [pod] )
         PodResource resource = mockPodResource(pod )
         List<PodResource> expected = [resource]
 
         when:
-        List<PodResource> actual = instance.getDeploymentPodResources( name )
+        List<PodResource> actual = instance.getPodsForDeploymentAsResources( name )
 
         then:
         actual == expected
@@ -263,7 +263,7 @@ class ResourceLookupControllerTest extends Specification
         List<PodResource> expected = [resource]
 
         when:
-        List<PodResource> actual = instance.getDeploymentPodResources( name )
+        List<PodResource> actual = instance.getPodsForDeploymentAsResources( name )
 
         then:
         actual == expected
@@ -275,13 +275,13 @@ class ResourceLookupControllerTest extends Specification
         mockDeploymentWithNameGet( name, null )
 
         when:
-        List<PodResource> actual = instance.getDeploymentPodResources( name )
+        List<PodResource> actual = instance.getPodsForDeploymentAsResources( name )
 
         then:
         actual == []
     }
 
-    def "Get pod or first deployment pod resource, is a managed pod"()
+    def "Find first pod for resource, matches a managed pod"()
     {
         given:
         Pod p = Mock()
@@ -290,14 +290,14 @@ class ResourceLookupControllerTest extends Specification
 
 
         when:
-        Optional<PodResource> actual = instance.findPodResource( name )
+        Optional<PodResource> actual = instance.findFirstPodForResource( name )
 
         then:
         actual.isPresent(  )
         actual.get() == pr
     }
 
-    def "Get pod or first deployment pod resource, un managed pod"()
+    def "Find first pod for resource, matches unmanaged pod"()
     {
         given:
         Pod p = Mock()
@@ -306,14 +306,14 @@ class ResourceLookupControllerTest extends Specification
 
 
         when:
-        Optional<PodResource> actual = instance.findPodResource( name )
+        Optional<PodResource> actual = instance.findFirstPodForResource( name )
 
         then:
         actual.isPresent(  )
         actual.get(  ) == pr
     }
 
-    def "Get pod or first deployment pod resource, managed deployment"()
+    def "Find first pod for resource, matches managed deployment"()
     {
         given:
         Pod p = Mock()
@@ -321,17 +321,17 @@ class ResourceLookupControllerTest extends Specification
         PodResource pr = mockPodResource( p )
 
 
-        store.putDeploymentPods( name, [p] )
+        store.putPodsForDeployment( name, [p] )
 
         when:
-        Optional<PodResource> actual = instance.findPodResource( name )
+        Optional<PodResource> actual = instance.findFirstPodForResource( name )
 
         then:
         actual.isPresent(  )
         actual.get() == pr
     }
 
-    def "Get pod or first deployment pod resource, un managed deployment"()
+    def "Find first pod for resource, matches unmanaged deployment"()
     {
         given:
         Pod pod = Mock()
@@ -341,38 +341,38 @@ class ResourceLookupControllerTest extends Specification
         PodResource pr = mockPodResource( pod )
 
         when:
-        Optional<PodResource> actual = instance.findPodResource( name )
+        Optional<PodResource> actual = instance.findFirstPodForResource( name )
 
         then:
         actual.isPresent(  )
         actual.get() == pr
     }
 
-    def "Get pod or first deployment pod resource, none"()
+    def "Find first pod for resource, no matches"()
     {
         given:
         mockPodWithNameGet( name, null )
         mockDeploymentWithNameGet( name, null )
 
         when:
-        Optional<PodResource> actual = instance.findPodResource( name )
+        Optional<PodResource> actual = instance.findFirstPodForResource( name )
 
         then:
         actual.isEmpty(  )
     }
 
-    def "Get pod or first deployment pod resource, multiple deployment pods"()
+    def "Find first pod for resource, matches deployment with multiple pods, returns first."()
     {
         given:
         Pod p1 = Mock()
         Pod p2 = Mock()
         mockPodWithNameGet( name, null )
-        store.putDeploymentPods( name, [p1, p2] )
+        store.putPodsForDeployment( name, [p1, p2] )
         PodResource pr = mockPodResource( p1 )
         mockPodResource( p2 )
 
         when:
-        Optional<PodResource> actual = instance.findPodResource( name )
+        Optional<PodResource> actual = instance.findFirstPodForResource( name )
 
         then:
         actual.isPresent(  )

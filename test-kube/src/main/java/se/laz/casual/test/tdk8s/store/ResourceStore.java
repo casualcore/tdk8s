@@ -9,7 +9,7 @@ package se.laz.casual.test.tdk8s.store;
 import java.util.Map;
 
 /**
- * Generic store for resources providing standard CRUD functionality.
+ * Store for resources of a specific Type providing standard CRUD functionality.
  *
  * @param <T> the resource type the store handles.
  */
@@ -48,8 +48,9 @@ public interface ResourceStore<T>
     void put( String name, T value );
 
     /**
+     * Store all the resources with the provided name.
      *
-     * @param all
+     * @param all the resources to be added to the store.
      */
     void putAll( Map<String,T> all );
 

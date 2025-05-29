@@ -11,7 +11,6 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.PodResource;
 import se.laz.casual.test.tdk8s.store.ResourcesStore;
 import se.laz.casual.test.tdk8s.watchers.DeleteResourceWatcher;
-import se.laz.casual.test.tdk8s.watchers.DeleteWatcher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +19,9 @@ import java.util.concurrent.TimeUnit;
 
 import static se.laz.casual.test.tdk8s.TestKube.RESOURCE_LABEL_NAME;
 
+/**
+ * Controls the provisioning of Pod resources.
+ */
 public class ProvisioningPodController implements ProvisionableAsync
 {
     private final KubernetesClient client;
@@ -62,7 +64,7 @@ public class ProvisioningPodController implements ProvisionableAsync
         for( Pod p: resourcesStore.getPods().values() )
         {
             PodResource podResource = client.pods().resource( p );
-            deleteWatchers.add( new DeleteResourceWatcher<>( new DeleteWatcher<>(), podResource ) );
+            deleteWatchers.add( new DeleteResourceWatcher<>( podResource ) );
 
             podResource.delete();
         }

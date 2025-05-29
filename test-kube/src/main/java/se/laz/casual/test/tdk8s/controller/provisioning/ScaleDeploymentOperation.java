@@ -13,11 +13,13 @@ import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import se.laz.casual.test.tdk8s.TestKubeException;
 import se.laz.casual.test.tdk8s.store.ResourceNotFoundException;
 import se.laz.casual.test.tdk8s.watchers.DeleteResourceWatcher;
-import se.laz.casual.test.tdk8s.watchers.DeleteWatcher;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Scale operation for a Deployment, encapsulates watches for Pod deletion when scaling down.
+ */
 public class ScaleDeploymentOperation implements ScaleOperation<Deployment>
 {
     private final ResourceLookupController lookupController;
@@ -32,7 +34,7 @@ public class ScaleDeploymentOperation implements ScaleOperation<Deployment>
     @Override
     public Deployment scale( String name, int replicas )
     {
-        RollableScalableResource<Deployment> resource = lookupController.getDeploymentResource( name )
+        RollableScalableResource<Deployment> resource = lookupController.getDeploymentAsResource( name )
                 .orElseThrow( () -> new ResourceNotFoundException( "Resource not found: " + name ) );
         Deployment deployment = resource.get();
         int currentReplicas = deployment.getSpec().getReplicas();
@@ -59,12 +61,12 @@ public class ScaleDeploymentOperation implements ScaleOperation<Deployment>
         if( currentReplicas > replicas )
         {
 
-            List<PodResource> pods = this.lookupController.getDeploymentPodResources( name );
+            List<PodResource> pods = this.lookupController.getPodsForDeploymentAsResources( name );
             if( pods.size() != currentReplicas )
             {
                 throw new TestKubeException( "Unexpected number of current replicas found: " + pods.size() + ", expected: " + currentReplicas );
             }
-            watcher = new DeleteResourceWatcher<>( new DeleteWatcher<>( currentReplicas - replicas ), pods );
+            watcher = new DeleteResourceWatcher<>( pods, currentReplicas - replicas );
         }
     }
 

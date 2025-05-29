@@ -20,69 +20,88 @@ import java.util.Optional;
 public interface ResourceLookupController
 {
     /**
-     * Retrieves the PodResource for a pod matching the name.
-     * </br>
-     * The name can be either the alias for the managed resource or
-     * the actual underlying name of the resource inside the cluster.
-     *
-     * @param name of the pod alias in the store, or pod name in the cluster.
-     * @return PodResource of the found pod or empty if not found.
-     */
-    Optional<PodResource> getPodResource( String name );
-
-    /**
-     * Retrieves the RollableScalableResource<Deployment> for a deployment matching the name.
-     * </br>
-     * The name can be either the alias for the managed resource or
-     * the actual underlying name of the resource inside the cluster.
-     *
-     * @param name of the deployment alias in the store, or deployment name in the cluster.
-     * @return RollableScalableResource<Deployment> of the found deployment or empty if not found.
-     */
-    Optional<RollableScalableResource<Deployment>> getDeploymentResource( String name );
-
-    /**
-     * Retrieve the PodResources for the deployment matching the name.
-     *
-     * @param name of the deployment alias in the store, or deployment name in the cluster.
-     * @return List of PodResources for the deployment or empty if not found.
-     */
-    List<PodResource> getDeploymentPodResources( String name );
-
-    /**
-     * Find deployment pods for the named deployment.
+     * Retrieves the PodResource for a Pod matching the name.
      * <p>
-     * The name can be either the alias for the managed resource or
-     * the actual underlying name of the resource inside the cluster.
+     *     The name can be either the alias for the managed Pod
+     *     or the actual underlying name of the Pod inside the cluster.
+     * </p>
+     *
+     * @param name of the Pod.
+     * @return PodResource of the found Pod or empty if not found.
+     */
+    Optional<PodResource> getPodAsResource( String name );
+
+    /**
+     * Retrieves the RollableScalableResource<Deployment> for a Deployment matching the name.
+     * <p>
+     *     The name can be either the alias for the managed Deployment
+     *     or the actual underlying name of the Deployment inside the cluster.
+     * </p>
+     *
+     * @param name of the Deployment.
+     * @return RollableScalableResource<Deployment> of the found Deployment or empty if not found.
+     */
+    Optional<RollableScalableResource<Deployment>> getDeploymentAsResource( String name );
+
+    /**
+     * Retrieve the PodResources for the Deployment matching the name.
+     * <p>
+     *     The name can be either the alias for the managed Deployment
+     *     or the actual underlying name of the Deployment inside the cluster.
+     * </p>
+     *
+     * @param name of the Deployment.
+     * @return List of PodResources for the Deployment. List is empty if none found.
+     */
+    List<PodResource> getPodsForDeploymentAsResources( String name );
+
+    /**
+     * Retrieve the Pods for the named Deployment directly from the cluster.
+     * <p>
+     *     The name can be either the alias for the managed Deployment
+     *     or the actual underlying name of the Deployment inside the cluster.
      * </p>
      * <p>
-     * The list of pods returned is always retrieves from the cluster.
+     *      The list of Pods returned is always retrieved from the cluster.
      * </p>
-     * @param name of the deployment alias in the store, or deployment name in the cluster.
-     * @return list of the found deployment pods or empty if not found.
+     *
+     * @param name of the Deployment.
+     * @return List of the Pods for the Deployment found. List is empty if none found.
      */
-    List<Pod> findDeploymentPods( String name );
+    List<Pod> retrievePodsForDeployment( String name );
 
     /**
-     * Retrieves the ServiceResource for a service matching the name.
-     * </br>
-     * The name can be either the alias for the managed resource or
-     * the actual underlying name of the resource inside the cluster.
+     * Retrieves the ServiceResource for a Service matching the name.
+     * <p>
+     *     The name can be either the alias for the managed Service
+     *     or the actual underlying name of the Service inside the cluster.
+     * </p>
      *
-     * @param name of the service alias in the store, or service name in the cluster.
-     * @return ServiceResource of the found service or empty if not found.
+     * @param name of the Service.
+     * @return ServiceResource for the Service found, or empty if not found.
      */
-    Optional<ServiceResource<Service>> getServiceResource( String name );
+    Optional<ServiceResource<Service>> getServiceAsResource( String name );
 
     /**
-     * Find a pod matching the podAlias provided.
-     * <br/>
-     * Initially check for managed or unmanaged pods matching.
-     * Then check for managed or unmanaged deployments.
-     * If deployment match has multiple replicas, the first is returned at random.
+     * Find a Pod for the resource, returning the first match.
+     * <p>
+     *     The resource name can be either the alias for the managed resource
+     *     or the actual underlying name of the resource inside the cluster.
+     * </p>
+     * <p>
+     *     Note: If the resource has multiple pods associated the first is used.
+     * </p>
      *
-     * @param name pod alias for pod to retrieve.
-     * @return PodResource of the found pod or empty if not found.
+     * Search order for resource Pods is:
+     * <ol>
+     *     <li>Managed Pods</li>
+     *     <li>Unmanaged Pods</li>
+     *     <li>Managed Deployment Pods</li>
+     *     <li>Unmanaged Deployment Pods</li>
+     * </ol>
+     *
+     * @param resource for which to find a Pod.
+     * @return PodResource for the resource found or empty if not found.
      */
-    Optional<PodResource> findPodResource( String name );
+    Optional<PodResource> findFirstPodForResource( String resource );
 }

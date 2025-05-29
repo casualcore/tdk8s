@@ -13,7 +13,6 @@ import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import se.laz.casual.test.tdk8s.store.ResourcesStore;
 import se.laz.casual.test.tdk8s.watchers.DeleteResourceWatcher;
-import se.laz.casual.test.tdk8s.watchers.DeleteWatcher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +21,9 @@ import java.util.concurrent.TimeUnit;
 
 import static se.laz.casual.test.tdk8s.TestKube.RESOURCE_LABEL_NAME;
 
+/**
+ * Controls the provisioning of Deployment resources.
+ */
 public class ProvisioningDeploymentController implements ScaleOperation<Deployment>, ProvisionableAsync
 {
     private final KubernetesClient client;
@@ -77,11 +79,11 @@ public class ProvisioningDeploymentController implements ScaleOperation<Deployme
         {
             RollableScalableResource<Deployment> deploymentResource = client.apps().deployments().resource( entry.getValue() );
 
-            deleteResourceWatchers.add( new DeleteResourceWatcher<>( new DeleteWatcher<>(), deploymentResource ) );
+            deleteResourceWatchers.add( new DeleteResourceWatcher<>( deploymentResource ) );
 
             //Add watches for all deployment pods to delete.
-            List<PodResource> podList = lookupController.getDeploymentPodResources( entry.getKey() );
-            deleteResourceWatchers.add( new DeleteResourceWatcher<>( new DeleteWatcher<>(podList.size()), podList ) );
+            List<PodResource> podList = lookupController.getPodsForDeploymentAsResources( entry.getKey() );
+            deleteResourceWatchers.add( new DeleteResourceWatcher<>( podList ) );
 
             deploymentResource.delete();
         }
@@ -112,7 +114,7 @@ public class ProvisioningDeploymentController implements ScaleOperation<Deployme
 
     private void updateStoredDeploymentPods( String name )
     {
-        List<Pod> pods = lookupController.findDeploymentPods( name );
-        resourcesStore.putDeploymentPods( name, pods );
+        List<Pod> pods = lookupController.retrievePodsForDeployment( name );
+        resourcesStore.putPodsForDeployment( name, pods );
     }
 }

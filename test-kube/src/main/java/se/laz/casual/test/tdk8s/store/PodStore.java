@@ -8,6 +8,9 @@ package se.laz.casual.test.tdk8s.store;
 
 import io.fabric8.kubernetes.api.model.Pod;
 
+/**
+ * Store for Pods.
+ */
 public class PodStore extends AbstractResourceStore<Pod>
 {
 

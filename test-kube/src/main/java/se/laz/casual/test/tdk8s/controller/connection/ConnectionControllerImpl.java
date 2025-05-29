@@ -22,7 +22,7 @@ import java.net.InetAddress;
 import java.util.logging.Logger;
 
 /**
- * Controller responsible for handling connection requests to resources in the TestKube.
+ * Controller responsible for handling connection requests to resources.
  */
 public class ConnectionControllerImpl implements ConnectionController
 {
@@ -42,7 +42,7 @@ public class ConnectionControllerImpl implements ConnectionController
     @Override
     public KubeConnection getConnection( String service, int targetPort )
     {
-        ServiceResource<Service> sr = lookupController.getServiceResource( service )
+        ServiceResource<Service> sr = lookupController.getServiceAsResource( service )
                 .orElseThrow( ()-> new ConnectionException( "Resource unavailable: " + service ) );
 
         Service s = sr.get();
@@ -56,7 +56,7 @@ public class ConnectionControllerImpl implements ConnectionController
         // Fix for running from outside a container / cluster.
         if( !runtimeController.isInsideContainer() )
         {
-            log.info( ()->"Running outside of a container, attempting to connect externally." );
+            log.finest( ()->"Running outside of a container, attempting to connect externally." );
             // Check if the service should be externally accessible.
             if( s.getSpec().getType() != null && s.getSpec().getType().equals( "LoadBalancer" ) &&
                     !s.getStatus().getLoadBalancer().getIngress().isEmpty() )
@@ -68,10 +68,10 @@ public class ConnectionControllerImpl implements ConnectionController
                         .findFirst()
                         .map( ServicePort::getPort )
                         .orElse( -1 );
-                log.info( ()-> "External IP: " + externalIp + ". External Port: " + externalPort );
+                log.finest( ()-> "External IP: " + externalIp + ". External Port: " + externalPort );
                 if( externalPort != -1 && networkController.canConnect( externalIp, externalPort ) )
                 {
-                    log.info( ()->"Connection available externally." );
+                    log.finest( ()->"Connection available externally." );
                     return new ServiceConnection( externalIp, externalPort );
                 }
             }
@@ -88,9 +88,9 @@ public class ConnectionControllerImpl implements ConnectionController
     @Override
     public KubeConnection getPortForwardConnection( String resource, int targetPort )
     {
-        return lookupController.getServiceResource( resource )
+        return lookupController.getServiceAsResource( resource )
                 .map( serviceServiceResource -> createPortForwardConnection( serviceServiceResource, targetPort ) )
-                .orElseGet( () -> lookupController.findPodResource( resource )
+                .orElseGet( () -> lookupController.findFirstPodForResource( resource )
                 .map( pr -> createPortForwardConnection( pr, targetPort ) )
                 .orElseThrow( () -> new ConnectionException( "Resource unavailable: " + resource ) ) );
     }

@@ -13,9 +13,9 @@ public interface ProvisioningProbe
 {
     /**
      * Probe a test kube to determine if provisioning is complete.
-     * <br/>
-     * A probe can be expected to be run multiple times until
-     * it returns true.
+     * <p>
+     *     A probe can be expected to be run multiple times until it returns true.
+     * </p>
      *
      * @param testKube the current testKube instance to probe against.
      * @return if the provisioning probe was successful or not.

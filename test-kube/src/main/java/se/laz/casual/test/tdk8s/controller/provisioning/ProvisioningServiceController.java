@@ -11,7 +11,6 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.ServiceResource;
 import se.laz.casual.test.tdk8s.store.ResourcesStore;
 import se.laz.casual.test.tdk8s.watchers.DeleteResourceWatcher;
-import se.laz.casual.test.tdk8s.watchers.DeleteWatcher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +18,9 @@ import java.util.Map;
 
 import static se.laz.casual.test.tdk8s.TestKube.RESOURCE_LABEL_NAME;
 
+/**
+ * Controls the provisioning of Service resources.
+ */
 public class ProvisioningServiceController implements ProvisionableAsync
 {
     private final KubernetesClient client;
@@ -58,7 +60,7 @@ public class ProvisioningServiceController implements ProvisionableAsync
         for( Service s: resourcesStore.getServices().values() )
         {
             ServiceResource<Service> serviceResource = client.services().resource( s );
-            deleteWatchers.add( new DeleteResourceWatcher<>( new DeleteWatcher<>(), serviceResource ) );
+            deleteWatchers.add( new DeleteResourceWatcher<>( serviceResource ) );
 
             serviceResource.delete();
         }

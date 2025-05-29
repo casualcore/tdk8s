@@ -10,6 +10,9 @@ import io.fabric8.kubernetes.api.model.Pod;
 
 import java.util.List;
 
+/**
+ * Store for Pods of a Deployment.
+ */
 public class DeploymentPodsStore extends AbstractResourceStore<List<Pod>>
 {
 

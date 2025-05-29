@@ -11,6 +11,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Abstract storage for Resources, a wrapper for a ConcurrentHashMap.
+ *
+ * @param <T> type of Resource that is stored.
+ */
 public abstract class AbstractResourceStore<T> implements ResourceStore<T>
 {
     public static final String NAME_IS_NULL = "Name is null.";

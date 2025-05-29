@@ -13,7 +13,7 @@ import java.net.Socket;
 import java.util.logging.Logger;
 
 /**
- * Checks if network connectivity conditions.
+ * Checks network connectivity conditions.
  */
 public class NetworkChecker
 {

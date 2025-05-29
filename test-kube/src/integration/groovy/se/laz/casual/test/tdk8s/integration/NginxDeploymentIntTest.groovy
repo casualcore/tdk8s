@@ -93,7 +93,7 @@ class NginxDeploymentIntTest extends Specification
         pods.size(  ) == 1
 
         when:
-        List<Pod> storedPods = instance.getResourcesStore(  ).getDeploymentPods( deploymentName )
+        List<Pod> storedPods = instance.getResourcesStore(  ).getPodsForDeployment( deploymentName )
 
         then:
         storedPods.size(  ) == 1

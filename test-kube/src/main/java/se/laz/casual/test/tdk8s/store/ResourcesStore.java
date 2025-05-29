@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Store for the resources which are part of the TestKube.
+ * Store for the all managed resources which are part of the TestKube.
  */
 public class ResourcesStore
 {
@@ -35,11 +35,11 @@ public class ResourcesStore
     }
 
     /**
-     * Get a pod by name.
+     * Get a Pod by name.
      *
-     * @param name of the pod.
-     * @return stored pod
-     * @throws ResourceNotFoundException if pod not stored.
+     * @param name of the Pod.
+     * @return stored Pod
+     * @throws ResourceNotFoundException if Pod not stored.
      */
     public Pod getPod( String name )
     {
@@ -47,9 +47,9 @@ public class ResourcesStore
     }
 
     /**
-     * Get all stored pods.
+     * Get all stored Pods.
      *
-     * @return map of pods stored.
+     * @return map of Pods stored.
      */
     public Map<String,Pod> getPods( )
     {
@@ -57,10 +57,10 @@ public class ResourcesStore
     }
 
     /**
-     * Check if the pod with name is stored.
+     * Check if the Pod with name is stored.
      *
-     * @param name of the pod.
-     * @return if named pod is stored.
+     * @param name of the Pod.
+     * @return if named Pod is stored.
      */
     public boolean containsPod( String name )
     {
@@ -68,8 +68,8 @@ public class ResourcesStore
     }
 
     /**
-     * Store a pod by name.
-     * @param name of the pod to store.
+     * Store a Pod by name.
+     * @param name of the Pod to store.
      * @param pod to store.
      */
     public void putPod( String name, Pod pod )
@@ -78,7 +78,7 @@ public class ResourcesStore
     }
 
     /**
-     * Store all pods provided.
+     * Store all Pods provided.
      *
      * @param pods to store.
      */
@@ -88,11 +88,11 @@ public class ResourcesStore
     }
 
     /**
-     * Remove pod by name.
+     * Remove Pod by name.
      *
-     * @param name of pod to remove.
-     * @return the removed pod.
-     * @throws ResourceNotFoundException if pod is not stored.
+     * @param name of Pod to remove.
+     * @return the removed Pod.
+     * @throws ResourceNotFoundException if Pod is not stored.
      */
     public Pod removePod( String name )
     {
@@ -100,11 +100,11 @@ public class ResourcesStore
     }
 
     /**
-     * Get a deployment by name.
+     * Get a Deployment by name.
      *
-     * @param name of the deployment.
-     * @return stored deployment
-     * @throws ResourceNotFoundException if deployment not stored.
+     * @param name of the Deployment.
+     * @return stored Deployment
+     * @throws ResourceNotFoundException if Deployment not stored.
      */
     public Deployment getDeployment( String name )
     {
@@ -112,9 +112,9 @@ public class ResourcesStore
     }
 
     /**
-     * Get all stored deployments.
+     * Get all stored Deployments.
      *
-     * @return map of deployments stored.
+     * @return map of Deployments stored.
      */
     public Map<String,Deployment> getDeployments( )
     {
@@ -122,10 +122,10 @@ public class ResourcesStore
     }
 
     /**
-     * Check if the deployment with name is stored.
+     * Check if the Deployment with name is stored.
      *
-     * @param name of the deployment.
-     * @return if named deployment is stored.
+     * @param name of the Deployment.
+     * @return if named Deployment is stored.
      */
     public boolean containsDeployment( String name )
     {
@@ -133,8 +133,8 @@ public class ResourcesStore
     }
 
     /**
-     * Store a deployment by name.
-     * @param name of the deployment to store.
+     * Store a Deployment by name.
+     * @param name of the Deployment to store.
      * @param deployment to store.
      */
     public void putDeployment( String name, Deployment deployment )
@@ -143,7 +143,7 @@ public class ResourcesStore
     }
 
     /**
-     * Store all deployments provided.
+     * Store all Deployments provided.
      *
      * @param deployments to store.
      */
@@ -153,10 +153,10 @@ public class ResourcesStore
     }
 
     /**
-     * Remove deployment by name.
+     * Remove Deployment by name.
      *
-     * @param name of deployment to remove.
-     * @return the removed deployment.
+     * @param name of Deployment to remove.
+     * @return the removed Deployment.
      * @throws ResourceNotFoundException if deployment is not stored.
      */
     public Deployment removeDeployment( String name )
@@ -165,77 +165,77 @@ public class ResourcesStore
     }
 
     /**
-     * Get deployment pods by deployment name.
+     * Get Pods for Deployment by Deployment name.
      *
-     * @param name of the deployment.
-     * @return deployment pods stored.
+     * @param name of the Deployment.
+     * @return Pods stored for the Deployment.
      * @throws ResourceNotFoundException if deployment not stored.
      */
-    public List<Pod> getDeploymentPods( String name )
+    public List<Pod> getPodsForDeployment( String name )
     {
         return this.deploymentPodsStore.get( name );
     }
 
     /**
-     * Get all stored deployment pods.
+     * Get all stored Deployments Pods.
      *
-     * @return map of deployment pods stored.
+     * @return map of Deployment Pods stored.
      */
-    public Map<String, List<Pod>> getDeploymentPods( )
+    public Map<String, List<Pod>> getPodsForDeployments( )
     {
         return this.deploymentPodsStore.getAll();
     }
 
     /**
-     * Check if the pods for deployment with name is stored.
+     * Check if the Pods for Deployment with Deployment name is stored.
      *
-     * @param name of the deployment.
-     * @return if deployment pods are stored.
+     * @param name of the Deployment.
+     * @return if Pods for the Deployment are stored.
      */
-    public boolean containsDeploymentPods( String name )
+    public boolean containsPodsForDeployment( String name )
     {
         return this.deploymentPodsStore.contains( name );
     }
 
     /**
-     * Store pods for a deployment by name.
+     * Store Pods for a Deployment by Deployment name.
      *
-     * @param name of the deployment to store.
+     * @param name of the Deployment for which to store Pods.
      * @param pods to store.
      */
-    public void putDeploymentPods( String name, List<Pod> pods )
+    public void putPodsForDeployment( String name, List<Pod> pods )
     {
         this.deploymentPodsStore.put( name, pods );
     }
 
     /**
-     * Store all deployments pods provided.
+     * Store all Pods for Deployments provided.
      *
-     * @param deploymentPods to store.
+     * @param podsForDeployments to store.
      */
-    public void putDeploymentPods( Map<String,List<Pod>> deploymentPods )
+    public void putPodsForDeployments( Map<String,List<Pod>> podsForDeployments )
     {
-        this.deploymentPodsStore.putAll( deploymentPods );
+        this.deploymentPodsStore.putAll( podsForDeployments );
     }
 
     /**
-     * Remove deployment pods by name.
+     * Remove Pods for Deployment by Deployment name.
      *
-     * @param name of deployment to remove pods.
-     * @return the removed deployment pods.
-     * @throws ResourceNotFoundException if deployment pods are not stored.
+     * @param name of Deployment to remove Pods.
+     * @return the removed Pods for the Deployment.
+     * @throws ResourceNotFoundException if Pods for the Deployment are not stored.
      */
-    public List<Pod> removeDeploymentPods( String name )
+    public List<Pod> removePodsForDeployment( String name )
     {
         return this.deploymentPodsStore.remove( name );
     }
 
     /**
-     * Get a service by name.
+     * Get a Service by name.
      *
-     * @param name of the service.
-     * @return service by name
-     * @throws ResourceNotFoundException if service not stored.
+     * @param name of the Service.
+     * @return Service by name.
+     * @throws ResourceNotFoundException if Service not stored.
      */
     public Service getService( String name )
     {
@@ -243,9 +243,9 @@ public class ResourcesStore
     }
 
     /**
-     * Get all stored services.
+     * Get all stored Services.
      *
-     * @return map of services stored.
+     * @return map of Services stored.
      */
     public Map<String,Service> getServices( )
     {
@@ -253,9 +253,9 @@ public class ResourcesStore
     }
 
     /**
-     * Check if the service with name is stored.
+     * Check if the Service with name is stored.
      *
-     * @param name of the service.
+     * @param name of the Service.
      * @return if it is stored.
      */
     public boolean containsService( String name )
@@ -264,8 +264,8 @@ public class ResourcesStore
     }
 
     /**
-     * Store a service by name.
-     * @param name of the service to store.
+     * Store a Service by name.
+     * @param name of the Service to store.
      * @param service to store.
      */
     public void putService( String name, Service service )
@@ -274,7 +274,7 @@ public class ResourcesStore
     }
 
     /**
-     * Store all services provided.
+     * Store all Services provided.
      *
      * @param services to store.
      */
@@ -284,11 +284,11 @@ public class ResourcesStore
     }
 
     /**
-     * Remove service by name.
+     * Remove Service by name.
      *
-     * @param name of service to remove.
-     * @return the removed service.
-     * @throws ResourceNotFoundException if service is not stored.
+     * @param name of Service to remove.
+     * @return the removed Service.
+     * @throws ResourceNotFoundException if Service is not stored.
      */
     public Service removeService( String name )
     {

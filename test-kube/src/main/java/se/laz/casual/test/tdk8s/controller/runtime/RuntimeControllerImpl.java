@@ -8,6 +8,9 @@ package se.laz.casual.test.tdk8s.controller.runtime;
 
 import se.laz.casual.test.tdk8s.runtime.ContainerAwareness;
 
+/**
+ * Controls runtime checks.
+ */
 public class RuntimeControllerImpl implements RuntimeController
 {
     @Override

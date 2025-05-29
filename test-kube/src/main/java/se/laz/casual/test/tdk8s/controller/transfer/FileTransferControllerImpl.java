@@ -13,7 +13,7 @@ import se.laz.casual.test.tdk8s.store.ResourceNotFoundException;
 import java.nio.file.Path;
 
 /**
- * Controller responsible for handling file transfers.
+ * Controls file transfers to and from resources.
  */
 public class FileTransferControllerImpl implements FileTransferController
 {
@@ -25,24 +25,24 @@ public class FileTransferControllerImpl implements FileTransferController
     }
 
     @Override
-    public boolean download( String pod, String source, Path destination )
+    public boolean download( String resource, String source, Path destination )
     {
-        PodResource resource = getPodResource( pod );
+        PodResource pod = getPodResource( resource );
 
-        return resource.file( source ).copy( destination );
+        return pod.file( source ).copy( destination );
     }
 
     @Override
-    public boolean upload( String pod, String source, Path destination )
+    public boolean upload( String resource, String source, Path destination )
     {
-        PodResource resource = getPodResource( pod );
+        PodResource pod = getPodResource( resource );
 
-        return resource.file( source ).upload( destination );
+        return pod.file( source ).upload( destination );
     }
 
-    private PodResource getPodResource( String pod )
+    private PodResource getPodResource( String resource )
     {
-        return lookupController.findPodResource( pod )
-                .orElseThrow( ()-> new ResourceNotFoundException( "Unable to find pod " + pod ) );
+        return lookupController.findFirstPodForResource( resource )
+                .orElseThrow( ()-> new ResourceNotFoundException( "Unable to find Pod for resource: " + resource ) );
     }
 }

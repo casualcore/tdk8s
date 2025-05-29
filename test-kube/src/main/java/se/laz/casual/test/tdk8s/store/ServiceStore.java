@@ -8,6 +8,9 @@ package se.laz.casual.test.tdk8s.store;
 
 import io.fabric8.kubernetes.api.model.Service;
 
+/**
+ * Store for Services.
+ */
 public class ServiceStore extends AbstractResourceStore<Service>
 {
 }

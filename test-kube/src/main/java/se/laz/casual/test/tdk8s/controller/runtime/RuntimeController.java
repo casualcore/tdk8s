@@ -9,8 +9,7 @@ package se.laz.casual.test.tdk8s.controller.runtime;
 public interface RuntimeController
 {
     /**
-     * Determine if the process is currently running within
-     * a container.
+     * Determine if the process is currently running within a container.
      *
      * @return is inside a container.
      */

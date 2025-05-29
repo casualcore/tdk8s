@@ -33,6 +33,9 @@ import se.laz.casual.test.tdk8s.store.ResourcesStore;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Controller facade, delegating to more specialised controllers to perform the actual operations.
+ */
 public class KubeController implements ProvisioningController, ConnectionController, ExecController, LogController, FileTransferController
 {
     private final ProvisioningController provisioningController;
@@ -89,15 +92,15 @@ public class KubeController implements ProvisioningController, ConnectionControl
     }
 
     @Override
-    public void scale( String name, int replicas )
+    public void scale( String resource, int replicas )
     {
-        provisioningController.scale( name, replicas );
+        provisioningController.scale( resource, replicas );
     }
 
     @Override
-    public CompletableFuture<Void> scaleAsync( String name, int replicas )
+    public CompletableFuture<Void> scaleAsync( String resource, int replicas )
     {
-        return provisioningController.scaleAsync( name, replicas );
+        return provisioningController.scaleAsync( resource, replicas );
     }
 
     // ConnectionController
@@ -117,43 +120,43 @@ public class KubeController implements ProvisioningController, ConnectionControl
     // Execution Controller
 
     @Override
-    public ExecResult executeCommand( String pod, String... command )
+    public ExecResult executeCommand( String resource, String... command )
     {
-        return this.execController.executeCommand( pod, command );
+        return this.execController.executeCommand( resource, command );
     }
 
     @Override
-    public CompletableFuture<ExecResult> executeCommandAsync( String pod, String... command )
+    public CompletableFuture<ExecResult> executeCommandAsync( String resource, String... command )
     {
-        return this.execController.executeCommandAsync( pod, command );
+        return this.execController.executeCommandAsync( resource, command );
     }
 
     // Log Controller
 
     @Override
-    public String getLog( String pod )
+    public String getLog( String resource )
     {
-        return this.logController.getLog( pod );
+        return this.logController.getLog( resource );
     }
 
     @Override
-    public String getLogTail( String pod, int lines )
+    public String getLogTail( String resource, int lines )
     {
-        return this.logController.getLogTail( pod, lines );
+        return this.logController.getLogTail( resource, lines );
     }
 
     @Override
-    public String getLogSince( String pod, String sinceTime )
+    public String getLogSince( String resource, String sinceTime )
     {
-        return this.logController.getLogSince( pod, sinceTime );
+        return this.logController.getLogSince( resource, sinceTime );
     }
 
     // File Transfer Controller
 
     @Override
-    public boolean download( String pod, String source, Path destination )
+    public boolean download( String resource, String source, Path destination )
     {
-        return this.fileTransferController.download( pod, source, destination );
+        return this.fileTransferController.download( resource, source, destination );
     }
 
     @Override

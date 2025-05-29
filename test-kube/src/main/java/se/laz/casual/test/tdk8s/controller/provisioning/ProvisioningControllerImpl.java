@@ -13,8 +13,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Controller responsible for provisioning and destruction of
- * resources within the TestKube.
+ * Controller responsible for provisioning and destruction of managed resources within the TestKube.
+ * Delegates operations to specialised controllers for Deployment, Pod, Service and Provisioning Probes.
  */
 public class ProvisioningControllerImpl implements ProvisioningController
 {
@@ -85,14 +85,14 @@ public class ProvisioningControllerImpl implements ProvisioningController
     }
 
     @Override
-    public void scale( String name, int replicas )
+    public void scale( String resource, int replicas )
     {
-        this.provisioningDeploymentController.scale( name, replicas );
+        this.provisioningDeploymentController.scale( resource, replicas );
     }
 
     @Override
-    public CompletableFuture<Void> scaleAsync( String name, int replicas )
+    public CompletableFuture<Void> scaleAsync( String resource, int replicas )
     {
-        return CompletableFuture.runAsync( ()-> scale( name, replicas ) );
+        return CompletableFuture.runAsync( ()-> scale( resource, replicas ) );
     }
 }

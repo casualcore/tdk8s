@@ -8,6 +8,9 @@ package se.laz.casual.test.tdk8s.exec;
 
 import java.util.Objects;
 
+/**
+ * Command execution result, containing the exit code and command output.
+ */
 public class ExecResult
 {
     private final int exitCode;
@@ -19,11 +22,23 @@ public class ExecResult
         this.output = builder.output;
     }
 
+    /**
+     * Exit code returned when running the command.
+     *
+     * @return commands exit code.
+     */
     public int getExitCode()
     {
         return exitCode;
     }
 
+    /**
+     * Output returned when running the command.
+     * <p>
+     *     The output combines both STDOUT and STDERR.
+     * </p>
+     * @return the command output.
+     */
     public String getOutput()
     {
         return output;
