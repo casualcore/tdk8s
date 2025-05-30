@@ -6,7 +6,7 @@
 
 // casual-java group and version
 group = 'se.laz.casual'
-version = '0.0.1-beta-SNAPSHOT'
+version = '0.0.1-beta'
 
 ext.libs = [
   fabric8: 'io.fabric8:kubernetes-client:7.1.0',
