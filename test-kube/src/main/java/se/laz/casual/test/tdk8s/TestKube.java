@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static java.lang.System.Logger.Level.DEBUG;
+
 /**
  * Manages kubernetes resources for the purpose of test.
  * <p>
@@ -58,6 +60,8 @@ import java.util.UUID;
  */
 public class TestKube implements Provisionable, Connectable
 {
+    private static final System.Logger logger = System.getLogger(TestKube.class.getName());
+
     public static final String RESOURCE_LABEL_NAME = "tdk8s";
     private final KubernetesClient client;
     private final String label;
@@ -84,6 +88,9 @@ public class TestKube implements Provisionable, Connectable
         }
 
         this.kubeController = kc;
+
+        logger.log( DEBUG, ()-> "TestKube built with label value: " + this.label + " check resources with: " +
+                "kubectl get all -l " + TestKube.RESOURCE_LABEL_NAME + "=" + this.label);
     }
 
     /**

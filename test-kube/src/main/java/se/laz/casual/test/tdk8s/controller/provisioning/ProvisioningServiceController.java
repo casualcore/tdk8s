@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.System.Logger.Level.DEBUG;
 import static se.laz.casual.test.tdk8s.TestKube.RESOURCE_LABEL_NAME;
 
 /**
@@ -23,6 +24,8 @@ import static se.laz.casual.test.tdk8s.TestKube.RESOURCE_LABEL_NAME;
  */
 public class ProvisioningServiceController implements ProvisionableAsync
 {
+    private static final System.Logger logger = System.getLogger(ProvisioningServiceController.class.getName());
+
     private final KubernetesClient client;
     private final ResourcesStore resourcesStore;
     private final String labelValue;
@@ -45,6 +48,7 @@ public class ProvisioningServiceController implements ProvisionableAsync
             Service updated = s.edit().editMetadata().addToLabels( RESOURCE_LABEL_NAME, labelValue ).endMetadata().build();
             updated = client.services().resource( updated ).serverSideApply();
             resourcesStore.putService( name, updated );
+            logger.log( DEBUG, ()-> "Service applied: " + name );
         }
     }
 
@@ -57,12 +61,13 @@ public class ProvisioningServiceController implements ProvisionableAsync
     @Override
     public void destroyAsync()
     {
-        for( Service s: resourcesStore.getServices().values() )
+        for( Map.Entry<String,Service> entry : resourcesStore.getServices().entrySet() )
         {
-            ServiceResource<Service> serviceResource = client.services().resource( s );
+            ServiceResource<Service> serviceResource = client.services().resource( entry.getValue() );
             deleteWatchers.add( new DeleteResourceWatcher<>( serviceResource ) );
 
             serviceResource.delete();
+            logger.log( DEBUG, ()-> "Service deleted: " + entry.getKey() );
         }
     }
 

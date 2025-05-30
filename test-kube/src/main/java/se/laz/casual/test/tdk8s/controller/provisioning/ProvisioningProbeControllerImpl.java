@@ -23,8 +23,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import static java.lang.System.Logger.Level.DEBUG;
+import static java.lang.System.Logger.Level.WARNING;
 
 /**
  * Controls the execution of ProvisioningProbes, running them in parallel with
@@ -32,9 +33,9 @@ import java.util.logging.Logger;
  */
 public class ProvisioningProbeControllerImpl implements ProvisioningProbeController
 {
-    static Logger log = Logger.getLogger( ProvisioningProbeControllerImpl.class.getName() );
-    private final FailsafeExecutor<Object> executor;
+    private static final System.Logger logger = System.getLogger( ProvisioningProbeControllerImpl.class.getName() );
 
+    private final FailsafeExecutor<Object> executor;
     private final TestKube testKube;
 
     public ProvisioningProbeControllerImpl( TestKube testKube )
@@ -88,16 +89,16 @@ public class ProvisioningProbeControllerImpl implements ProvisioningProbeControl
         for( Map.Entry<String, ProvisioningProbe> entry : probes.entrySet() )
         {
             CompletableFuture<Boolean> future = executor.getAsync( () -> {
-                log.finest( () -> "Running provisioning probe: " + entry.getKey() );
+                logger.log( DEBUG, () -> "Running provisioning probe: " + entry.getKey() );
                 try
                 {
                     boolean result = entry.getValue().ready( testKube );
-                    log.finest( () -> "Provisioning probe returned " + result + " : " + entry.getKey() );
+                    logger.log( DEBUG, () -> "Provisioning probe returned " + result + " : " + entry.getKey() );
                     return result;
                 }
                 catch( Exception e )
                 {
-                    log.log( Level.WARNING, e, () -> "Provisioning probe completed exceptionally : " + entry.getKey() );
+                    logger.log( WARNING, () -> "Provisioning probe completed exceptionally : " + entry.getKey(), e );
                     return false;
                 }
             } );

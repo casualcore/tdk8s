@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static java.lang.System.Logger.Level.DEBUG;
 import static se.laz.casual.test.tdk8s.TestKube.RESOURCE_LABEL_NAME;
 
 /**
@@ -26,6 +27,8 @@ import static se.laz.casual.test.tdk8s.TestKube.RESOURCE_LABEL_NAME;
  */
 public class ProvisioningDeploymentController implements ScaleOperation<Deployment>, ProvisionableAsync
 {
+    private static final System.Logger logger = System.getLogger( ProvisioningDeploymentController.class.getName() );
+
     private final KubernetesClient client;
     private final ResourcesStore resourcesStore;
     private final ResourceLookupController lookupController;
@@ -59,6 +62,7 @@ public class ProvisioningDeploymentController implements ScaleOperation<Deployme
                     .build();
             updated = client.apps().deployments().resource( updated ).serverSideApply();
             resourcesStore.putDeployment( name, updated );
+            logger.log( DEBUG, ()-> "Deployment applied: " + name );
         }
     }
 
@@ -69,6 +73,7 @@ public class ProvisioningDeploymentController implements ScaleOperation<Deployme
         {
             client.apps().deployments().resource( entry.getValue() ).waitUntilReady( 1, TimeUnit.MINUTES );
             updateStoredDeploymentPods( entry.getKey() );
+            logger.log( DEBUG, ()-> "Deployment ready: " + entry.getKey() );
         }
     }
 
@@ -86,6 +91,7 @@ public class ProvisioningDeploymentController implements ScaleOperation<Deployme
             deleteResourceWatchers.add( new DeleteResourceWatcher<>( podList ) );
 
             deploymentResource.delete();
+            logger.log( DEBUG, ()-> "Deployment deleted: " + entry.getKey() );
         }
     }
 
@@ -115,6 +121,7 @@ public class ProvisioningDeploymentController implements ScaleOperation<Deployme
     private void updateStoredDeploymentPods( String name )
     {
         List<Pod> pods = lookupController.retrievePodsForDeployment( name );
+        logger.log( DEBUG, ()-> "Found " + pods.size() + " Pod(s) for Deployment: " + name );
         resourcesStore.putPodsForDeployment( name, pods );
     }
 }

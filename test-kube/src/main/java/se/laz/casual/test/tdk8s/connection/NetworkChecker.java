@@ -10,14 +10,15 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.logging.Logger;
+
+import static java.lang.System.Logger.Level.DEBUG;
 
 /**
  * Checks network connectivity conditions.
  */
 public class NetworkChecker
 {
-    static Logger log = Logger.getLogger( NetworkChecker.class.getName());
+    private static final System.Logger logger = System.getLogger( NetworkChecker.class.getName());
 
     private NetworkChecker()
     {
@@ -39,7 +40,7 @@ public class NetworkChecker
         }
         catch( IOException e )
         {
-            log.finest( ()-> "Unable to connect to: " + host + ":" + port );
+            logger.log( DEBUG, ()-> "Unable to connect to: " + host + ":" + port );
             return false;
         }
     }

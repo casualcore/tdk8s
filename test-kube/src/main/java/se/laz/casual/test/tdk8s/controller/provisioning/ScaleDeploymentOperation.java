@@ -17,11 +17,15 @@ import se.laz.casual.test.tdk8s.watchers.DeleteResourceWatcher;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static java.lang.System.Logger.Level.DEBUG;
+
 /**
  * Scale operation for a Deployment, encapsulates watches for Pod deletion when scaling down.
  */
 public class ScaleDeploymentOperation implements ScaleOperation<Deployment>
 {
+    private static final System.Logger logger = System.getLogger(ScaleDeploymentOperation.class.getName());
+
     private final ResourceLookupController lookupController;
 
     private DeleteResourceWatcher<Pod> watcher;
@@ -40,11 +44,13 @@ public class ScaleDeploymentOperation implements ScaleOperation<Deployment>
         int currentReplicas = deployment.getSpec().getReplicas();
         if( currentReplicas == replicas )
         {
+            logger.log( DEBUG, ()->"Deployment " + name + " replica count already correct: " + replicas );
             return deployment;
         }
 
         preScale( name, replicas, currentReplicas );
 
+        logger.log( DEBUG, ()-> "Deployment " + name + " scaling from " + currentReplicas + " to " + replicas );
         resource.scale( replicas );
 
         postScale();
@@ -60,7 +66,6 @@ public class ScaleDeploymentOperation implements ScaleOperation<Deployment>
         // even though "additional" pods are still running awaiting completion of their termination.
         if( currentReplicas > replicas )
         {
-
             List<PodResource> pods = this.lookupController.getPodsForDeploymentAsResources( name );
             if( pods.size() != currentReplicas )
             {

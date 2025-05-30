@@ -19,14 +19,16 @@ import se.laz.casual.test.tdk8s.controller.provisioning.ResourceLookupController
 import se.laz.casual.test.tdk8s.controller.runtime.RuntimeController;
 
 import java.net.InetAddress;
-import java.util.logging.Logger;
+
+import static java.lang.System.Logger.Level.DEBUG;
+import static java.lang.System.Logger.Level.WARNING;
 
 /**
  * Controller responsible for handling connection requests to resources.
  */
 public class ConnectionControllerImpl implements ConnectionController
 {
-    Logger log = Logger.getLogger( ConnectionControllerImpl.class.getName());
+    private static final System.Logger logger = System.getLogger(ConnectionControllerImpl.class.getName() );
 
     private final ResourceLookupController lookupController;
     private final NetworkController networkController;
@@ -56,7 +58,7 @@ public class ConnectionControllerImpl implements ConnectionController
         // Fix for running from outside a container / cluster.
         if( !runtimeController.isInsideContainer() )
         {
-            log.finest( ()->"Running outside of a container, attempting to connect externally." );
+            logger.log( DEBUG, ()-> "Running outside of a container, attempting to connect externally." );
             // Check if the service should be externally accessible.
             if( s.getSpec().getType() != null && s.getSpec().getType().equals( "LoadBalancer" ) &&
                     !s.getStatus().getLoadBalancer().getIngress().isEmpty() )
@@ -68,15 +70,15 @@ public class ConnectionControllerImpl implements ConnectionController
                         .findFirst()
                         .map( ServicePort::getPort )
                         .orElse( -1 );
-                log.finest( ()-> "External IP: " + externalIp + ". External Port: " + externalPort );
+                logger.log( DEBUG, ()-> "External IP: " + externalIp + ". External Port: " + externalPort );
                 if( externalPort != -1 && networkController.canConnect( externalIp, externalPort ) )
                 {
-                    log.finest( ()->"Connection available externally." );
+                    logger.log( DEBUG, ()->"Connection available externally." );
                     return new ServiceConnection( externalIp, externalPort );
                 }
             }
 
-            log.warning( ()-> "Creating a port forward connection for service: "+ service + ", to allow seamless connectivity during development. " +
+            logger.log( WARNING, ()-> "Creating a port forward connection for service: "+ service + ", to allow seamless connectivity during development. " +
                     "Load Balancing will not work. Do NOT use for performance testing." );
             return createPortForwardConnection( sr, targetPort );
         }

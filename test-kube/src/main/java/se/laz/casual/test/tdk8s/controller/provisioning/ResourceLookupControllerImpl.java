@@ -19,7 +19,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
+
+import static java.lang.System.Logger.Level.WARNING;
 
 /**
  * Get resources by name, checking the resource store cache, then cluster.
@@ -28,7 +29,7 @@ import java.util.logging.Logger;
  */
 public class ResourceLookupControllerImpl implements ResourceLookupController
 {
-    Logger log = Logger.getLogger( ResourceLookupControllerImpl.class.getName());
+    private static final System.Logger logger = System.getLogger( ResourceLookupControllerImpl.class.getName());
 
     private final KubernetesClient client;
     private final ResourcesStore resourcesStore;
@@ -167,7 +168,7 @@ public class ResourceLookupControllerImpl implements ResourceLookupController
         }
         if( podList.size() > 1 )
         {
-            log.warning( ()-> "Retrieved first pod from a deployment with multiple replicas." );
+            logger.log( WARNING, ()-> "Retrieved first Pod from a Deployment with multiple replicas: " + podList.size() );
         }
         return Optional.ofNullable( podResource );
     }

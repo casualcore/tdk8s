@@ -12,11 +12,12 @@ import se.laz.casual.test.tdk8s.TestKubeException;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
+
+import static java.lang.System.Logger.Level.DEBUG;
 
 public class DeleteWatcher<T> implements Watcher<T>
 {
-    Logger log = Logger.getLogger(DeleteWatcher.class.getName());
+    private static final System.Logger logger = System.getLogger(DeleteWatcher.class.getName());
 
     private final CountDownLatch deleteLatch;
 
@@ -35,8 +36,8 @@ public class DeleteWatcher<T> implements Watcher<T>
     {
         if( action == Action.DELETED )
         {
-            log.finest( ()-> "Deleted." );
             deleteLatch.countDown();
+            logger.log( DEBUG, ()-> deleteLatch.getCount() + " delete(s) remaining, after delete observed for: " + resource.toString() );
         }
     }
 
@@ -50,6 +51,7 @@ public class DeleteWatcher<T> implements Watcher<T>
     {
         try
         {
+            logger.log( DEBUG, ()-> "Waiting for "+ deleteLatch.getCount() + " deletions." );
             deleteLatch.await();
         }
         catch( InterruptedException e )
@@ -63,6 +65,7 @@ public class DeleteWatcher<T> implements Watcher<T>
     {
         try
         {
+            logger.log( DEBUG, ()-> "Waiting for "+ deleteLatch.getCount() + " deletions, with timeout." );
             return deleteLatch.await( timeout, unit );
         }
         catch( InterruptedException e )
