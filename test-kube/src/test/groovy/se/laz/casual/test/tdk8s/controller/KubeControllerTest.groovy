@@ -6,11 +6,14 @@
 
 package se.laz.casual.test.tdk8s.controller
 
+import io.fabric8.kubernetes.client.KubernetesClient
+import se.laz.casual.test.tdk8s.TestKube
 import se.laz.casual.test.tdk8s.controller.connection.ConnectionController
 import se.laz.casual.test.tdk8s.controller.exec.ExecController
 import se.laz.casual.test.tdk8s.controller.logging.LogController
 import se.laz.casual.test.tdk8s.controller.provisioning.ProvisioningController
 import se.laz.casual.test.tdk8s.controller.transfer.FileTransferController
+import spock.lang.Shared
 import spock.lang.Specification
 
 import java.nio.file.Path
@@ -19,18 +22,55 @@ import java.time.format.DateTimeFormatter
 
 class KubeControllerTest extends Specification
 {
+    @Shared KubernetesClient client = Mock()
+    @Shared TestKube testKube = Mock()
+    @Shared String labelValue = UUID.randomUUID(  ).toString(  )
+
     KubeController instance
 
     def setup()
     {
-        instance = KubeController.newBuilder(  ).build(  )
+        instance = newBuilder()
+                .build(  )
+    }
+
+    KubeController.Builder newBuilder( )
+    {
+        KubeController.newBuilder(  )
+                .testKube( testKube )
+                .client( client )
+                .label( labelValue )
+    }
+
+    def "Null throws NullPointerException"()
+    {
+        when:
+        KubeController.newBuilder(  )
+                .testKube( tk )
+                .client( c )
+                .label( l )
+                .build(  )
+
+        then:
+        thrown NullPointerException
+
+        where:
+        tk       | c      | l
+        testKube | client | null
+        testKube | null   | labelValue
+        testKube | null   | null
+        null     | client | labelValue
+        null     | client | null
+        null     | null   | labelValue
+        null     | null   | null
     }
 
     def "Provisioning delegates correctly."()
     {
         given:
         ProvisioningController pc = Mock()
-        instance = KubeController.newBuilder(  ).provisioningController( pc ).build(  )
+        instance = newBuilder()
+                .provisioningController( pc ).build(  )
 
         when:
         instance.init(  )
@@ -77,7 +117,7 @@ class KubeControllerTest extends Specification
     {
         given:
         ConnectionController cc = Mock()
-        instance = KubeController.newBuilder(  ).connectionController( cc ).build(  )
+        instance = newBuilder(  ).connectionController( cc ).build(  )
         String name = "my-service"
         int port = 8080
 
@@ -98,7 +138,7 @@ class KubeControllerTest extends Specification
     {
         given:
         ExecController ec = Mock()
-        instance = KubeController.newBuilder(  ).execController( ec ).build(  )
+        instance = newBuilder(  ).execController( ec ).build(  )
         String name = "my-pod"
         String[] command = ["sh", "-c", "echo 'hi'"]
 
@@ -119,7 +159,7 @@ class KubeControllerTest extends Specification
     {
         given:
         LogController lc = Mock()
-        instance = KubeController.newBuilder(  ).logController( lc ).build(  )
+        instance = newBuilder(  ).logController( lc ).build(  )
         String name = "my-pod"
         int lines = 10
         String since = ZonedDateTime.now().format( DateTimeFormatter.ISO_OFFSET_DATE_TIME )
@@ -147,7 +187,7 @@ class KubeControllerTest extends Specification
     {
         given:
         FileTransferController fc = Mock()
-        instance = KubeController.newBuilder(  ).fileTransferController( fc ).build(  )
+        instance = newBuilder(  ).fileTransferController( fc ).build(  )
         String name = "my-pod"
         String source = "./file.txt"
         Path dest = Path.of( "dest.txt" )

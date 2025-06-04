@@ -31,6 +31,7 @@ import se.laz.casual.test.tdk8s.exec.ExecResult;
 import se.laz.casual.test.tdk8s.store.ResourcesStore;
 
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -247,9 +248,17 @@ public class KubeController implements ProvisioningController, ConnectionControl
 
         public KubeController build()
         {
+            checkNulls();
             initControllers();
 
             return new KubeController( this );
+        }
+
+        private void checkNulls()
+        {
+            Objects.requireNonNull( this.testKube, "TestKube is null." );
+            Objects.requireNonNull( this.client, "Kubernetes client is null." );
+            Objects.requireNonNull( this.label, "Label is null." );
         }
 
         private void initControllers()
