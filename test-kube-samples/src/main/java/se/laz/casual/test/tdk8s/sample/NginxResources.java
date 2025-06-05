@@ -1,0 +1,167 @@
+/*
+ * Copyright (c) 2025, The casual project. All rights reserved.
+ *
+ * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
+ */
+
+package se.laz.casual.test.tdk8s.sample;
+
+import io.fabric8.kubernetes.api.model.IntOrString;
+import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodBuilder;
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServiceBuilder;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
+
+import java.util.Map;
+
+public final class NginxResources
+{
+    private NginxResources()
+    {
+    }
+
+    public static final String NGINX_CONTAINER_NAME = "nginx";
+    public static final String NGINX_CONTAINER_IMAGE = "nginx:1.27.4";
+
+    public static final Map<String, String> SELECTOR = Map.of( "app", "nginx-test-app" );
+
+    public static final String SIMPLE_NGINX_POD_NAME = "nginx-test";
+
+    public static final Pod SIMPLE_NGINX_POD = new PodBuilder()
+            .withNewMetadata()
+            .withName( SIMPLE_NGINX_POD_NAME )
+            .addToLabels( SELECTOR )
+            .endMetadata()
+            .withNewSpec()
+            .addNewContainer()
+            .withName( NGINX_CONTAINER_NAME )
+            .withImage( NGINX_CONTAINER_IMAGE )
+            .addNewPort().withContainerPort( 80 ).endPort()
+            .withNewReadinessProbe()
+            .withNewTcpSocket()
+            .withNewPort()
+            .withValue( 80 )
+            .endPort()
+            .endTcpSocket()
+            .endReadinessProbe()
+            .endContainer()
+            .endSpec()
+            .build();
+
+    public static final String SIMPLE_NGINX_SERVICE_NAME = "nginx-service";
+
+    public static final Service SIMPLE_NGINX_SERVICE = new ServiceBuilder()
+            .withNewMetadata()
+            .withName( SIMPLE_NGINX_SERVICE_NAME )
+            .endMetadata()
+            .withNewSpec()
+            .addToSelector( SELECTOR )
+            .addNewPort().withName( "http" ).withPort( 80 ).endPort()
+            .endSpec()
+            .build();
+
+    public static final String EXTERNAL_NGINX_SERVICE_NAME = "nginx-external";
+
+    public static final Service EXTERNAL_NGINX_SERVICE = new ServiceBuilder()
+            .withNewMetadata()
+            .withName( EXTERNAL_NGINX_SERVICE_NAME )
+            .endMetadata()
+            .withNewSpec()
+            .addToSelector( SELECTOR )
+            .addNewPort()
+            .withName( "http" )
+            .withPort( 61819 ) //hope this is free!!
+            .withTargetPort( new IntOrString( 80 ) )
+            .endPort()
+            .withType("LoadBalancer" )
+            .endSpec()
+            .build();
+
+    public static final Map<String, String> SELECTOR2 = Map.of( "app", "nginx-test-app-2" );
+
+    public static final String SIMPLE_NGINX_POD_NAME2 = "nginx-test2";
+
+    public static final Pod SIMPLE_NGINX_POD2 = new PodBuilder()
+            .withNewMetadata()
+            .withName( SIMPLE_NGINX_POD_NAME2 )
+            .addToLabels( SELECTOR2 )
+            .endMetadata()
+            .withNewSpec()
+            .addNewContainer()
+            .withName( NGINX_CONTAINER_NAME )
+            .withImage( NGINX_CONTAINER_IMAGE )
+            .addNewPort().withContainerPort( 80 ).endPort()
+            .withNewReadinessProbe()
+            .withNewTcpSocket()
+            .withNewPort()
+            .withValue( 80 )
+            .endPort()
+            .endTcpSocket()
+            .endReadinessProbe()
+            .endContainer()
+            .endSpec()
+            .build();
+
+    public static final String SIMPLE_NGINX_SERVICE_NAME2 = "nginx-service2";
+
+    public static final Service SIMPLE_NGINX_SERVICE2 = new ServiceBuilder()
+            .withNewMetadata()
+            .withName( SIMPLE_NGINX_SERVICE_NAME2 )
+            .endMetadata()
+            .withNewSpec()
+            .addToSelector( SELECTOR2 )
+            .addNewPort().withName( "http" ).withPort( 80 ).endPort()
+            .endSpec()
+            .build();
+
+    public static final Map<String, String> DEPLOYMENT_SELECTOR = Map.of( "app", "nginx-test-app3" );
+
+    public static final String SIMPLE_NGINX_DEPLOYMENT_NAME = "nginx-deployment";
+
+    public static final Deployment SIMPLE_NGINX_DEPLOYMENT = new DeploymentBuilder()
+            .withNewMetadata()
+                .withName( SIMPLE_NGINX_DEPLOYMENT_NAME )
+            .endMetadata()
+            .withNewSpec()
+            .withReplicas( 1 )
+            .withNewSelector()
+                .addToMatchLabels( DEPLOYMENT_SELECTOR )
+            .endSelector()
+            .withNewTemplate()
+                .withNewMetadata()
+                    .withName( SIMPLE_NGINX_DEPLOYMENT_NAME )
+                    .withLabels( DEPLOYMENT_SELECTOR )
+                .endMetadata()
+                .withNewSpec()
+                    .addNewContainer()
+                        .withName( NGINX_CONTAINER_NAME )
+                        .withImage( NGINX_CONTAINER_IMAGE )
+                        .addNewPort().withContainerPort( 80 ).endPort()
+                        .withNewReadinessProbe()
+                            .withNewTcpSocket()
+                                .withNewPort()
+                                    .withValue( 80 )
+                                .endPort()
+                            .endTcpSocket()
+                        .endReadinessProbe()
+                    .endContainer()
+                .endSpec()
+            .endTemplate()
+            .endSpec()
+            .build();
+
+    public static final String SIMPLE_NGINX_SERVICE_NAME3 = "nginx-service3";
+
+    public static final Service SIMPLE_NGINX_SERVICE3 = new ServiceBuilder()
+            .withNewMetadata()
+            .withName( SIMPLE_NGINX_SERVICE_NAME3 )
+            .endMetadata()
+            .withNewSpec()
+            .addToSelector( DEPLOYMENT_SELECTOR )
+            .addNewPort().withName( "http" ).withPort( 80 ).endPort()
+            .endSpec()
+            .build();
+
+}

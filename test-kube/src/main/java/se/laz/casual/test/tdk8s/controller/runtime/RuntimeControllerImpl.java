@@ -1,0 +1,21 @@
+/*
+ * Copyright (c) 2025, The casual project. All rights reserved.
+ *
+ * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
+ */
+
+package se.laz.casual.test.tdk8s.controller.runtime;
+
+import se.laz.casual.test.tdk8s.runtime.ContainerAwareness;
+
+/**
+ * Controls runtime checks.
+ */
+public class RuntimeControllerImpl implements RuntimeController
+{
+    @Override
+    public boolean isInsideContainer()
+    {
+        return ContainerAwareness.isInsideContainer();
+    }
+}

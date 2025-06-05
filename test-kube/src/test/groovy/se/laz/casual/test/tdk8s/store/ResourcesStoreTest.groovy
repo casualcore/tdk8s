@@ -1,0 +1,403 @@
+/*
+ * Copyright (c) 2025, The casual project. All rights reserved.
+ *
+ * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
+ */
+
+package se.laz.casual.test.tdk8s.store
+
+import io.fabric8.kubernetes.api.model.Pod
+import io.fabric8.kubernetes.api.model.PodBuilder
+import io.fabric8.kubernetes.api.model.Service
+import io.fabric8.kubernetes.api.model.ServiceBuilder
+import io.fabric8.kubernetes.api.model.apps.Deployment
+import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder
+import se.laz.casual.test.tdk8s.probe.ProvisioningProbe
+import spock.lang.Shared
+import spock.lang.Specification
+
+class ResourcesStoreTest extends Specification
+{
+    ResourcesStore instance
+
+    @Shared
+    String podName1 = "single-pod-resource-1"
+
+    @Shared
+    Pod pod1 = new PodBuilder(  )
+            .withNewMetadata(  )
+            .withName( podName1 )
+            .endMetadata(  )
+            .build(  )
+
+    @Shared
+    String podName2 = "single-pod-resource-2"
+
+    @Shared
+    Pod pod2 = new PodBuilder(  )
+            .withNewMetadata(  )
+            .withName( podName2 )
+            .endMetadata(  )
+            .build(  )
+
+    @Shared
+    String deploymentName1 = "single-deployment-resource-1"
+
+    @Shared
+    Deployment deployment1 = new DeploymentBuilder()
+        .withNewMetadata(  )
+            .withName( deploymentName1 )
+        .endMetadata(  )
+        .build(  )
+
+    @Shared
+    String deploymentName2 = "single-deployment-resource-2"
+
+    @Shared
+    Deployment deployment2 = new DeploymentBuilder()
+        .withNewMetadata(  )
+            .withName( deploymentName2 )
+        .endMetadata(  )
+        .build(  )
+
+    @Shared
+    List<Pod> deployment1Pods = [pod1, pod2]
+
+    @Shared
+    List<Pod> deployment2Pods = [pod1]
+
+    @Shared
+    String serviceName1 = "single-service-resource-1"
+
+    @Shared
+    Service service1 = new ServiceBuilder(  )
+            .withNewMetadata(  )
+            .withName( serviceName1 )
+            .endMetadata(  )
+            .build()
+
+    @Shared
+    String serviceName2 = "single-service-resource-2"
+
+    @Shared
+    Service service2 = new ServiceBuilder(  )
+            .withNewMetadata(  )
+            .withName( serviceName2 )
+            .endMetadata(  )
+            .build()
+
+    def setup()
+    {
+        instance = new ResourcesStore()
+    }
+
+    def "Create, is empty."()
+    {
+        expect:
+        instance.getPods() == [:]
+        instance.getDeployments() == [:]
+        instance.getServices() == [:]
+        instance.getProvisioningProbes() == [:]
+    }
+
+    def "Retrieve non existent pod, throws ResourceNotFoundException"()
+    {
+        when:
+        instance.getPod( "blah" )
+
+        then:
+        thrown ResourceNotFoundException
+    }
+
+    def "Remove non existent pod, throws ResourceNotFoundException"()
+    {
+        when:
+        instance.removePod( "blah" )
+
+        then:
+        thrown ResourceNotFoundException
+    }
+
+
+    def "Add pods, retrieve, modify, retrieve, remove."()
+    {
+        when:
+        instance.putPod( podName1, pod1 )
+
+        then:
+        instance.getPods() == [(podName1): pod1]
+        instance.getPod( podName1 ) == pod1
+        instance.containsPod( podName1 )
+        !instance.containsPod( podName2 )
+
+        when:
+        instance.putPod( podName2, pod2 )
+
+        then:
+        instance.getPods() == [(podName1): pod1, (podName2): pod2]
+        instance.getPod( podName1 ) == pod1
+        instance.getPod( podName2 ) == pod2
+        instance.containsPod( podName1 )
+        instance.containsPod( podName2 )
+
+        when:
+        instance.putPod( podName1, pod2 )
+        instance.putPod( podName2, pod1 )
+
+        then:
+        instance.getPods() == [(podName1): pod2, (podName2): pod1]
+        instance.getPod( podName1 ) == pod2
+        instance.getPod( podName2 ) == pod1
+        instance.containsPod( podName1 )
+        instance.containsPod( podName2 )
+
+        when:
+        instance.removePod( podName1 )
+
+        then:
+        instance.getPods() == [(podName2): pod1 ]
+        !instance.containsPod( podName1 )
+        instance.containsPod( podName2 )
+
+    }
+
+    def "Retrieve non existent deployment, throws ResourceNotFoundException"()
+    {
+        when:
+        instance.getDeployment( "blah" )
+
+        then:
+        thrown ResourceNotFoundException
+    }
+
+    def "Remove non existent deployment, throws ResourceNotFoundException"()
+    {
+        when:
+        instance.removeDeployment( "blah" )
+
+        then:
+        thrown ResourceNotFoundException
+    }
+
+
+    def "Add deployment, retrieve, modify, retrieve, remove."()
+    {
+        when:
+        instance.putDeployment( deploymentName1, deployment1 )
+
+        then:
+        instance.getDeployments() == [(deploymentName1): deployment1]
+        instance.getDeployment( deploymentName1 ) == deployment1
+        instance.containsDeployment( deploymentName1 )
+        !instance.containsDeployment( deploymentName2 )
+
+        when:
+        instance.putDeployment( deploymentName2, deployment2 )
+
+        then:
+        instance.getDeployments() == [(deploymentName1): deployment1, (deploymentName2): deployment2]
+        instance.getDeployment( deploymentName1 ) == deployment1
+        instance.getDeployment( deploymentName2 ) == deployment2
+        instance.containsDeployment( deploymentName1 )
+        instance.containsDeployment( deploymentName2 )
+
+        when:
+        instance.putDeployment( deploymentName1, deployment2 )
+        instance.putDeployment( deploymentName2, deployment1 )
+
+        then:
+        instance.getDeployments() == [(deploymentName1): deployment2, (deploymentName2): deployment1]
+        instance.getDeployment( deploymentName1 ) == deployment2
+        instance.getDeployment( deploymentName2 ) == deployment1
+        instance.containsDeployment( deploymentName1 )
+        instance.containsDeployment( deploymentName2 )
+
+        when:
+        instance.removeDeployment( deploymentName1 )
+
+        then:
+        instance.getDeployments() == [(deploymentName2): deployment1 ]
+        !instance.containsDeployment( deploymentName1 )
+        instance.containsDeployment( deploymentName2 )
+
+    }
+
+    def "Retrieve non existent deployment pods, throws ResourceNotFoundException"()
+    {
+        when:
+        instance.getPodsForDeployment( "blah" )
+
+        then:
+        thrown ResourceNotFoundException
+    }
+
+    def "Remove non existent deployment pods, throws ResourceNotFoundException"()
+    {
+        when:
+        instance.removePodsForDeployment( "blah" )
+
+        then:
+        thrown ResourceNotFoundException
+    }
+
+
+    def "Add deployment pods, retrieve, modify, retrieve, remove."()
+    {
+        when:
+        instance.putPodsForDeployment( deploymentName1, deployment1Pods )
+
+        then:
+        instance.getPodsForDeployments() == [(deploymentName1): deployment1Pods]
+        instance.getPodsForDeployment( deploymentName1 ) == deployment1Pods
+        instance.containsPodsForDeployment( deploymentName1 )
+        !instance.containsPodsForDeployment( deploymentName2 )
+
+        when:
+        instance.putPodsForDeployment( deploymentName2, deployment2Pods )
+
+        then:
+        instance.getPodsForDeployments() == [(deploymentName1): deployment1Pods, (deploymentName2): deployment2Pods]
+        instance.getPodsForDeployment( deploymentName1 ) == deployment1Pods
+        instance.getPodsForDeployment( deploymentName2 ) == deployment2Pods
+        instance.containsPodsForDeployment( deploymentName1 )
+        instance.containsPodsForDeployment( deploymentName2 )
+
+        when:
+        instance.putPodsForDeployment( deploymentName1, deployment2Pods )
+        instance.putPodsForDeployment( deploymentName2, deployment1Pods )
+
+        then:
+        instance.getPodsForDeployments() == [(deploymentName1): deployment2Pods, (deploymentName2): deployment1Pods]
+        instance.getPodsForDeployment( deploymentName1 ) == deployment2Pods
+        instance.getPodsForDeployment( deploymentName2 ) == deployment1Pods
+        instance.containsPodsForDeployment( deploymentName1 )
+        instance.containsPodsForDeployment( deploymentName2 )
+
+        when:
+        instance.removePodsForDeployment( deploymentName1 )
+
+        then:
+        instance.getPodsForDeployments() == [(deploymentName2): deployment1Pods ]
+        !instance.containsPodsForDeployment( deploymentName1 )
+        instance.containsPodsForDeployment( deploymentName2 )
+    }
+
+    def "Retrieve non existent service, throws ResourceNotFoundException"()
+    {
+        when:
+        instance.getService( "blah" )
+
+        then:
+        thrown ResourceNotFoundException
+    }
+
+    def "Remove non existent Service, throws ResourceNotFoundException"()
+    {
+        when:
+        instance.removeService( "blah" )
+
+        then:
+        thrown ResourceNotFoundException
+    }
+
+    def "Add services, retrieve, modify, retrieve, remove."()
+    {
+        when:
+        instance.putService( serviceName1, service1 )
+
+        then:
+        instance.getServices() == [(serviceName1): service1]
+        instance.getService( serviceName1 ) == service1
+        instance.containsService( serviceName1 )
+        !instance.containsService( serviceName2 )
+
+        when:
+        instance.putService( serviceName2, service2 )
+
+        then:
+        instance.getServices() == [(serviceName1): service1, (serviceName2): service2]
+        instance.getService( serviceName1 ) == service1
+        instance.getService( serviceName2 ) == service2
+        instance.containsService( serviceName1 )
+        instance.containsService( serviceName2 )
+
+        when:
+        instance.putService( serviceName1, service2 )
+        instance.putService( serviceName2, service1 )
+
+        then:
+        instance.getServices() == [(serviceName1): service2, (serviceName2): service1]
+        instance.getService( serviceName1 ) == service2
+        instance.getService( serviceName2 ) == service1
+        instance.containsService( serviceName1 )
+        instance.containsService( serviceName2 )
+
+        when:
+        instance.removeService( serviceName1 )
+
+        then:
+        instance.getServices() == [(serviceName2): service1 ]
+        !instance.containsService( serviceName1 )
+        instance.containsService( serviceName2 )
+    }
+
+    def "Put all pods."()
+    {
+        given:
+        Map<String, Pod> pods = [(podName1): pod1, (podName2): pod2 ]
+
+        when:
+        instance.putPods( pods )
+
+        then:
+        instance.getPods(  ) == pods
+    }
+
+    def "Put all deployments."()
+    {
+        given:
+        Map<String, Deployment> deployments = [(deploymentName1): deployment1, (deploymentName2): deployment2 ]
+
+        when:
+        instance.putDeployments( deployments )
+
+        then:
+        instance.getDeployments(  ) == deployments
+    }
+
+    def "Put all deployment pods."()
+    {
+        given:
+        Map<String, List<Pod>> deploymentPods = [(deploymentName1): deployment1Pods, (deploymentName2): deployment2Pods ]
+
+        when:
+        instance.putPodsForDeployments( deploymentPods )
+
+        then:
+        instance.getPodsForDeployments(  ) == deploymentPods
+    }
+
+    def "Put all services."()
+    {
+        given:
+        Map<String, Service> services = [(serviceName1): service1,(serviceName2): service2]
+
+        when:
+        instance.putServices( services )
+
+        then:
+        instance.getServices() == services
+    }
+
+    def "Put and Get all init probes."()
+    {
+        given:
+        Map<String, ProvisioningProbe> probes = ["p1": {-> return false}, "p2": {-> return true} ]
+
+        when:
+        instance.putProvisioningProbes( probes )
+
+        then:
+        instance.getProvisioningProbes( ) == probes
+    }
+}

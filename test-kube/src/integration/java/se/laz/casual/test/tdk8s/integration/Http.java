@@ -1,0 +1,32 @@
+/*
+ * Copyright (c) 2025, The casual project. All rights reserved.
+ *
+ * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
+ */
+
+package se.laz.casual.test.tdk8s.integration;
+
+import se.laz.casual.test.tdk8s.connection.KubeConnection;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+public class Http
+{
+    public static HttpResponse<String> httpGet( KubeConnection connection ) throws IOException, InterruptedException
+    {
+        String host = connection.getHostName();
+        int port = connection.getPort();
+
+        HttpClient httpClient = HttpClient.newBuilder(  ).build(  );
+        HttpRequest request = HttpRequest.newBuilder( )
+                .uri( URI.create( "http://" + host + ":" + port +"/" ) )
+                .GET( )
+                .build(  );
+
+        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+    }
+}
