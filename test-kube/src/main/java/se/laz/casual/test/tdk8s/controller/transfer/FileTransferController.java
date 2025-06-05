@@ -42,11 +42,11 @@ public interface FileTransferController
      *     Note: If the resource has multiple pods associated the first is used.
      * </p>
      *
-     * @param pod to which to upload.
+     * @param resource to which to upload.
      * @param source file on the local filesystem to upload.
      * @param destination file on the resource to which to save the upload.
      * @return if the operation was successful.
      * @throws ResourceNotFoundException if the resource was not found.
      */
-    boolean upload( String pod, String source, Path destination );
+    boolean upload( String resource, String source, Path destination );
 }

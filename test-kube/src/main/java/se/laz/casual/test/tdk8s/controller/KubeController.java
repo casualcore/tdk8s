@@ -34,6 +34,18 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
+import static se.laz.casual.test.tdk8s.controller.ControllerParameterValidator.validateConnection;
+import static se.laz.casual.test.tdk8s.controller.ControllerParameterValidator.validateDownload;
+import static se.laz.casual.test.tdk8s.controller.ControllerParameterValidator.validateExecuteCommand;
+import static se.laz.casual.test.tdk8s.controller.ControllerParameterValidator.validateExecuteCommandAsync;
+import static se.laz.casual.test.tdk8s.controller.ControllerParameterValidator.validateGetLog;
+import static se.laz.casual.test.tdk8s.controller.ControllerParameterValidator.validateGetLogSince;
+import static se.laz.casual.test.tdk8s.controller.ControllerParameterValidator.validateGetLogTail;
+import static se.laz.casual.test.tdk8s.controller.ControllerParameterValidator.validatePortForwardConnection;
+import static se.laz.casual.test.tdk8s.controller.ControllerParameterValidator.validateScale;
+import static se.laz.casual.test.tdk8s.controller.ControllerParameterValidator.validateScaleAsync;
+import static se.laz.casual.test.tdk8s.controller.ControllerParameterValidator.validateUpload;
+
 /**
  * Controller facade, delegating to more specialised controllers to perform the actual operations.
  */
@@ -95,12 +107,14 @@ public class KubeController implements ProvisioningController, ConnectionControl
     @Override
     public void scale( String resource, int replicas )
     {
+        validateScale( resource, replicas );
         provisioningController.scale( resource, replicas );
     }
 
     @Override
     public CompletableFuture<Void> scaleAsync( String resource, int replicas )
     {
+        validateScaleAsync( resource, replicas );
         return provisioningController.scaleAsync( resource, replicas );
     }
 
@@ -109,12 +123,14 @@ public class KubeController implements ProvisioningController, ConnectionControl
     @Override
     public KubeConnection getConnection( String service, int targetPort )
     {
+        validateConnection( service, targetPort );
         return connectionController.getConnection( service, targetPort );
     }
 
     @Override
     public KubeConnection getPortForwardConnection( String resource, int targetPort )
     {
+        validatePortForwardConnection( resource, targetPort );
         return connectionController.getPortForwardConnection( resource, targetPort );
     }
 
@@ -123,12 +139,14 @@ public class KubeController implements ProvisioningController, ConnectionControl
     @Override
     public ExecResult executeCommand( String resource, String... command )
     {
+        validateExecuteCommand( resource, command );
         return this.execController.executeCommand( resource, command );
     }
 
     @Override
     public CompletableFuture<ExecResult> executeCommandAsync( String resource, String... command )
     {
+        validateExecuteCommandAsync( resource, command );
         return this.execController.executeCommandAsync( resource, command );
     }
 
@@ -137,18 +155,21 @@ public class KubeController implements ProvisioningController, ConnectionControl
     @Override
     public String getLog( String resource )
     {
+        validateGetLog( resource );
         return this.logController.getLog( resource );
     }
 
     @Override
     public String getLogTail( String resource, int lines )
     {
+        validateGetLogTail( resource, lines );
         return this.logController.getLogTail( resource, lines );
     }
 
     @Override
     public String getLogSince( String resource, String sinceTime )
     {
+        validateGetLogSince( resource, sinceTime );
         return this.logController.getLogSince( resource, sinceTime );
     }
 
@@ -157,13 +178,15 @@ public class KubeController implements ProvisioningController, ConnectionControl
     @Override
     public boolean download( String resource, String source, Path destination )
     {
+        validateDownload( resource, source, destination );
         return this.fileTransferController.download( resource, source, destination );
     }
 
     @Override
-    public boolean upload( String pod, String source, Path destination )
+    public boolean upload( String resource, String source, Path destination )
     {
-        return this.fileTransferController.upload( pod, source, destination );
+        validateUpload( resource, source, destination );
+        return this.fileTransferController.upload( resource, source, destination );
     }
 
     public static Builder newBuilder()
