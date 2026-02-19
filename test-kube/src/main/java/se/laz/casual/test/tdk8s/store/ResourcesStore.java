@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2025, The casual project. All rights reserved.
+ * Copyright (c) 2025 - 2026, The casual project. All rights reserved.
  *
  * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
  */
 
 package se.laz.casual.test.tdk8s.store;
 
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
@@ -24,6 +25,7 @@ public class ResourcesStore
     private final DeploymentPodsStore deploymentPodsStore;
     private final ServiceStore serviceStore;
     private final ProvisioningProbeStore provisioningProbeStore;
+    private final ConfigMapStore configMapStore;
 
     public ResourcesStore()
     {
@@ -32,6 +34,7 @@ public class ResourcesStore
         this.deploymentPodsStore = new DeploymentPodsStore();
         this.serviceStore = new ServiceStore();
         this.provisioningProbeStore = new ProvisioningProbeStore();
+        this.configMapStore = new ConfigMapStore();
     }
 
     /**
@@ -293,6 +296,71 @@ public class ResourcesStore
     public Service removeService( String name )
     {
         return this.serviceStore.remove( name );
+    }
+
+    /**
+     * Get a ConfigMap by name.
+     *
+     * @param name of the ConfigMap.
+     * @return stored ConfigMap
+     * @throws ResourceNotFoundException if ConfigMap not stored.
+     */
+    public ConfigMap getConfigMap( String name )
+    {
+        return this.configMapStore.get( name );
+    }
+
+    /**
+     * Get all stored ConfigMaps.
+     *
+     * @return map of ConfigMaps stored.
+     */
+    public Map<String,ConfigMap> getConfigMaps( )
+    {
+        return this.configMapStore.getAll();
+    }
+
+    /**
+     * Check if the ConfigMap with name is stored.
+     *
+     * @param name of the ConfigMap.
+     * @return if named ConfigMap is stored.
+     */
+    public boolean containsConfigMap( String name )
+    {
+        return this.configMapStore.contains( name );
+    }
+
+    /**
+     * Store a ConfigMap by name.
+     * @param name of the ConfigMap to store.
+     * @param configMap to store.
+     */
+    public void putConfigMap( String name, ConfigMap configMap )
+    {
+        this.configMapStore.put( name, configMap );
+    }
+
+    /**
+     * Store all ConfigMaps provided.
+     *
+     * @param configMaps to store.
+     */
+    public void putConfigMaps( Map<String, ConfigMap> configMaps )
+    {
+        this.configMapStore.putAll( configMaps );
+    }
+
+    /**
+     * Remove ConfigMap by name.
+     *
+     * @param name of ConfigMap to remove.
+     * @return the removed ConfigMap.
+     * @throws ResourceNotFoundException if ConfigMap is not stored.
+     */
+    public ConfigMap removeConfigMap( String name )
+    {
+        return this.configMapStore.remove( name );
     }
 
     /**

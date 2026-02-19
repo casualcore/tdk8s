@@ -271,6 +271,7 @@ Managed Resources are stored within the `TestKube` resource store which can be a
 Pod p = instance.getResourcesStore().getPod( "my_pod_alias" );
 Service s = instance.getResourcesStore().getService( "my_service_alias" );
 Deployment d = instance.getResourcesStore().getDeployment( "my_deployment_alias" );
+ConfigMap c = instance.getResourcesStore().getConfigMap( "my_config_map_alias" );
 ```
 
 When referring to `k8s` resources by name, `tdk8s` will initially look within the `ResourcesStore`. 

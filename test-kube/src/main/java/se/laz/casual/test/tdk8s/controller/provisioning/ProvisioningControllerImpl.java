@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, The casual project. All rights reserved.
+ * Copyright (c) 2025 - 2026, The casual project. All rights reserved.
  *
  * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
  */
@@ -25,6 +25,7 @@ public class ProvisioningControllerImpl implements ProvisioningController
     private final ProvisioningDeploymentController provisioningDeploymentController;
     private final ProvisioningPodController provisioningPodController;
     private final ProvisioningServiceController provisioningServiceController;
+    private final ProvisioningConfigMapController provisioningConfigMapController;
 
     public ProvisioningControllerImpl( ProvisioningProbeController provisioningProbeController, KubernetesClient client, ResourcesStore resourcesStore, ResourceLookupController lookupController, String labelValue )
     {
@@ -34,6 +35,7 @@ public class ProvisioningControllerImpl implements ProvisioningController
         this.provisioningDeploymentController = new ProvisioningDeploymentController( client, resourcesStore, lookupController, labelValue );
         this.provisioningPodController = new ProvisioningPodController( client, resourcesStore, labelValue );
         this.provisioningServiceController = new ProvisioningServiceController( client, resourcesStore, labelValue );
+        this.provisioningConfigMapController = new ProvisioningConfigMapController( client, resourcesStore, labelValue );
     }
 
     @Override
@@ -46,6 +48,7 @@ public class ProvisioningControllerImpl implements ProvisioningController
     @Override
     public void initAsync()
     {
+        this.provisioningConfigMapController.initAsync();
         this.provisioningDeploymentController.initAsync();
         this.provisioningPodController.initAsync();
         this.provisioningServiceController.initAsync();
@@ -54,6 +57,7 @@ public class ProvisioningControllerImpl implements ProvisioningController
     @Override
     public void waitUntilReady()
     {
+        this.provisioningConfigMapController.waitUntilReady();
         this.provisioningDeploymentController.waitUntilReady();
         this.provisioningPodController.waitUntilReady();
         this.provisioningServiceController.waitUntilReady();
@@ -74,6 +78,7 @@ public class ProvisioningControllerImpl implements ProvisioningController
         this.provisioningDeploymentController.destroyAsync();
         this.provisioningPodController.destroyAsync();
         this.provisioningServiceController.destroyAsync();
+        this.provisioningConfigMapController.destroyAsync();
     }
 
     @Override
@@ -82,6 +87,7 @@ public class ProvisioningControllerImpl implements ProvisioningController
         this.provisioningDeploymentController.waitUntilDestroyed();
         this.provisioningPodController.waitUntilDestroyed();
         this.provisioningServiceController.waitUntilDestroyed();
+        this.provisioningConfigMapController.waitUntilDestroyed();
     }
 
     @Override

@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2025, The casual project. All rights reserved.
+ * Copyright (c) 2025 - 2026, The casual project. All rights reserved.
  *
  * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
  */
 
 package se.laz.casual.test.tdk8s.controller.provisioning
 
+import io.fabric8.kubernetes.api.model.ConfigMap
+import io.fabric8.kubernetes.api.model.ConfigMapBuilder
 import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.api.model.PodBuilder
 import io.fabric8.kubernetes.api.model.Service
@@ -18,6 +20,7 @@ import io.fabric8.kubernetes.client.Watcher
 import io.fabric8.kubernetes.client.dsl.AppsAPIGroupDSL
 import io.fabric8.kubernetes.client.dsl.MixedOperation
 import io.fabric8.kubernetes.client.dsl.PodResource
+import io.fabric8.kubernetes.client.dsl.Resource
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource
 import io.fabric8.kubernetes.client.dsl.ServiceResource
 import se.laz.casual.test.tdk8s.TestKube
@@ -41,6 +44,7 @@ class ProvisioningControllerTest extends Specification
     String podName = "my-pod"
     String deploymentName = "my-deployment"
     String serviceName = "my-service"
+    String configMapName = "my-config-map"
 
     ProvisioningControllerImpl instance
 
@@ -77,6 +81,12 @@ class ProvisioningControllerTest extends Specification
             .endMetadata(  )
             .build(  )
 
+    ConfigMap initialConfigMap = new ConfigMapBuilder(  ).withNewMetadata(  ).withName( configMapName ).addToLabels("a", "b"  ).endMetadata(  ).build(  )
+    ConfigMap expectedConfigMap = initialConfigMap.edit(  ).editMetadata(  )
+            .addToLabels( TestKube.RESOURCE_LABEL_NAME, label )
+            .endMetadata(  )
+            .build(  )
+
     def setup()
     {
         instance = new ProvisioningControllerImpl( provisioningProbeController, client, store, lookupController, label )
@@ -85,6 +95,7 @@ class ProvisioningControllerTest extends Specification
     def "init applies managed resources in store with label applied and updates store, waits until resources are ready."()
     {
         given:
+        mockCreateConfigMap( expectedConfigMap )
         mockCreatePod( expectedPod )
         mockWaitForPod( expectedPod )
         mockCreateDeployment( expectedDeployment )
@@ -95,6 +106,7 @@ class ProvisioningControllerTest extends Specification
         store.putPod( podName, initialPod )
         store.putDeployment( deploymentName, initialDeployment )
         store.putService( serviceName, initialSvc )
+        store.putConfigMap( configMapName, initialConfigMap )
 
         when:
         instance.init(  )
@@ -104,11 +116,13 @@ class ProvisioningControllerTest extends Specification
         store.getDeployment( deploymentName ) == expectedDeployment
         store.getPodsForDeployment( deploymentName ) == [expectedPod]
         store.getService( serviceName ) == expectedSvc
+        store.getConfigMap( configMapName ) == expectedConfigMap
     }
 
     def "init async managed resources in store with label applied and updates store."()
     {
         given:
+        mockCreateConfigMap( expectedConfigMap )
         mockCreatePod( expectedPod )
         mockCreateDeployment( expectedDeployment )
         mockCreateService( expectedSvc )
@@ -116,6 +130,7 @@ class ProvisioningControllerTest extends Specification
         store.putPod( podName, initialPod )
         store.putDeployment( deploymentName, initialDeployment )
         store.putService( serviceName, initialSvc )
+        store.putConfigMap( configMapName, initialConfigMap )
 
         when:
         instance.initAsync(  )
@@ -124,6 +139,7 @@ class ProvisioningControllerTest extends Specification
         store.getPod( podName  ) == expectedPod
         store.getDeployment( deploymentName ) == expectedDeployment
         store.getService( serviceName ) == expectedSvc
+        store.getConfigMap( configMapName ) == expectedConfigMap
     }
 
     def "wait until ready, waits for pods and deployments in store."()
@@ -136,6 +152,7 @@ class ProvisioningControllerTest extends Specification
         store.putPod( podName, expectedPod )
         store.putDeployment( deploymentName, expectedDeployment )
         store.putService( serviceName, expectedSvc )
+        store.putConfigMap( configMapName, expectedConfigMap )
 
         when:
         instance.waitUntilReady(  )
@@ -167,11 +184,13 @@ class ProvisioningControllerTest extends Specification
         store.putDeployment( deploymentName, expectedDeployment )
         store.putPodsForDeployment( deploymentName, [expectedPod] )
         store.putService( serviceName, expectedSvc )
+        store.putConfigMap( configMapName, expectedConfigMap )
 
         mockDeleteDeployment( expectedDeployment )
         mockWatchDeleteDeploymentPods( deploymentName, 1 )
         mockDeletePod( expectedPod )
         mockDeleteService( expectedSvc )
+        mockDeleteConfigMap( expectedConfigMap )
 
         when:
         instance.destroy(  )
@@ -187,11 +206,13 @@ class ProvisioningControllerTest extends Specification
         store.putDeployment( deploymentName, expectedDeployment )
         store.putPodsForDeployment( deploymentName, [expectedPod] )
         store.putService( serviceName, expectedSvc )
+        store.putConfigMap( configMapName, expectedConfigMap )
 
         mockDeleteDeployment( expectedDeployment )
         mockWatchDeleteDeploymentPods( deploymentName, 2 )
         mockDeletePod( expectedPod )
         mockDeleteService( expectedSvc )
+        mockDeleteConfigMap( expectedConfigMap )
 
         when:
         instance.destroyAsync(  )
@@ -418,6 +439,27 @@ class ProvisioningControllerTest extends Specification
         return resource
     }
 
+    void mockCreateConfigMap( ConfigMap configMap )
+    {
+        Resource<ConfigMap> resource = mockConfigMapResource( configMap )
+        1* resource.serverSideApply(  ) >> configMap
+    }
+
+    MixedOperation mockClientConfigMaps( )
+    {
+        MixedOperation mo = Mock()
+        1* client.configMaps(  ) >> mo
+        return mo
+    }
+
+    Resource<ConfigMap> mockConfigMapResource( ConfigMap configMap )
+    {
+        MixedOperation mo = mockClientConfigMaps(  )
+        Resource<ConfigMap> resource = Mock()
+        1* mo.resource( configMap ) >> resource
+        return resource
+    }
+
     PodResource mockWatchDeletePod( Pod pod )
     {
         PodResource resource = mockPodResource( pod )
@@ -479,6 +521,18 @@ class ProvisioningControllerTest extends Specification
         }
         1* watch.close()
         1* sr.delete()
+    }
+
+    void mockDeleteConfigMap( ConfigMap configMap )
+    {
+        Resource<ConfigMap> cr = mockConfigMapResource( configMap )
+        Watch watch = Mock( )
+        1* cr.watch( _ ) >> { Watcher watcher ->
+            watcher.eventReceived( Watcher.Action.DELETED, configMap )
+            return watch
+        }
+        1* watch.close()
+        1* cr.delete()
     }
 
 }

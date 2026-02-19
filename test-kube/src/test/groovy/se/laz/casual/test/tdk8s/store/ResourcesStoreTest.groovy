@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2025, The casual project. All rights reserved.
+ * Copyright (c) 2025 - 2026, The casual project. All rights reserved.
  *
  * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
  */
 
 package se.laz.casual.test.tdk8s.store
 
+import io.fabric8.kubernetes.api.model.ConfigMap
+import io.fabric8.kubernetes.api.model.ConfigMapBuilder
 import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.api.model.PodBuilder
 import io.fabric8.kubernetes.api.model.Service
@@ -86,6 +88,26 @@ class ResourcesStoreTest extends Specification
             .endMetadata(  )
             .build()
 
+    @Shared
+    String configMapName1 = "single-config-map-1"
+
+    @Shared
+    ConfigMap configMap1  = new ConfigMapBuilder(  )
+            .withNewMetadata(  )
+            .withName( configMapName1 )
+            .endMetadata(  )
+            .build(  )
+
+    @Shared
+    String configMapName2 = "single-config-map-2"
+
+    @Shared
+    ConfigMap configMap2  = new ConfigMapBuilder(  )
+            .withNewMetadata(  )
+            .withName( configMapName2 )
+            .endMetadata(  )
+            .build(  )
+
     def setup()
     {
         instance = new ResourcesStore()
@@ -98,6 +120,7 @@ class ResourcesStoreTest extends Specification
         instance.getDeployments() == [:]
         instance.getServices() == [:]
         instance.getProvisioningProbes() == [:]
+        instance.getConfigMaps() == [:]
     }
 
     def "Retrieve non existent pod, throws ResourceNotFoundException"()
@@ -341,6 +364,67 @@ class ResourcesStoreTest extends Specification
         instance.containsService( serviceName2 )
     }
 
+    def "Retrieve non existent configmap, throws ResourceNotFoundException"()
+    {
+        when:
+        instance.getConfigMap( "blah" )
+
+        then:
+        thrown ResourceNotFoundException
+    }
+
+    def "Remove non existent configmap, throws ResourceNotFoundException"()
+    {
+        when:
+        instance.removeConfigMap( "blah" )
+
+        then:
+        thrown ResourceNotFoundException
+    }
+
+
+    def "Add configmap, retrieve, modify, retrieve, remove."()
+    {
+        when:
+        instance.putConfigMap( configMapName1, configMap1 )
+
+        then:
+        instance.getConfigMaps() == [(configMapName1): configMap1]
+        instance.getConfigMap( configMapName1 ) == configMap1
+        instance.containsConfigMap( configMapName1 )
+        !instance.containsConfigMap( configMapName2 )
+
+        when:
+        instance.putConfigMap( configMapName2, configMap2 )
+
+        then:
+        instance.getConfigMaps() == [(configMapName1): configMap1, (configMapName2): configMap2]
+        instance.getConfigMap( configMapName1 ) == configMap1
+        instance.getConfigMap( configMapName2 ) == configMap2
+        instance.containsConfigMap( configMapName1 )
+        instance.containsConfigMap( configMapName2 )
+
+        when:
+        instance.putConfigMap( configMapName1, configMap2 )
+        instance.putConfigMap( configMapName2, configMap1 )
+
+        then:
+        instance.getConfigMaps() == [(configMapName1): configMap2, (configMapName2): configMap1]
+        instance.getConfigMap( configMapName1 ) == configMap2
+        instance.getConfigMap( configMapName2 ) == configMap1
+        instance.containsConfigMap( configMapName1 )
+        instance.containsConfigMap( configMapName2 )
+
+        when:
+        instance.removeConfigMap( configMapName1 )
+
+        then:
+        instance.getConfigMaps() == [(configMapName2): configMap1 ]
+        !instance.containsConfigMap( configMapName1 )
+        instance.containsConfigMap( configMapName2 )
+
+    }
+
     def "Put all pods."()
     {
         given:
@@ -387,6 +471,18 @@ class ResourcesStoreTest extends Specification
 
         then:
         instance.getServices() == services
+    }
+
+    def "Put all configmaps."()
+    {
+        given:
+        Map<String, ConfigMap> maps = [(configMapName1): configMap1, (configMapName2): configMap2 ]
+
+        when:
+        instance.putConfigMaps( maps )
+
+        then:
+        instance.getConfigMaps(  ) == maps
     }
 
     def "Put and Get all init probes."()
