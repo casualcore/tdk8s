@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2025, The casual project. All rights reserved.
+ * Copyright (c) 2025 - 2026, The casual project. All rights reserved.
  *
  * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
  */
 
 package se.laz.casual.test.tdk8s;
 
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
@@ -45,8 +46,8 @@ import static java.lang.System.Logger.Level.DEBUG;
  *      objects.
  * </p>
  * <p>
- *      Note: Currently only Deployment, Pod and Service resources can be managed, though additional
- *      resources should be added later e.g. ConfigMap, PVC.
+ *      Note: Currently only Deployment, Pod, Service and ConfigMap resources can be managed, though
+ *      additional resources should be added later e.g. PVC.
  * </p>
  * <p>
  *      All managed resources are labeled with a unique label, this label can be configured using the
@@ -146,6 +147,17 @@ public class TestKube implements Provisionable, Connectable
         return this.resourcesStore.getServices();
     }
 
+
+    /**
+     * Gets the ConfigMaps managed by this TestKube.
+     *
+     * @return map of the managed config maps.
+     */
+    public Map<String, ConfigMap> getConfigMaps()
+    {
+        return this.resourcesStore.getConfigMaps();
+    }
+
     /**
      * Gets the resources store for this TesTKube.
      *
@@ -221,6 +233,7 @@ public class TestKube implements Provisionable, Connectable
         private Map<String, Service> services = new HashMap<>();
         private Map<String, Deployment> deployments = new HashMap<>();
         private Map<String, ProvisioningProbe> initProbes = new HashMap<>();
+        private Map<String, ConfigMap> configMaps = new HashMap<>();
         private KubeController kubeController;
         private ResourcesStore resourcesStore;
 
@@ -301,6 +314,22 @@ public class TestKube implements Provisionable, Connectable
         }
 
         /**
+         * Add a ConfigMap to be managed.
+         * <p>
+         *      The alias provided can be used to retrieve and does not have to match
+         *      the actual name of ConfigMap provided.
+         * </p>
+         * @param alias of the ConfigMap.
+         * @param configMap to be managed.
+         * @return the builder.
+         */
+        public Builder addConfigMap( String alias, ConfigMap configMap )
+        {
+            this.configMaps.put( alias, configMap );
+            return this;
+        }
+
+        /**
          * Add a custom provisioning probe to be executed at the end of the initialisation process.
          * <p>
          *      Probes are executed repeatedly until they succeed (return true) or a timeout has occurred.
@@ -366,6 +395,7 @@ public class TestKube implements Provisionable, Connectable
             this.resourcesStore.putDeployments( deployments );
             this.resourcesStore.putServices( services );
             this.resourcesStore.putProvisioningProbes( initProbes );
+            this.resourcesStore.putConfigMaps( configMaps );
 
             return new TestKube( this );
         }

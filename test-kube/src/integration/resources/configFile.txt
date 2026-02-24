@@ -1,0 +1,1 @@
+this is the contents of the config file that is to be mounted onto the pod.

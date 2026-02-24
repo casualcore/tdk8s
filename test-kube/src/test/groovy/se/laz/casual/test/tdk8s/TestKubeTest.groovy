@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2025, The casual project. All rights reserved.
+ * Copyright (c) 2025 - 2026, The casual project. All rights reserved.
  *
  * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
  */
 
 package se.laz.casual.test.tdk8s
 
+import io.fabric8.kubernetes.api.model.ConfigMap
+import io.fabric8.kubernetes.api.model.ConfigMapBuilder
 import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.api.model.PodBuilder
 import io.fabric8.kubernetes.api.model.Service
@@ -48,6 +50,16 @@ class TestKubeTest extends Specification
     Deployment deployment = new DeploymentBuilder(  )
         .withNewMetadata(  )
             .withName( deploymentName )
+        .endMetadata(  )
+            .build(  )
+
+    @Shared
+    String configMapName = "single-config-map"
+
+    @Shared
+    ConfigMap configMap  = new ConfigMapBuilder(  )
+        .withNewMetadata(  )
+            .withName( configMapName )
         .endMetadata(  )
             .build(  )
 
@@ -125,6 +137,17 @@ class TestKubeTest extends Specification
 
         then:
         instance.getDeployments() == [(deploymentName): deployment ]
+    }
+
+    def "Create TestKube with a single configmap."()
+    {
+        when:
+        instance = TestKube.newBuilder()
+            .addConfigMap( configMapName, configMap )
+            .build()
+
+        then:
+        instance.getConfigMaps() == [(configMapName): configMap ]
     }
 
     def "ResourcesStore accessible."()
