@@ -125,6 +125,21 @@ class VolumeMounterTest extends Specification
         thrown ResourceNotFoundException
     }
 
+    def "Add pod volume with nulls, throws NullPointerException."()
+    {
+        when:
+        VolumeMounter.mount( pod as Pod, mount )
+
+        then:
+        thrown NullPointerException
+
+        where:
+        pod                             | mount
+        NginxResources.SIMPLE_NGINX_POD | null
+        null                            | FileMount.newBuilder().configMap( map ).mountPath( "/tmp/t.log" ).build()
+        null                            | null
+    }
+
     def "Add deployment volume mount for configmap."()
     {
         given:
@@ -227,6 +242,21 @@ class VolumeMounterTest extends Specification
 
         then:
         thrown ResourceNotFoundException
+    }
+
+    def "Add deployment volume with nulls, throws NullPointerException."()
+    {
+        when:
+        VolumeMounter.mount( deployment as Deployment, mount )
+
+        then:
+        thrown NullPointerException
+
+        where:
+        deployment | mount
+        NginxResources.SIMPLE_NGINX_DEPLOYMENT | null
+        null                                   | FileMount.newBuilder().configMap( map ).mountPath( "/tmp/t.log" ).build()
+        null                                   | null
     }
 
 }
