@@ -180,7 +180,7 @@ public class TestKube implements Provisionable, Connectable
      *     <li>{@link KubeController#getLog(String)}</li>
      *     <li>{@link KubeController#executeCommand(String, String...)}</li>
      *     <li>{@link KubeController#download(String, String, Path)}</li>
-     *     <li>{@link KubeController#upload(String, String, Path)}</li>
+     *     <li>{@link KubeController#upload(String, Path, String)}</li>
      * </ul>
      * </p>
      *

@@ -361,8 +361,8 @@ Both methods return a `boolean` value indicating if the operations was successfu
 
 Examples:
 ```java
-boolean downloadSuccess = instance.getController().download( podAlias, "/tmp/podfile", localDstFile.toPath() );
-boolean uploadSuccess = instance.getController().upload( podAlias, "./localfile.txt", podFile.toPath() );
+boolean downloadSuccess = instance.getController().download( podAlias, "/tmp/podfile.txt", Paths.get("./localfile.txt") );
+boolean uploadSuccess = instance.getController().upload( podAlias, Paths.get("./localfile.txt"), "/tmp/podFile.txt" );
 ```
 
 ### Connect via `port-forward`
@@ -510,6 +510,72 @@ are clearly identifiable, though if you wish to control this value you can also 
 ```java
 TestKube.newBuilder().label("my value").build();
 ```
+
+#### Helpers
+
+It is recommended to create helper methods to simplify the creation of `k8s` resources as you require for your tests.
+Some simple helpers are also provided in the `se.laz.casual.test.tdk8s.resources` package for common operations:
+
+* Updating the image used by a `Pod` or `Deployment` container.
+* Mount a local file on a `Pod` or `Deployment` container.
+
+##### Update Container Images
+
+If you want to reuse an existing definition of a `Pod` or `Deployment`, but with different versions of a container image.
+For example, this can be useful for running regression and compatability tests with different versions of backend dependencies.
+
+Define your `Pod` or `Deployment` as normal and then update the image using the `ImageUpdater` prior to adding it to the `TestKube`.
+
+```java
+Pod pod = NginxResources.SIMPLE_NGINX_POD;
+// set pod image on first container.
+pod = ImageUpdater.setImage( pod, "new-image:0.0.3" );
+// set pod image on named container.
+pod = ImageUpdater.setImage( pod, "new-image:0.0.3", "nginx" );
+
+Deployment deployment = NginxResources.SIMPLE_NGINX_DEPLOYMENT;
+// set deployment image on first container.
+deployment = ImageUpdater.setImage( deployment, "new-image:0.0.3" );
+// set deployment image on named container.
+deployment = ImageUpdater.setImage( deployment, "new-image:0.0.3", "nginx" );
+```
+
+##### Mount Local File
+
+If you need to test different configurations of a `Pod` or `Deployment` which requires changing a container file.
+For example, this can be useful for running tests with different features enabled or disabled without needing to
+create a new docker image for each permutation.
+
+Create a local file containing the desired configuration and create a `ConfigMap` from this file.
+
+Add this `ConfigMap` to the `TestKube` so that it is also a managed `k8s` resource.
+
+Define your `Pod` or `Deployment` as normal and then update their definition to mount the `ConfigMap` as a file, 
+prior to adding their definition to the `TestKube`.
+
+```java
+Pod pod = NginxResources.SIMPLE_NGINX_POD;
+
+// Define your configuration file as a local test file resource.
+Path configFile = Paths.get( "src/integration/resources/config.toml");
+// Create a ConfigMap from the local file.
+ConfigMap map = ConfigMapFactory.fromFile( "my-cm", configFile );
+
+// Define how to mount the file from the ConfigMap.
+FileMount mount = FileMount.newBuilder().configMap( map ).mountPath( "/data/config.toml" ).build();
+
+// Update the resource by mounting the FileMount.
+Pod updatedPod = VolumeMounter.mount( pod, mount );
+
+// Add the updated Pod and the ConfigMap to the TestKube so it is a managed resource to ensure correct provisioning.
+instance = TestKube.newBuilder()   
+        .addConfigMap( "my-cm-alias", map )
+        .addPod( "my-pod-alias", updatedPod )
+        .build();
+
+instance.init();
+```
+For a working example of this see [ConfigMap Mount Integration Test](./test-kube/src/integration/groovy/se/laz/casual/test/tdk8s/integration/ConfigMapMountInt.groovy).
 
 #### Grouping
 

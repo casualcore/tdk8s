@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, The casual project. All rights reserved.
+ * Copyright (c) 2025 - 2026, The casual project. All rights reserved.
  *
  * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
  */
@@ -92,9 +92,11 @@ public class ControllerParameterValidator
         validatePath( destination, DESTINATION );
     }
 
-    public static void validateUpload( String resource, String source, Path destination )
+    public static void validateUpload( String resource, Path source, String destination )
     {
-        validateDownload( resource, source, destination );
+        validateString( resource, RESOURCE );
+        validatePath( source, SOURCE );
+        validateString( destination, DESTINATION );
     }
 
     private static void validateString( String value, String name )
