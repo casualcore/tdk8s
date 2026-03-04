@@ -11,16 +11,17 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import se.laz.casual.test.tdk8s.store.ResourceNotFoundException;
 
 import java.util.Objects;
+import java.util.function.IntSupplier;
 
 import static se.laz.casual.test.tdk8s.resources.ContainerFinder.findIndexOfContainerWithName;
 
 /**
- * Update images on different resources.
+ * Update container images on k8s resources.
  */
-public final class ContainerImageUpdater
+public final class ImageUpdater
 {
 
-    private ContainerImageUpdater()
+    private ImageUpdater()
     {
     }
 
@@ -33,8 +34,7 @@ public final class ContainerImageUpdater
      */
     public static Pod setImage( Pod pod, String image )
     {
-        Objects.requireNonNull( pod, "Pod is null." );
-        Objects.requireNonNull( image, "Image is null." );
+        validate( pod, image );
 
         return setImageOfContainerAtIndex( pod, image, 0 );
     }
@@ -50,15 +50,10 @@ public final class ContainerImageUpdater
      */
     public static Pod setImage( Pod pod, String image, String container )
     {
-        Objects.requireNonNull( pod, "Pod is null." );
-        Objects.requireNonNull( image, "Image is null." );
-        Objects.requireNonNull( container, "container is null." );
+        validate( pod, image );
 
-        int index = findIndexOfContainerWithName( pod, container );
-        if( index == -1 )
-        {
-            throw new ResourceNotFoundException( "Unable to find container with name: " + container );
-        }
+        int index = findValidContainer( container, ()-> findIndexOfContainerWithName( pod, container ) );
+
         return setImageOfContainerAtIndex( pod, image, index );
     }
 
@@ -71,11 +66,9 @@ public final class ContainerImageUpdater
      */
     public static Deployment setImage( Deployment deployment, String image )
     {
-        Objects.requireNonNull( deployment, "Deployment is null." );
-        Objects.requireNonNull( image, "Image is null." );
+        validate( deployment, image );
 
         return setImageOfContainerAtIndex( deployment, image, 0 );
-
     }
 
     /**
@@ -89,16 +82,29 @@ public final class ContainerImageUpdater
      */
     public static Deployment setImage( Deployment deployment, String image, String container )
     {
-        Objects.requireNonNull( deployment, "Deployment is null." );
+        validate( deployment, image );
+
+        int index = findValidContainer( container, ()-> findIndexOfContainerWithName( deployment, container ) );
+
+        return setImageOfContainerAtIndex( deployment, image, index );
+    }
+
+    private static void validate( Object resource, String image )
+    {
+        Objects.requireNonNull( resource, "Resource is null." );
         Objects.requireNonNull( image, "Image is null." );
+    }
+
+    private static int findValidContainer( String container, IntSupplier containerFinder )
+    {
         Objects.requireNonNull( container, "container is null." );
 
-        int index = findIndexOfContainerWithName( deployment, container );
+        int index = containerFinder.getAsInt();
         if( index == -1 )
         {
             throw new ResourceNotFoundException( "Unable to find container with name: " + container );
         }
-        return setImageOfContainerAtIndex( deployment, image, index );
+        return index;
     }
 
     private static Pod setImageOfContainerAtIndex( Pod pod, String image, int containerIndex )

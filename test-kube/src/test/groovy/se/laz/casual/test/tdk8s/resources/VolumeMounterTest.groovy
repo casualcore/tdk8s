@@ -7,13 +7,14 @@
 package se.laz.casual.test.tdk8s.resources
 
 import io.fabric8.kubernetes.api.model.ConfigMap
-import io.fabric8.kubernetes.api.model.ConfigMapBuilder
 import io.fabric8.kubernetes.api.model.Pod
+import io.fabric8.kubernetes.api.model.apps.Deployment
 import se.laz.casual.test.tdk8s.sample.NginxResources
+import se.laz.casual.test.tdk8s.store.ResourceNotFoundException
 import spock.lang.Shared
 import spock.lang.Specification
 
-import java.nio.file.Files
+import java.nio.file.Paths
 
 class VolumeMounterTest extends Specification
 {
@@ -21,21 +22,25 @@ class VolumeMounterTest extends Specification
     String mapName = "config-map-1"
 
     @Shared
-    ConfigMap map = new ConfigMapBuilder()
-            .withNewMetadata(  ).withName( mapName ).endMetadata(  )
-            .addToData( "test.txt", Files.readString( new File( "./src/test/resources/test.txt").toPath(  ) ) )
-            .build()
+    ConfigMap map = ConfigMapFactory.fromFile( mapName, Paths.get( "src/test/resources/test.txt") )
 
 
     def "Add pod volume mount for configmap."()
     {
         given:
-        String volumeName = "tdk8s-vol-0"
+        String volumeName = "tdk8s-vol-01"
+        String container = NginxResources.NGINX_CONTAINER_NAME
         String mountPath = "/data/test.txt"
         String subPath = "test.txt"
         Pod pod = NginxResources.SIMPLE_NGINX_POD
 
-        Pod expected = NginxResources.SIMPLE_NGINX_POD.edit(  )
+        FileMount mount = FileMount.newBuilder().configMap( map )
+                .mountPath( mountPath )
+                .container( container )
+                .volume( volumeName )
+                .build()
+
+        Pod expected = pod.edit(  )
                 .editSpec(  )
                 .addNewVolume(  )
                     .withName( volumeName )
@@ -54,53 +59,174 @@ class VolumeMounterTest extends Specification
                 .build(  )
 
         when:
-        Pod actual = new PodVolumeMounter( pod )
-                    .configMap( mapName )
-                    .name( volumeName )
-                    .mountPath( mountPath )
-                    .subPath( subPath )
-                .mount()
+        Pod actual = VolumeMounter.mount( pod, mount )
 
         then:
         actual == expected
     }
 
-    def "Add pod volume with defaults."()
+    def "Add pod volume mount without container name for configmap."()
     {
         given:
+        String volumeName = "tdk8s-vol-01"
+        String mountPath = "/data/test.txt"
+        String subPath = "test.txt"
+        Pod pod = NginxResources.SIMPLE_NGINX_POD
+
+        FileMount mount = FileMount.newBuilder().configMap( map )
+                .mountPath( mountPath )
+                .volume( volumeName )
+                .build()
+
+        Pod expected = pod.edit(  )
+                .editSpec(  )
+                .addNewVolume(  )
+                .withName( volumeName )
+                .withNewConfigMap(  )
+                .withName( mapName )
+                .endConfigMap(  )
+                .endVolume(  )
+                .editContainer( 0 )
+                .addNewVolumeMount(  )
+                .withName( volumeName )
+                .withMountPath( mountPath )
+                .withSubPath( subPath )
+                .endVolumeMount(  )
+                .endContainer(  )
+                .endSpec(  )
+                .build(  )
+
+        when:
+        Pod actual = VolumeMounter.mount( pod, mount )
+
+        then:
+        actual == expected
+    }
+
+    def "Add pod volume mount invalid container name, throws ResourceNotFound."()
+    {
+        given:
+        String volumeName = "tdk8s-vol-01"
+        String container = "invalid"
         String mountPath = "/data/test.txt"
 
         Pod pod = NginxResources.SIMPLE_NGINX_POD
 
-        when:
-        Pod actual = new PodVolumeMounter( pod )
-                .configMap( mapName )
+        FileMount mount = FileMount.newBuilder().configMap( map )
                 .mountPath( mountPath )
-            .mount()
+                .container( container )
+                .volume( volumeName )
+                .build()
+
+        when:
+        VolumeMounter.mount( pod, mount )
 
         then:
-        actual.getSpec(  ).getVolumes(  ).size(  ) == 1
-        actual.getSpec(  ).getContainers(  ).get( 0 ).getVolumeMounts(  ).size(  ) == 1
+        thrown ResourceNotFoundException
     }
 
-    def "Add volume, both pvc and configmap provided - fails."()
+    def "Add deployment volume mount for configmap."()
     {
         given:
-        VolumeMounter<?> instance = initial
-            .configMap( cm )
-            .persistentVolumeClaim( "other" )
-            .mountPath( mountPath )
+        String volumeName = "tdk8s-vol-0"
+        String container = NginxResources.NGINX_CONTAINER_NAME
+        String mountPath = "/data/test.txt"
+        String subPath = "test.txt"
+        Deployment deployment = NginxResources.SIMPLE_NGINX_DEPLOYMENT
+
+        FileMount mount = FileMount.newBuilder().configMap( map )
+                .mountPath( mountPath )
+                .container( container )
+                .volume( volumeName )
+                .build()
+
+        Deployment expected = deployment.edit(  )
+                .editSpec(  )
+                .editTemplate(  ).editSpec(  )
+                .addNewVolume(  )
+                .withName( volumeName )
+                .withNewConfigMap(  )
+                .withName( mapName )
+                .endConfigMap(  )
+                .endVolume(  )
+                .editContainer( 0 )
+                .addNewVolumeMount(  )
+                .withName( volumeName )
+                .withMountPath( mountPath )
+                .withSubPath( subPath )
+                .endVolumeMount(  )
+                .endContainer(  )
+                .endSpec(  )
+                .endTemplate(  ).endSpec(  )
+                .build(  )
 
         when:
-        instance.mount()
+        Deployment actual = VolumeMounter.mount( deployment, mount )
 
         then:
-        thrown IllegalStateException
+        actual == expected
+    }
 
-        where:
-        cm        | pvc    | mountPath | initial
-        "config1" | "pvc1" | "/data"   | new PodVolumeMounter( NginxResources.SIMPLE_NGINX_POD )
-        "config2" | "pvc2" | "/config" | new DeploymentVolumeMounter( NginxResources.SIMPLE_NGINX_DEPLOYMENT )
+    def "Add deployment volume mount without container name for configmap."()
+    {
+        given:
+        String volumeName = "tdk8s-vol-0"
+        String mountPath = "/data/test.txt"
+        String subPath = "test.txt"
+        Deployment deployment = NginxResources.SIMPLE_NGINX_DEPLOYMENT
+
+        FileMount mount = FileMount.newBuilder().configMap( map )
+                .mountPath( mountPath )
+                .volume( volumeName )
+                .build()
+
+        Deployment expected = deployment.edit(  )
+                .editSpec(  )
+                .editTemplate(  ).editSpec(  )
+                .addNewVolume(  )
+                .withName( volumeName )
+                .withNewConfigMap(  )
+                .withName( mapName )
+                .endConfigMap(  )
+                .endVolume(  )
+                .editContainer( 0 )
+                .addNewVolumeMount(  )
+                .withName( volumeName )
+                .withMountPath( mountPath )
+                .withSubPath( subPath )
+                .endVolumeMount(  )
+                .endContainer(  )
+                .endSpec(  )
+                .endTemplate(  ).endSpec(  )
+                .build(  )
+
+        when:
+        Deployment actual = VolumeMounter.mount( deployment, mount )
+
+        then:
+        actual == expected
+    }
+
+    def "Add pod volume mount invalid container name, throws ResourceNotFound."()
+    {
+        given:
+        String volumeName = "tdk8s-vol-01"
+        String container = "invalid"
+        String mountPath = "/data/test.txt"
+
+        Deployment deployment = NginxResources.SIMPLE_NGINX_DEPLOYMENT
+
+        FileMount mount = FileMount.newBuilder().configMap( map )
+                .mountPath( mountPath )
+                .container( container )
+                .volume( volumeName )
+                .build()
+
+        when:
+        VolumeMounter.mount( deployment, mount )
+
+        then:
+        thrown ResourceNotFoundException
     }
 
 }

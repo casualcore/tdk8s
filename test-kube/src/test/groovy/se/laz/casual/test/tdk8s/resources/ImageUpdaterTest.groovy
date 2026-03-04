@@ -12,7 +12,7 @@ import se.laz.casual.test.tdk8s.sample.NginxResources
 import se.laz.casual.test.tdk8s.store.ResourceNotFoundException
 import spock.lang.Specification
 
-class ContainerImageUpdaterTest extends Specification
+class ImageUpdaterTest extends Specification
 {
     def "Change pods first container image to the one provided"()
     {
@@ -24,7 +24,7 @@ class ContainerImageUpdaterTest extends Specification
                 .endContainer().endSpec().build()
 
         when:
-        Pod actual = ContainerImageUpdater.setImage( pod, image )
+        Pod actual = ImageUpdater.setImage( pod, image )
 
         then:
         actual == expected
@@ -54,7 +54,7 @@ class ContainerImageUpdaterTest extends Specification
                 .endContainer().endSpec().build()
 
         when:
-        Pod actual = ContainerImageUpdater.setImage( pod, image, "additional" )
+        Pod actual = ImageUpdater.setImage( pod, image, "additional" )
 
         then:
         actual == expected
@@ -80,7 +80,7 @@ class ContainerImageUpdaterTest extends Specification
                 .build()
 
         when:
-        Deployment actual = ContainerImageUpdater.setImage( deployment, image )
+        Deployment actual = ImageUpdater.setImage( deployment, image )
 
         then:
         actual == expected
@@ -116,7 +116,7 @@ class ContainerImageUpdaterTest extends Specification
                 .build()
 
         when:
-        Deployment actual = ContainerImageUpdater.setImage( deployment, image, "additional" )
+        Deployment actual = ImageUpdater.setImage( deployment, image, "additional" )
 
         then:
         actual == expected
@@ -133,7 +133,7 @@ class ContainerImageUpdaterTest extends Specification
     def "Change pod container image, container name doesn't exist"()
     {
         when:
-        ContainerImageUpdater.setImage( NginxResources.SIMPLE_NGINX_POD, "update", "invalid" )
+        ImageUpdater.setImage( NginxResources.SIMPLE_NGINX_POD, "update", "invalid" )
 
         then:
         thrown ResourceNotFoundException
@@ -142,7 +142,7 @@ class ContainerImageUpdaterTest extends Specification
     def "Change image pod nulls."()
     {
         when:
-        ContainerImageUpdater.setImage( pod as Pod, image )
+        ImageUpdater.setImage( pod as Pod, image )
 
         then:
         thrown NullPointerException
@@ -157,7 +157,7 @@ class ContainerImageUpdaterTest extends Specification
     def "Change image pod nulls."()
     {
         when:
-        ContainerImageUpdater.setImage( pod as Pod, image, container )
+        ImageUpdater.setImage( pod as Pod, image, container )
 
         then:
         thrown NullPointerException
@@ -173,7 +173,7 @@ class ContainerImageUpdaterTest extends Specification
     def "Change pod container image, container name doesn't exist"()
     {
         when:
-        ContainerImageUpdater.setImage( NginxResources.SIMPLE_NGINX_DEPLOYMENT, "update", "invalid" )
+        ImageUpdater.setImage( NginxResources.SIMPLE_NGINX_DEPLOYMENT, "update", "invalid" )
 
         then:
         thrown ResourceNotFoundException
@@ -182,7 +182,7 @@ class ContainerImageUpdaterTest extends Specification
     def "Change image deployment nulls."()
     {
         when:
-        ContainerImageUpdater.setImage( deployment as Deployment, image )
+        ImageUpdater.setImage( deployment as Deployment, image )
 
         then:
         thrown NullPointerException
@@ -197,7 +197,7 @@ class ContainerImageUpdaterTest extends Specification
     def "Change image deployment nulls."()
     {
         when:
-        ContainerImageUpdater.setImage( deployment as Deployment, image, container )
+        ImageUpdater.setImage( deployment as Deployment, image, container )
 
         then:
         thrown NullPointerException
