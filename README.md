@@ -361,8 +361,8 @@ Both methods return a `boolean` value indicating if the operations was successfu
 
 Examples:
 ```java
-boolean downloadSuccess = instance.getController().download( podAlias, "/tmp/podfile", localDstFile.toPath() );
-boolean uploadSuccess = instance.getController().upload( podAlias, "./localfile.txt", podFile.toPath() );
+boolean downloadSuccess = instance.getController().download( podAlias, "/tmp/podfile.txt", Paths.get("./localfile.txt") );
+boolean uploadSuccess = instance.getController().upload( podAlias, Paths.get("./localfile.txt"), "/tmp/podFile.txt" );
 ```
 
 ### Connect via `port-forward`

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, The casual project. All rights reserved.
+ * Copyright (c) 2025 - 2026, The casual project. All rights reserved.
  *
  * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
  */
@@ -342,20 +342,20 @@ class KubeControllerTest extends Specification
         FileTransferController fc = Mock()
         instance = newBuilder(  ).fileTransferController( fc ).build(  )
         String name = "my-pod"
-        String source = "./file.txt"
-        Path dest = Path.of( "dest.txt" )
+        String localFile = "./file.txt"
+        Path containerFile = Path.of( "dest.txt" )
 
         when:
-        instance.download( name, source, dest )
+        instance.download( name, localFile, containerFile )
 
         then:
-        1* fc.download( name, source, dest )
+        1* fc.download( name, localFile, containerFile )
 
         when:
-        instance.upload( name, source, dest )
+        instance.upload( name, containerFile, localFile )
 
         then:
-        1* fc.upload( name, source, dest )
+        1* fc.upload( name, containerFile, localFile )
     }
 
     def "File transfer controller validates parameters before delegates correctly."()
@@ -365,27 +365,27 @@ class KubeControllerTest extends Specification
         instance = newBuilder(  ).fileTransferController( fc ).build(  )
 
         when:
-        instance.download( name, source, dest )
+        instance.download( name, containerFile, localFile )
 
         then:
         thrown expected
         0* fc._
 
         when:
-        instance.upload( name, source, dest )
+        instance.upload( name, localFile, containerFile )
 
         then:
         thrown expected
         0* fc._
 
         where:
-        name     | source       | dest                  || expected
-        null     | "./file.txt" | Path.of( "dest.txt" ) || NullPointerException
-        ""       | "./file.txt" | Path.of( "dest.txt" ) || IllegalArgumentException
-        " "      | "./file.txt" | Path.of( "dest.txt" ) || IllegalArgumentException
-        "my-pod" | null         | Path.of( "dest.txt" ) || NullPointerException
-        "my-pod" | ""           | Path.of( "dest.txt" ) || IllegalArgumentException
-        "my-pod" | " "          | Path.of( "dest.txt" ) || IllegalArgumentException
-        "my-pod" | "./file.txt" | null                  || NullPointerException
+        name     | containerFile | localFile             || expected
+        null     | "./file.txt"  | Path.of( "dest.txt" ) || NullPointerException
+        ""       | "./file.txt"  | Path.of( "dest.txt" ) || IllegalArgumentException
+        " "      | "./file.txt"  | Path.of( "dest.txt" ) || IllegalArgumentException
+        "my-pod" | null          | Path.of( "dest.txt" ) || NullPointerException
+        "my-pod" | ""            | Path.of( "dest.txt" ) || IllegalArgumentException
+        "my-pod" | " "           | Path.of( "dest.txt" ) || IllegalArgumentException
+        "my-pod" | "./file.txt"  | null                  || NullPointerException
     }
 }

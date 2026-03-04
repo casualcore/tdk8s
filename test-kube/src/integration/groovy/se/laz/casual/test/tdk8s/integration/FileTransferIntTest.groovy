@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, The casual project. All rights reserved.
+ * Copyright (c) 2025 - 2026, The casual project. All rights reserved.
  *
  * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
  */
@@ -71,20 +71,33 @@ class FileTransferIntTest extends Specification
         actual.startsWith( "#!/bin/sh" )
 
         cleanup:
-        p.toFile().delete()
+        Files.delete( p )
     }
 
     def "Upload file to the pod."()
     {
         given:
-        File f = new File( "./src/integration/resources/test.txt")
+        File localFile = new File( "./src/integration/resources/test.txt")
+        String containerPath =  "/tmp/test.txt"
 
-        assert f.exists(  )
+        assert localFile.exists(  )
 
         when:
-        boolean successful = instance.getController().upload( podName, "/tmp/test.txt", f.toPath(  ) )
+        boolean successful = instance.getController().upload( podName, localFile.toPath(  ), containerPath )
 
         then:
         successful
+
+        when:
+        Path downloadedFile = Files.createTempFile( "FileTransferIntTest", "txt" )
+
+        successful = instance.getController(  ).download( podName, containerPath, downloadedFile )
+
+        then:
+        successful
+        Files.readString( localFile.toPath(  ) ) == Files.readString( downloadedFile )
+
+        cleanup:
+        Files.delete( downloadedFile )
     }
 }

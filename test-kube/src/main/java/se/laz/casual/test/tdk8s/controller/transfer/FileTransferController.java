@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, The casual project. All rights reserved.
+ * Copyright (c) 2025 - 2026, The casual project. All rights reserved.
  *
  * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
  */
@@ -48,5 +48,5 @@ public interface FileTransferController
      * @return if the operation was successful.
      * @throws ResourceNotFoundException if the resource was not found.
      */
-    boolean upload( String resource, String source, Path destination );
+    boolean upload( String resource, Path source, String destination );
 }

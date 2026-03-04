@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, The casual project. All rights reserved.
+ * Copyright (c) 2025 - 2026, The casual project. All rights reserved.
  *
  * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
  */
@@ -183,7 +183,7 @@ public class KubeController implements ProvisioningController, ConnectionControl
     }
 
     @Override
-    public boolean upload( String resource, String source, Path destination )
+    public boolean upload( String resource, Path source, String destination )
     {
         validateUpload( resource, source, destination );
         return this.fileTransferController.upload( resource, source, destination );

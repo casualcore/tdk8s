@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, The casual project. All rights reserved.
+ * Copyright (c) 2025 - 2026, The casual project. All rights reserved.
  *
  * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
  */
@@ -22,8 +22,8 @@ class FileTransferControllerTest extends Specification
     FileTransferController instance
 
     @Shared String name = "my-pod"
-    @Shared String src = "myfile"
-    @Shared Path dest = Path.of( "dest.txt" )
+    @Shared String containerFile = "myfile"
+    @Shared Path localFile = Path.of( "dest.txt" )
 
     def setup()
     {
@@ -36,11 +36,11 @@ class FileTransferControllerTest extends Specification
         PodResource resource = Mock()
         1* rlc.findFirstPodForResource( name ) >> Optional.of( resource )
         CopyOrReadable cor = Mock( )
-        1* resource.file( src ) >> cor
-        1* cor.copy( dest ) >> success
+        1* resource.file( containerFile ) >> cor
+        1* cor.copy( localFile ) >> success
 
         when:
-        boolean actual = instance.download( name, src, dest )
+        boolean actual = instance.download( name, containerFile, localFile )
 
         then:
         actual == success
@@ -58,7 +58,7 @@ class FileTransferControllerTest extends Specification
         1* rlc.findFirstPodForResource( name ) >> Optional.empty(  )
 
         when:
-        instance.download( name, src, dest )
+        instance.download( name, containerFile, localFile )
 
         then:
         thrown ResourceNotFoundException
@@ -70,11 +70,11 @@ class FileTransferControllerTest extends Specification
         PodResource resource = Mock()
         1* rlc.findFirstPodForResource( name ) >> Optional.of( resource )
         CopyOrReadable cor = Mock( )
-        1* resource.file( src ) >> cor
-        1* cor.upload( dest ) >> success
+        1* resource.file( containerFile ) >> cor
+        1* cor.upload( localFile ) >> success
 
         when:
-        boolean actual = instance.upload( name, src, dest )
+        boolean actual = instance.upload( name, localFile, containerFile )
 
         then:
         actual == success
@@ -92,7 +92,7 @@ class FileTransferControllerTest extends Specification
         1* rlc.findFirstPodForResource( name ) >> Optional.empty(  )
 
         when:
-        instance.upload( name, src, dest )
+        instance.upload( name, localFile, containerFile )
 
         then:
         thrown ResourceNotFoundException
