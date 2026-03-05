@@ -18,7 +18,13 @@ class FileMountTest extends Specification
     @Shared
     ConfigMap map = ConfigMapFactory.fromFile( "my-map", Paths.get( "src/test/resources/test.txt") )
     @Shared
+    ConfigMap multiMap = ConfigMapFactory.fromFiles( "my-multi-map",
+            Paths.get( "src/test/resources/test.txt"),
+            Paths.get( "src/test/resources/test2.txt"))
+    @Shared
     String mountPath = "/mnt/test.txt"
+    @Shared
+    String subPath = "test.txt"
     @Shared
     String volume = "custom-vol-01"
     @Shared
@@ -30,6 +36,7 @@ class FileMountTest extends Specification
         FileMount instance = FileMount.newBuilder()
                 .configMap( map )
                 .mountPath( mountPath )
+                .subPath( subPath )
                 .volume( volume )
                 .container( container )
                 .build()
@@ -37,6 +44,7 @@ class FileMountTest extends Specification
         then:
         instance.getConfigMap() == map
         instance.getMountPath() == mountPath
+        instance.getSubPath() == subPath
         instance.getVolume() == volume
         instance.getContainer() == container
     }
@@ -54,6 +62,45 @@ class FileMountTest extends Specification
         instance.getMountPath() == mountPath
         instance.getVolume() == FileMount.DEFAULT_VOLUME_NAME
         instance.getContainer() == null
+        instance.getSubPath() == "test.txt"
+    }
+
+    def "Subpath validation correct."()
+    {
+        when:
+        FileMount instance = FileMount.newBuilder()
+                .configMap( cm )
+                .mountPath( mountPath )
+                .subPath( path )
+                .build(  )
+
+        then:
+        instance.getSubPath(  ) == expected
+
+        where:
+        cm       | path        | expected
+        map      | null        | "test.txt"
+        multiMap | "test.txt"  | "test.txt"
+        multiMap | "test2.txt" | "test2.txt"
+    }
+
+    def "Subpath validation exceptional."()
+    {
+        when:
+        FileMount.newBuilder()
+                .configMap( cm )
+                .mountPath( mountPath )
+                .subPath( path )
+                .build(  )
+
+        then:
+        thrown IllegalArgumentException
+
+        where:
+        cm       | path
+        map      | "invalid.txt"
+        multiMap | "invalid.txt"
+        multiMap | null
     }
 
 }

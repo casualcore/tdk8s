@@ -10,7 +10,6 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import se.laz.casual.test.tdk8s.store.ResourceNotFoundException;
 
-import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.function.IntSupplier;
 
@@ -89,7 +88,7 @@ public final class VolumeMounter
                         .addNewVolumeMount()
                             .withName( mount.getVolume() )
                             .withMountPath( mount.getMountPath() )
-                            .withSubPath( Paths.get( mount.getMountPath() ).getFileName().toString() )
+                            .withSubPath( mount.getSubPath() )
                         .endVolumeMount()
                     .endContainer()
                 .endSpec()
@@ -110,7 +109,7 @@ public final class VolumeMounter
                                 .addNewVolumeMount()
                                     .withName( mount.getVolume() )
                                     .withMountPath( mount.getMountPath() )
-                                    .withSubPath( Paths.get( mount.getMountPath() ).getFileName().toString() )
+                                    .withSubPath( mount.getSubPath() )
                                 .endVolumeMount()
                             .endContainer()
                         .endSpec()

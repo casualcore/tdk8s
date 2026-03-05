@@ -65,4 +65,56 @@ class ConfigMapFactoryTest extends Specification
             Paths.get( "src/test/resources/invalid.txt")
         ]
     }
+
+    def "Create with multiple files."()
+    {
+        given:
+        String mapName = "mymap"
+        Path file = Paths.get( "src/test/resources/test.txt" )
+        Path file2 = Paths.get( "src/test/resources/test2.txt" )
+
+        ConfigMap expected = new ConfigMapBuilder(  )
+                .withNewMetadata(  )
+                .withName( mapName )
+                .endMetadata(  )
+                .addToData( "test.txt", Files.readString( file ) )
+                .addToData( "test2.txt", Files.readString( file2 ) )
+                .build(  )
+
+        when:
+        ConfigMap actual = ConfigMapFactory.fromFiles( mapName, file, file2 )
+
+        then:
+        actual == expected
+    }
+
+    def "Create with multiple files, with non existent file throws IllegalArgumentException."()
+    {
+        given:
+        String mapName = "mymap"
+        Path file = Paths.get( "src/test/resources/test.txt" )
+        Path file2 = Paths.get( "src/test/resources/invalid.txt" )
+
+        when:
+        ConfigMapFactory.fromFiles( mapName, file, file2 )
+
+        then:
+        thrown IllegalArgumentException
+    }
+
+    def "Create with nulls, throws NullPointerException."()
+    {
+        when:
+        ConfigMapFactory.fromFiles( name, file, file2 )
+
+        then:
+        thrown NullPointerException
+
+        where:
+        name  | file                                       | file2
+        "map" | Paths.get( "src/test/resources/test.txt" ) | null
+        "map" | null                                       | Paths.get( "src/test/resources/test2.txt" )
+        null  | Paths.get( "src/test/resources/test.txt" ) | Paths.get( "src/test/resources/test2.txt" )
+        null  | null                                       | null
+    }
 }
