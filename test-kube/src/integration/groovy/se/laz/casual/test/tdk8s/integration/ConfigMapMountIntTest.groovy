@@ -42,7 +42,7 @@ class ConfigMapMountIntTest extends Specification
     @Shared
     Path configFile = Paths.get("./src/integration/resources/configFile.txt")
     @Shared
-    String mountPath = "/data/configFile.txt"
+    String mountPath = "/data/configFile2.txt"
 
 
     def setupSpec()

@@ -140,6 +140,46 @@ class VolumeMounterTest extends Specification
         null                            | null
     }
 
+    def "Add pod volume mount with different mountpath file name for configmap."()
+    {
+        given:
+        String volumeName = "tdk8s-vol-01"
+        String container = NginxResources.NGINX_CONTAINER_NAME
+        String mountPath = "/data/test2.txt"
+        String subPath = "test.txt"
+        Pod pod = NginxResources.SIMPLE_NGINX_POD
+
+        FileMount mount = FileMount.newBuilder().configMap( map )
+                .mountPath( mountPath )
+                .container( container )
+                .volume( volumeName )
+                .build()
+
+        Pod expected = pod.edit(  )
+                .editSpec(  )
+                .addNewVolume(  )
+                .withName( volumeName )
+                .withNewConfigMap(  )
+                .withName( mapName )
+                .endConfigMap(  )
+                .endVolume(  )
+                .editContainer( 0 )
+                .addNewVolumeMount(  )
+                .withName( volumeName )
+                .withMountPath( mountPath )
+                .withSubPath( subPath )
+                .endVolumeMount(  )
+                .endContainer(  )
+                .endSpec(  )
+                .build(  )
+
+        when:
+        Pod actual = VolumeMounter.mount( pod, mount )
+
+        then:
+        actual == expected
+    }
+
     def "Add deployment volume mount for configmap."()
     {
         given:
@@ -257,6 +297,48 @@ class VolumeMounterTest extends Specification
         NginxResources.SIMPLE_NGINX_DEPLOYMENT | null
         null                                   | FileMount.newBuilder().configMap( map ).mountPath( "/tmp/t.log" ).build()
         null                                   | null
+    }
+
+    def "Add deployment volume mount with different mountpath file name for configmap."()
+    {
+        given:
+        String volumeName = "tdk8s-vol-0"
+        String container = NginxResources.NGINX_CONTAINER_NAME
+        String mountPath = "/data/test2.txt"
+        String subPath = "test.txt"
+        Deployment deployment = NginxResources.SIMPLE_NGINX_DEPLOYMENT
+
+        FileMount mount = FileMount.newBuilder().configMap( map )
+                .mountPath( mountPath )
+                .container( container )
+                .volume( volumeName )
+                .build()
+
+        Deployment expected = deployment.edit(  )
+                .editSpec(  )
+                .editTemplate(  ).editSpec(  )
+                .addNewVolume(  )
+                .withName( volumeName )
+                .withNewConfigMap(  )
+                .withName( mapName )
+                .endConfigMap(  )
+                .endVolume(  )
+                .editContainer( 0 )
+                .addNewVolumeMount(  )
+                .withName( volumeName )
+                .withMountPath( mountPath )
+                .withSubPath( subPath )
+                .endVolumeMount(  )
+                .endContainer(  )
+                .endSpec(  )
+                .endTemplate(  ).endSpec(  )
+                .build(  )
+
+        when:
+        Deployment actual = VolumeMounter.mount( deployment, mount )
+
+        then:
+        actual == expected
     }
 
 }

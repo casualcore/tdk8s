@@ -35,24 +35,45 @@ public final class ConfigMapFactory
      */
     public static ConfigMap fromFile( String name, Path file ) throws IOException
     {
-        validate( name, file );
-
-        return new ConfigMapBuilder()
-                .withNewMetadata()
-                    .withName( name )
-                .endMetadata()
-                .addToData( file.getFileName().toString(), Files.readString( file ) )
-                .build();
+        return fromFiles( name, file );
     }
 
-    private static void validate( String name, Path file )
+    /**
+     * Create a ConfigMap called name, with data from each of the files provided.
+     * The data key for the files will be the filename of the file path provided.
+     *
+     * @param name of the ConfigMap.
+     * @param files 1 or more files to read as data for the ConfigMap.
+     * @return ConfigMap containing the files.
+     * @throws IOException if there is an issue whilst reading the files.
+     */
+    public static ConfigMap fromFiles( String name, Path... files ) throws IOException
+    {
+        validate( name, files );
+
+        ConfigMapBuilder builder =  new ConfigMapBuilder()
+                .withNewMetadata()
+                .withName( name )
+                .endMetadata();
+        for( Path file: files )
+        {
+                builder.addToData( file.getFileName().toString(), Files.readString( file ) );
+        }
+        return builder.build();
+    }
+
+    private static void validate( String name, Path...files )
     {
         Objects.requireNonNull( name, "Name is null." );
-        Objects.requireNonNull( file, "File is null." );
+        Objects.requireNonNull( files, "Files is null." );
 
-        if( !Files.exists( file ) )
+        for( Path file: files )
         {
-            throw new IllegalArgumentException( "File does not exist." );
+            Objects.requireNonNull( file, "Files is null." );
+            if( !Files.exists( file ) )
+            {
+                throw new IllegalArgumentException( "File does not exist." );
+            }
         }
     }
 }

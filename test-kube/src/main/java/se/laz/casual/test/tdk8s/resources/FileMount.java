@@ -19,13 +19,15 @@ public class FileMount
 
     private final ConfigMap configMap;
     private final String mountPath;
+    private final String subPath;
     private final String volume;
     private final String container;
 
-    private FileMount( ConfigMap configMap, String mountPath, String volume, String containerName )
+    private FileMount( ConfigMap configMap, String mountPath, String subPath, String volume, String containerName )
     {
         this.configMap = configMap;
         this.mountPath = mountPath;
+        this.subPath = subPath;
         this.volume = volume;
         this.container = containerName;
     }
@@ -47,6 +49,16 @@ public class FileMount
     public String getMountPath()
     {
         return mountPath;
+    }
+
+    /**
+     * The entry of the ConfigMap to use as the file.
+     *
+     * @return ConfigMap entry subpath.
+     */
+    public String getSubPath()
+    {
+        return subPath;
     }
 
     /**
@@ -78,6 +90,7 @@ public class FileMount
     {
         private ConfigMap configMap;
         private String mountPath;
+        private String subPath;
         private String volume = DEFAULT_VOLUME_NAME;
         private String container;
 
@@ -106,7 +119,23 @@ public class FileMount
         }
 
         /**
+         * Optional - ConfigMap entry subpath to use as the file contents.
+         * <br/>
+         * If not provided, the ConfigMap must have a single entry, which will be used.
+         *
+         * @param subPath of the ConfigMap to use.
+         * @return Builder.
+         */
+        public Builder subPath( String subPath )
+        {
+            this.subPath = subPath;
+            return this;
+        }
+
+        /**
          * Optional - volume name to mount the file.
+         * <br/>
+         * If not provided a default name will be used.
          *
          * @param volume name of the volume.
          * @return Builder.
@@ -119,6 +148,8 @@ public class FileMount
 
         /**
          * Optional - name of the container to mount the file upon.
+         *<br/>
+         * If not provided the first container will be used.
          *
          * @param container name to mount the file upon.
          * @return Builder.
@@ -134,7 +165,27 @@ public class FileMount
             Objects.requireNonNull( configMap, "ConfigMap is null." );
             Objects.requireNonNull( mountPath, "Mount path is null."  );
 
-            return new FileMount( configMap, mountPath, volume, container );
+            this.subPath = confirmValidSubPath( );
+
+            return new FileMount( configMap, mountPath, subPath, volume, container );
+        }
+
+        private String confirmValidSubPath( )
+        {
+            if( this.subPath == null )
+            {
+                if( this.configMap.getData().size() != 1 )
+                {
+                    throw new IllegalArgumentException( "ConfigMap contains multiple entries without a specified subpath." );
+                }
+                return this.configMap.getData().keySet().iterator().next();
+            }
+
+            if( !this.configMap.getData().containsKey( this.subPath ) )
+            {
+                throw new IllegalArgumentException( "ConfigMap does not contain an entry: " + this.subPath );
+            }
+            return this.subPath;
         }
     }
 }
