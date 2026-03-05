@@ -119,7 +119,7 @@ public class FileMount
         }
 
         /**
-         * Optional - ConfigMap entry subpath to use as the file contents.
+         * Optional - ConfigMap entry (subpath) to use as the file contents.
          * <br/>
          * If not provided, the ConfigMap must have a single entry, which will be used.
          *
