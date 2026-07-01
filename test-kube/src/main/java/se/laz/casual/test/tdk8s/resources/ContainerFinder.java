@@ -35,7 +35,7 @@ public class ContainerFinder
 
     private static int findIndexOfContainerWithName( List<Container> containers, String name )
     {
-        for( int i=0; i < containers.size(); i++ )
+        for( int i = 0; i < containers.size(); i++ )
         {
             if( containers.get( i ).getName().equals( name ) )
             {

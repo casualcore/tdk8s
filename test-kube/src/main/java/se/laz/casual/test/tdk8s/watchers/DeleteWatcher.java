@@ -17,11 +17,11 @@ import static java.lang.System.Logger.Level.DEBUG;
 
 public class DeleteWatcher<T> implements Watcher<T>
 {
-    private static final System.Logger logger = System.getLogger(DeleteWatcher.class.getName());
+    private static final System.Logger logger = System.getLogger( DeleteWatcher.class.getName() );
 
     private final CountDownLatch deleteLatch;
 
-    public DeleteWatcher( )
+    public DeleteWatcher()
     {
         this( 1 );
     }
@@ -37,7 +37,7 @@ public class DeleteWatcher<T> implements Watcher<T>
         if( action == Action.DELETED )
         {
             deleteLatch.countDown();
-            logger.log( DEBUG, ()-> deleteLatch.getCount() + " delete(s) remaining, after delete observed for: " + resource.toString() );
+            logger.log( DEBUG, () -> deleteLatch.getCount() + " delete(s) remaining, after delete observed for: " + resource.toString() );
         }
     }
 
@@ -51,7 +51,7 @@ public class DeleteWatcher<T> implements Watcher<T>
     {
         try
         {
-            logger.log( DEBUG, ()-> "Waiting for "+ deleteLatch.getCount() + " deletions." );
+            logger.log( DEBUG, () -> "Waiting for " + deleteLatch.getCount() + " deletions." );
             deleteLatch.await();
         }
         catch( InterruptedException e )
@@ -65,7 +65,7 @@ public class DeleteWatcher<T> implements Watcher<T>
     {
         try
         {
-            logger.log( DEBUG, ()-> "Waiting for "+ deleteLatch.getCount() + " deletions, with timeout." );
+            logger.log( DEBUG, () -> "Waiting for " + deleteLatch.getCount() + " deletions, with timeout." );
             return deleteLatch.await( timeout, unit );
         }
         catch( InterruptedException e )

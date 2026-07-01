@@ -16,16 +16,16 @@ public interface ProvisioningController extends Provisionable, ProvisionableAsyn
      * Scale the resource to the requested number of replicas and wait
      * until complete.
      * <p>
-     *     The resource name can be either the alias for the managed resource
-     *     or the actual underlying name of the resource inside the cluster.
+     * The resource name can be either the alias for the managed resource
+     * or the actual underlying name of the resource inside the cluster.
      * </p>
      * <p>
      * When the scale operation is complete depends on the change in the number of
      * replicas compared to the existing number of replicas.
      * <ul>
-     *     <li>unchanged - this is a no op.</li>
-     *     <li>less - it is complete one the additional replicas are terminated.</li>
-     *     <li>more - it is complete one the additional replicas are all ready.</li>
+     * <li>unchanged - this is a no op.</li>
+     * <li>less - it is complete one the additional replicas are terminated.</li>
+     * <li>more - it is complete one the additional replicas are all ready.</li>
      * </ul>
      * This is enforced to ensure determinism around the state of the resources after
      * the scale operation.
@@ -44,8 +44,8 @@ public interface ProvisioningController extends Provisionable, ProvisionableAsyn
     /**
      * Scale the resource to the requested number of replicas without waiting.
      * <p>
-     *     The resource name can be either the alias for the managed resource
-     *     or the actual underlying name of the resource inside the cluster.
+     * The resource name can be either the alias for the managed resource
+     * or the actual underlying name of the resource inside the cluster.
      * </p>
      * The returned future can be used to wait for completion as described
      * in {@link #scale(String, int)}.

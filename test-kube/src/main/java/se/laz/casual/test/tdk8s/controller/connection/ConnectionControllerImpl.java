@@ -28,7 +28,7 @@ import static java.lang.System.Logger.Level.WARNING;
  */
 public class ConnectionControllerImpl implements ConnectionController
 {
-    private static final System.Logger logger = System.getLogger(ConnectionControllerImpl.class.getName() );
+    private static final System.Logger logger = System.getLogger( ConnectionControllerImpl.class.getName() );
 
     private final ResourceLookupController lookupController;
     private final NetworkController networkController;
@@ -45,7 +45,7 @@ public class ConnectionControllerImpl implements ConnectionController
     public KubeConnection getConnection( String service, int targetPort )
     {
         ServiceResource<Service> sr = lookupController.getServiceAsResource( service )
-                .orElseThrow( ()-> new ConnectionException( "Resource unavailable: " + service ) );
+                .orElseThrow( () -> new ConnectionException( "Resource unavailable: " + service ) );
 
         Service s = sr.get();
 
@@ -58,10 +58,10 @@ public class ConnectionControllerImpl implements ConnectionController
         // Fix for running from outside a container / cluster.
         if( !runtimeController.isInsideContainer() )
         {
-            logger.log( DEBUG, ()-> "Running outside of a container, attempting to connect externally." );
+            logger.log( DEBUG, () -> "Running outside of a container, attempting to connect externally." );
             // Check if the service should be externally accessible.
             if( s.getSpec().getType() != null && s.getSpec().getType().equals( "LoadBalancer" ) &&
-                    !s.getStatus().getLoadBalancer().getIngress().isEmpty() )
+                !s.getStatus().getLoadBalancer().getIngress().isEmpty() )
             {
                 // Attempt to access service externally.
                 String externalIp = s.getStatus().getLoadBalancer().getIngress().get( 0 ).getIp();
@@ -70,16 +70,17 @@ public class ConnectionControllerImpl implements ConnectionController
                         .findFirst()
                         .map( ServicePort::getPort )
                         .orElse( -1 );
-                logger.log( DEBUG, ()-> "External IP: " + externalIp + ". External Port: " + externalPort );
+                logger.log( DEBUG, () -> "External IP: " + externalIp + ". External Port: " + externalPort );
                 if( externalPort != -1 && networkController.canConnect( externalIp, externalPort ) )
                 {
-                    logger.log( DEBUG, ()->"Connection available externally." );
+                    logger.log( DEBUG, () -> "Connection available externally." );
                     return new ServiceConnection( externalIp, externalPort );
                 }
             }
 
-            logger.log( WARNING, ()-> "Creating a port forward connection for service: "+ service + ", to allow seamless connectivity during development. " +
-                    "Load Balancing will not work. Do NOT use for performance testing." );
+            logger.log( WARNING, () -> "Creating a port forward connection for service: " + service +
+                                       ", to allow seamless connectivity during development. " +
+                                       "Load Balancing will not work. Do NOT use for performance testing." );
             return createPortForwardConnection( sr, targetPort );
         }
 
@@ -93,8 +94,8 @@ public class ConnectionControllerImpl implements ConnectionController
         return lookupController.getServiceAsResource( resource )
                 .map( serviceServiceResource -> createPortForwardConnection( serviceServiceResource, targetPort ) )
                 .orElseGet( () -> lookupController.findFirstPodForResource( resource )
-                .map( pr -> createPortForwardConnection( pr, targetPort ) )
-                .orElseThrow( () -> new ConnectionException( "Resource unavailable: " + resource ) ) );
+                        .map( pr -> createPortForwardConnection( pr, targetPort ) )
+                        .orElseThrow( () -> new ConnectionException( "Resource unavailable: " + resource ) ) );
     }
 
     private KubeConnection createPortForwardConnection( PortForwardable resource, int port )

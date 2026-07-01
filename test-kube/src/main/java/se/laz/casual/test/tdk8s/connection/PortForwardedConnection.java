@@ -47,7 +47,7 @@ public class PortForwardedConnection implements KubeConnection
         {
             localPortForward.close();
         }
-        catch ( IOException e )
+        catch( IOException e )
         {
             throw new ConnectionCloseException( "Close failed.", e );
         }

@@ -13,8 +13,8 @@ public interface ScaleOperation<T>
     /**
      * Scale the resource to the requested number of replicas.
      * <p>
-     *     The resource name can be either the alias for the managed resource
-     *     or the actual underlying name of the resource inside the cluster.
+     * The resource name can be either the alias for the managed resource
+     * or the actual underlying name of the resource inside the cluster.
      * </p>
      *
      * @param resource to be scaled.

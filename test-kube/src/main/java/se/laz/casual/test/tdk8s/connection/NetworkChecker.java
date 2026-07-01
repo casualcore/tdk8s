@@ -18,7 +18,7 @@ import static java.lang.System.Logger.Level.DEBUG;
  */
 public class NetworkChecker
 {
-    private static final System.Logger logger = System.getLogger( NetworkChecker.class.getName());
+    private static final System.Logger logger = System.getLogger( NetworkChecker.class.getName() );
 
     private NetworkChecker()
     {
@@ -40,7 +40,7 @@ public class NetworkChecker
         }
         catch( IOException e )
         {
-            logger.log( DEBUG, ()-> "Unable to connect to: " + host + ":" + port );
+            logger.log( DEBUG, () -> "Unable to connect to: " + host + ":" + port );
             return false;
         }
     }

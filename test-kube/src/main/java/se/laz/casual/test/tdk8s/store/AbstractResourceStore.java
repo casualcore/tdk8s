@@ -38,7 +38,7 @@ public abstract class AbstractResourceStore<T> implements ResourceStore<T>
         return resources.get( name );
     }
 
-    public Map<String, T> getAll( )
+    public Map<String, T> getAll()
     {
         return new HashMap<>( resources );
     }

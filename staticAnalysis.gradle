@@ -1,0 +1,52 @@
+/*
+ * Copyright (c) 2026, The casual project. All rights reserved.
+ *
+ * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
+ */
+
+apply plugin: 'com.github.spotbugs'
+apply plugin: 'com.diffplug.spotless'
+
+spotbugs {
+    ignoreFailures = true
+    showStackTraces = true
+    showProgress = true
+    reportsDir = file( "build/reports/" )
+    excludeFilter = file( "$rootProject.projectDir/spotbugs-excludes.xml" )
+}
+
+spotbugsMain {
+    reports {
+        xml.required = true
+        html.required = true
+        sarif.required = true
+    }
+}
+
+spotbugsTest {
+    enabled = false
+}
+
+spotbugsIntegration {
+    enabled = false
+}
+
+spotless{
+
+    java{
+        eclipse().configFile( "$rootProject.projectDir/spotless-checkstyle.xml" )
+        target "**/*.java"
+        removeUnusedImports()
+    }
+}
+
+
+sonar{
+    properties{
+        property "sonar.java.spotbugs.reportPaths","build/reports/main.xml"
+    }
+}
+
+
+
+

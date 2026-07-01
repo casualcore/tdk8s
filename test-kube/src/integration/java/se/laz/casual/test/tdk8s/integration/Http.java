@@ -21,12 +21,12 @@ public class Http
         String host = connection.getHostName();
         int port = connection.getPort();
 
-        HttpClient httpClient = HttpClient.newBuilder(  ).build(  );
-        HttpRequest request = HttpRequest.newBuilder( )
-                .uri( URI.create( "http://" + host + ":" + port +"/" ) )
-                .GET( )
-                .build(  );
+        HttpClient httpClient = HttpClient.newBuilder().build();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri( URI.create( "http://" + host + ":" + port + "/" ) )
+                .GET()
+                .build();
 
-        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        return httpClient.send( request, HttpResponse.BodyHandlers.ofString() );
     }
 }

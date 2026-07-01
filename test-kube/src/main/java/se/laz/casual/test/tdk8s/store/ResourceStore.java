@@ -29,7 +29,7 @@ public interface ResourceStore<T>
      *
      * @return map of resources.
      */
-    Map<String,T> getAll();
+    Map<String, T> getAll();
 
     /**
      * Checks if a resource with the given name is stored.
@@ -42,7 +42,7 @@ public interface ResourceStore<T>
     /**
      * Store the resource with the provided name.
      *
-     * @param name of the resource, used for retrieval later.
+     * @param name  of the resource, used for retrieval later.
      * @param value the resource to store.
      */
     void put( String name, T value );
@@ -52,7 +52,7 @@ public interface ResourceStore<T>
      *
      * @param all the resources to be added to the store.
      */
-    void putAll( Map<String,T> all );
+    void putAll( Map<String, T> all );
 
     /**
      * Remove the resource stored by name.

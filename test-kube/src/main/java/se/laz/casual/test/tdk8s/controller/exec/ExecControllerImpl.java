@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, The casual project. All rights reserved.
+ * Copyright (c) 2025 - 2026, The casual project. All rights reserved.
  *
  * This software is licensed under the MIT license, https://opensource.org/licenses/MIT
  */
@@ -13,6 +13,7 @@ import se.laz.casual.test.tdk8s.exec.ExecResult;
 import se.laz.casual.test.tdk8s.store.ResourceNotFoundException;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -41,7 +42,7 @@ public class ExecControllerImpl implements ExecController
             Integer exitCode = watch.exitCode().join();
             return ExecResult.newBuilder()
                     .exitCode( exitCode )
-                    .output( out.toString() )
+                    .output( out.toString( StandardCharsets.UTF_8 ) )
                     .build();
         }
     }

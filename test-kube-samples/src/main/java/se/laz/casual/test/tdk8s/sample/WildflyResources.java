@@ -72,7 +72,7 @@ public final class WildflyResources
             .withPort( 61818 ) //hope this is free!!
             .withTargetPort( new IntOrString( 8080 ) )
             .endPort()
-            .withType("LoadBalancer" )
+            .withType( "LoadBalancer" )
             .endSpec()
             .build();
 }
