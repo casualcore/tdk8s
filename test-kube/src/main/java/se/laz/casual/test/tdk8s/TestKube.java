@@ -29,39 +29,39 @@ import static java.lang.System.Logger.Level.DEBUG;
 /**
  * Manages kubernetes resources for the purpose of test.
  * <p>
- *      Provides the ability to interact with the k8s resources during the test are also provided
- *      <ul>
- *          <li>connections to resources</li>
- *          <li>access logs</li>
- *          <li>transfer files</li>
- *          <li>execute command</li>
- *      </ul>
- *      Resources should be created at the start of tests and destroyed at the end.
+ * Provides the ability to interact with the k8s resources during the test are also provided
+ * <ul>
+ * <li>connections to resources</li>
+ * <li>access logs</li>
+ * <li>transfer files</li>
+ * <li>execute command</li>
+ * </ul>
+ * Resources should be created at the start of tests and destroyed at the end.
  * </p>
  * <p>
- *      To allow maximum flexibility you can use the fabric8 api to define your resources.
- *      These resources are then managed by the TestKube instance.
- *      For more complex resource definitions it is advised to implement your own mapping
- *      code which produces you own fabric8 {@link io.fabric8.kubernetes.client.dsl.Resource}
- *      objects.
+ * To allow maximum flexibility you can use the fabric8 api to define your resources.
+ * These resources are then managed by the TestKube instance.
+ * For more complex resource definitions it is advised to implement your own mapping
+ * code which produces you own fabric8 {@link io.fabric8.kubernetes.client.dsl.Resource}
+ * objects.
  * </p>
  * <p>
- *      Note: Currently only Deployment, Pod, Service and ConfigMap resources can be managed, though
- *      additional resources should be added later e.g. PVC.
+ * Note: Currently only Deployment, Pod, Service and ConfigMap resources can be managed, though
+ * additional resources should be added later e.g. PVC.
  * </p>
  * <p>
- *      All managed resources are labeled with a unique label, this label can be configured using the
- *      builder.
+ * All managed resources are labeled with a unique label, this label can be configured using the
+ * builder.
  * </p>
  * <p>
- *      By default, the cluster connectivity is provided using a {@link KubernetesClient}
- *      with no additional configuration. If you require more complex setup, you can provide the appropriate
- *      {@link KubernetesClient} instance into the builder.
+ * By default, the cluster connectivity is provided using a {@link KubernetesClient}
+ * with no additional configuration. If you require more complex setup, you can provide the appropriate
+ * {@link KubernetesClient} instance into the builder.
  * </p>
  */
 public class TestKube implements Provisionable, Connectable
 {
-    private static final System.Logger logger = System.getLogger(TestKube.class.getName());
+    private static final System.Logger logger = System.getLogger( TestKube.class.getName() );
 
     public static final String RESOURCE_LABEL_NAME = "tdk8s";
     private final KubernetesClient client;
@@ -70,7 +70,7 @@ public class TestKube implements Provisionable, Connectable
 
     private final KubeController kubeController;
 
-    private TestKube(final Builder builder )
+    private TestKube( final Builder builder )
     {
         this.client = builder.client;
         this.label = builder.label;
@@ -90,14 +90,14 @@ public class TestKube implements Provisionable, Connectable
 
         this.kubeController = kc;
 
-        logger.log( DEBUG, ()-> "TestKube built with label value: " + this.label + " check resources with: " +
-                "kubectl get all -l " + TestKube.RESOURCE_LABEL_NAME + "=" + this.label);
+        logger.log( DEBUG, () -> "TestKube built with label value: " + this.label + " check resources with: " +
+                                 "kubectl get all -l " + TestKube.RESOURCE_LABEL_NAME + "=" + this.label );
     }
 
     /**
      * Gets the client associated with this TestKube.
      * <p>
-     *     If you need to perform more advanced operations.
+     * If you need to perform more advanced operations.
      * </p>
      *
      * @return the client.
@@ -122,7 +122,7 @@ public class TestKube implements Provisionable, Connectable
      *
      * @return map of managed pods.
      */
-    public Map<String,Pod> getPods()
+    public Map<String, Pod> getPods()
     {
         return this.resourcesStore.getPods();
     }
@@ -132,7 +132,7 @@ public class TestKube implements Provisionable, Connectable
      *
      * @return map of managed deployments.
      */
-    public Map<String,Deployment> getDeployments()
+    public Map<String, Deployment> getDeployments()
     {
         return this.resourcesStore.getDeployments();
     }
@@ -163,7 +163,7 @@ public class TestKube implements Provisionable, Connectable
      *
      * @return resources store.
      */
-    public ResourcesStore getResourcesStore( )
+    public ResourcesStore getResourcesStore()
     {
         return this.resourcesStore;
     }
@@ -175,12 +175,12 @@ public class TestKube implements Provisionable, Connectable
      * {@link KubeController} for this TestKube instance here,
      * providing you with more functionality, for example:
      * <ul>
-     *     <li>{@link KubeController#initAsync()}</li>
-     *     <li>{@link KubeController#destroyAsync()}</li>
-     *     <li>{@link KubeController#getLog(String)}</li>
-     *     <li>{@link KubeController#executeCommand(String, String...)}</li>
-     *     <li>{@link KubeController#download(String, String, Path)}</li>
-     *     <li>{@link KubeController#upload(String, Path, String)}</li>
+     * <li>{@link KubeController#initAsync()}</li>
+     * <li>{@link KubeController#destroyAsync()}</li>
+     * <li>{@link KubeController#getLog(String)}</li>
+     * <li>{@link KubeController#executeCommand(String, String...)}</li>
+     * <li>{@link KubeController#download(String, String, Path)}</li>
+     * <li>{@link KubeController#upload(String, Path, String)}</li>
      * </ul>
      * </p>
      *
@@ -213,11 +213,11 @@ public class TestKube implements Provisionable, Connectable
     public String toString()
     {
         return "TestKube{" +
-                "client=" + client +
-                ", label='" + label + '\'' +
-                ", resourcesStore=" + resourcesStore +
-                ", kubeController=" + kubeController +
-                '}';
+               "client=" + client +
+               ", label='" + label + '\'' +
+               ", resourcesStore=" + resourcesStore +
+               ", kubeController=" + kubeController +
+               '}';
     }
 
     public static Builder newBuilder()
@@ -266,12 +266,12 @@ public class TestKube implements Provisionable, Connectable
         /**
          * Add a Pod to be managed.
          * <p>
-         *      The alias provided can be used to retrieve and does not have to match
-         *      the actual name of the Pod provided.
+         * The alias provided can be used to retrieve and does not have to match
+         * the actual name of the Pod provided.
          * </p>
          *
          * @param alias of the Pod.
-         * @param pod to be managed.
+         * @param pod   to be managed.
          * @return the builder.
          */
         public Builder addPod( String alias, Pod pod )
@@ -283,11 +283,11 @@ public class TestKube implements Provisionable, Connectable
         /**
          * Add a Service to be managed.
          * <p>
-         *      The alias provided can be used to retrieve and does not have to match
-         *      the actual name of the Service provided.
+         * The alias provided can be used to retrieve and does not have to match
+         * the actual name of the Service provided.
          * </p>
          *
-         * @param alias of the Service.
+         * @param alias   of the Service.
          * @param service to be managed.
          * @return the builder.
          */
@@ -300,10 +300,11 @@ public class TestKube implements Provisionable, Connectable
         /**
          * Add a Deployment to be managed.
          * <p>
-         *      The alias provided can be used to retrieve and does not have to match
-         *      the actual name of the Deployment provided.
+         * The alias provided can be used to retrieve and does not have to match
+         * the actual name of the Deployment provided.
          * </p>
-         * @param alias of the Deployment.
+         * 
+         * @param alias      of the Deployment.
          * @param deployment to be managed.
          * @return the builder.
          */
@@ -316,10 +317,11 @@ public class TestKube implements Provisionable, Connectable
         /**
          * Add a ConfigMap to be managed.
          * <p>
-         *      The alias provided can be used to retrieve and does not have to match
-         *      the actual name of ConfigMap provided.
+         * The alias provided can be used to retrieve and does not have to match
+         * the actual name of ConfigMap provided.
          * </p>
-         * @param alias of the ConfigMap.
+         * 
+         * @param alias     of the ConfigMap.
          * @param configMap to be managed.
          * @return the builder.
          */
@@ -332,25 +334,25 @@ public class TestKube implements Provisionable, Connectable
         /**
          * Add a custom provisioning probe to be executed at the end of the initialisation process.
          * <p>
-         *      Probes are executed repeatedly until they succeed (return true) or a timeout has occurred.
-         *      Therefore, they should not result in side effect and can be executed multiple times without issue.
-         *      They should also ideally be short running to ensure they do not unnecessarily delay completion
-         *      of the initialisation process prior to test execution.
+         * Probes are executed repeatedly until they succeed (return true) or a timeout has occurred.
+         * Therefore, they should not result in side effect and can be executed multiple times without issue.
+         * They should also ideally be short running to ensure they do not unnecessarily delay completion
+         * of the initialisation process prior to test execution.
          * </p>
          * <p>
-         *      <b>Note:</b> These should be avoided where possible as in most scenarios correct usage of readiness
-         *      probes within the kubernetes resources should be sufficient to ensure that the managed
-         *      resources are all ready.
+         * <b>Note:</b> These should be avoided where possible as in most scenarios correct usage of readiness
+         * probes within the kubernetes resources should be sufficient to ensure that the managed
+         * resources are all ready.
          * </p>
          * <p>
-         *      However, they can be useful for example when new service IP details take time to propagate
-         *      within the cluster such that sleeps and retries are not required within the test code,
-         *      ensuring stable, repeatable test execution.
+         * However, they can be useful for example when new service IP details take time to propagate
+         * within the cluster such that sleeps and retries are not required within the test code,
+         * ensuring stable, repeatable test execution.
          * </p>
-         *      The current TestKube instance is made available to the probe to utilise as necessary.
-         *      For example, a probe using curl from one pod through a service to another pod:
-         *      <pre>
-         *      {@code
+         * The current TestKube instance is made available to the probe to utilise as necessary.
+         * For example, a probe using curl from one pod through a service to another pod:
+         * <pre>
+         * {@code
          *         builder.addProvisioningProbe( "service-check", (tk)-> {
          *             ExecResult result = tk.getController()
          *                   .executeCommandAsync( "pod-alias", "sh", "-c", "curl -s http://<service>:<port>" )
@@ -358,16 +360,16 @@ public class TestKube implements Provisionable, Connectable
          *             return result.getExitCode() == 0 && result.getOutput() == expected;
          *         });
          *      }
-         *      </pre>*
+         * </pre>*
          * </p>
          * <p>
-         *      <b>Note:</b> Care should be taken to consider where the probe is executing. When running from
-         *      a local machine accessing the cluster remotely it will not have the same network access as
-         *      when running within the cluster for example within a CI/CD pipeline.
-         *      Probes must be created to ensure they work in both scenarios to prevent issues.
+         * <b>Note:</b> Care should be taken to consider where the probe is executing. When running from
+         * a local machine accessing the cluster remotely it will not have the same network access as
+         * when running within the cluster for example within a CI/CD pipeline.
+         * Probes must be created to ensure they work in both scenarios to prevent issues.
          * </p>
          *
-         * @param name of the probe.
+         * @param name  of the probe.
          * @param probe to be executed.
          * @return the builder.
          */

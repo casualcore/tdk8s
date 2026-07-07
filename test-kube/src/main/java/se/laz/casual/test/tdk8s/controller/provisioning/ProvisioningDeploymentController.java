@@ -62,25 +62,25 @@ public class ProvisioningDeploymentController implements ScaleOperation<Deployme
                     .build();
             updated = client.apps().deployments().resource( updated ).serverSideApply();
             resourcesStore.putDeployment( name, updated );
-            logger.log( DEBUG, ()-> "Deployment applied: " + name );
+            logger.log( DEBUG, () -> "Deployment applied: " + name );
         }
     }
 
     @Override
     public void waitUntilReady()
     {
-        for( Map.Entry<String,Deployment> entry: resourcesStore.getDeployments().entrySet() )
+        for( Map.Entry<String, Deployment> entry : resourcesStore.getDeployments().entrySet() )
         {
             client.apps().deployments().resource( entry.getValue() ).waitUntilReady( 1, TimeUnit.MINUTES );
             updateStoredDeploymentPods( entry.getKey() );
-            logger.log( DEBUG, ()-> "Deployment ready: " + entry.getKey() );
+            logger.log( DEBUG, () -> "Deployment ready: " + entry.getKey() );
         }
     }
 
     @Override
     public void destroyAsync()
     {
-        for( Map.Entry<String,Deployment> entry: resourcesStore.getDeployments().entrySet() )
+        for( Map.Entry<String, Deployment> entry : resourcesStore.getDeployments().entrySet() )
         {
             RollableScalableResource<Deployment> deploymentResource = client.apps().deployments().resource( entry.getValue() );
 
@@ -91,14 +91,14 @@ public class ProvisioningDeploymentController implements ScaleOperation<Deployme
             deleteResourceWatchers.add( new DeleteResourceWatcher<>( podList ) );
 
             deploymentResource.delete();
-            logger.log( DEBUG, ()-> "Deployment deleted: " + entry.getKey() );
+            logger.log( DEBUG, () -> "Deployment deleted: " + entry.getKey() );
         }
     }
 
     @Override
     public void waitUntilDestroyed()
     {
-        for( DeleteResourceWatcher<?> watcher: deleteResourceWatchers )
+        for( DeleteResourceWatcher<?> watcher : deleteResourceWatchers )
         {
             watcher.waitUntilDeleted();
         }
@@ -121,7 +121,7 @@ public class ProvisioningDeploymentController implements ScaleOperation<Deployme
     private void updateStoredDeploymentPods( String name )
     {
         List<Pod> pods = lookupController.retrievePodsForDeployment( name );
-        logger.log( DEBUG, ()-> "Found " + pods.size() + " Pod(s) for Deployment: " + name );
+        logger.log( DEBUG, () -> "Found " + pods.size() + " Pod(s) for Deployment: " + name );
         resourcesStore.putPodsForDeployment( name, pods );
     }
 }

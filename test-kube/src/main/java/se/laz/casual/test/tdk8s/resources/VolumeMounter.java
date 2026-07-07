@@ -26,7 +26,7 @@ public final class VolumeMounter
      * Mount the {@link FileMount} as a volume on the pod resource.
      *
      * @param resource to mount upon.
-     * @param mount definition of what to mount.
+     * @param mount    definition of what to mount.
      * @return updated pod resource.
      * @throws ResourceNotFoundException if container for mount is not found.
      */
@@ -34,15 +34,16 @@ public final class VolumeMounter
     {
         validate( resource, mount );
 
-        int index = getContainerIndex( mount, ()-> ContainerFinder.findIndexOfContainerWithName( resource, mount.getContainer() ) );
+        int index = getContainerIndex( mount, () -> ContainerFinder.findIndexOfContainerWithName( resource, mount.getContainer() ) );
 
         return mountContainerAtIndex( resource, mount, index );
     }
 
     /**
      * Mount the {@link FileMount} as a volume on the deployment resource.
+     * 
      * @param resource to mount upon.
-     * @param mount definition of what to mount.
+     * @param mount    definition of what to mount.
      * @return updated deployment resource.
      * @throws ResourceNotFoundException if container for mount is not found.
      */
@@ -50,7 +51,7 @@ public final class VolumeMounter
     {
         validate( resource, mount );
 
-        int index = getContainerIndex( mount, ()-> ContainerFinder.findIndexOfContainerWithName( resource, mount.getContainer() ) );
+        int index = getContainerIndex( mount, () -> ContainerFinder.findIndexOfContainerWithName( resource, mount.getContainer() ) );
 
         return mountContainerAtIndex( resource, mount, index );
     }
@@ -80,41 +81,41 @@ public final class VolumeMounter
     {
         return resource.edit()
                 .editSpec()
-                    .addNewVolume()
-                        .withName( mount.getVolume() )
-                        .withNewConfigMap().withName( mount.getConfigMap().getMetadata().getName() ).endConfigMap()
-                    .endVolume()
-                    .editContainer( index )
-                        .addNewVolumeMount()
-                            .withName( mount.getVolume() )
-                            .withMountPath( mount.getMountPath() )
-                            .withSubPath( mount.getSubPath() )
-                        .endVolumeMount()
-                    .endContainer()
+                .addNewVolume()
+                .withName( mount.getVolume() )
+                .withNewConfigMap().withName( mount.getConfigMap().getMetadata().getName() ).endConfigMap()
+                .endVolume()
+                .editContainer( index )
+                .addNewVolumeMount()
+                .withName( mount.getVolume() )
+                .withMountPath( mount.getMountPath() )
+                .withSubPath( mount.getSubPath() )
+                .endVolumeMount()
+                .endContainer()
                 .endSpec()
-            .build();
+                .build();
     }
 
     private static Deployment mountContainerAtIndex( Deployment resource, FileMount mount, int index )
     {
         return resource.edit()
                 .editSpec()
-                    .editTemplate()
-                        .editSpec()
-                            .addNewVolume()
-                                .withName( mount.getVolume() )
-                                .withNewConfigMap().withName( mount.getConfigMap().getMetadata().getName() ).endConfigMap()
-                            .endVolume()
-                            .editContainer( index )
-                                .addNewVolumeMount()
-                                    .withName( mount.getVolume() )
-                                    .withMountPath( mount.getMountPath() )
-                                    .withSubPath( mount.getSubPath() )
-                                .endVolumeMount()
-                            .endContainer()
-                        .endSpec()
-                    .endTemplate()
+                .editTemplate()
+                .editSpec()
+                .addNewVolume()
+                .withName( mount.getVolume() )
+                .withNewConfigMap().withName( mount.getConfigMap().getMetadata().getName() ).endConfigMap()
+                .endVolume()
+                .editContainer( index )
+                .addNewVolumeMount()
+                .withName( mount.getVolume() )
+                .withMountPath( mount.getMountPath() )
+                .withSubPath( mount.getSubPath() )
+                .endVolumeMount()
+                .endContainer()
                 .endSpec()
-            .build();
+                .endTemplate()
+                .endSpec()
+                .build();
     }
 }

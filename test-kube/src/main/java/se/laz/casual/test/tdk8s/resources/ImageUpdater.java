@@ -28,7 +28,7 @@ public final class ImageUpdater
     /**
      * Update the image for first container in the pod.
      *
-     * @param pod to update the container image.
+     * @param pod   to update the container image.
      * @param image the new image.
      * @return updated pod.
      */
@@ -42,8 +42,8 @@ public final class ImageUpdater
     /**
      * Update the image for the container with the name provided in the pod.
      *
-     * @param pod to update the container image.
-     * @param image the new image.
+     * @param pod       to update the container image.
+     * @param image     the new image.
      * @param container the container name to update.
      * @return updated pod.
      * @throws ResourceNotFoundException if container is not found.
@@ -52,7 +52,7 @@ public final class ImageUpdater
     {
         validate( pod, image );
 
-        int index = findValidContainer( container, ()-> findIndexOfContainerWithName( pod, container ) );
+        int index = findValidContainer( container, () -> findIndexOfContainerWithName( pod, container ) );
 
         return setImageOfContainerAtIndex( pod, image, index );
     }
@@ -61,7 +61,7 @@ public final class ImageUpdater
      * Update the image for first container in the deployment.
      *
      * @param deployment to update the container image.
-     * @param image the new image.
+     * @param image      the new image.
      * @return updated deployment.
      */
     public static Deployment setImage( Deployment deployment, String image )
@@ -75,8 +75,8 @@ public final class ImageUpdater
      * Update the image for the container with the name provided in the deployment.
      *
      * @param deployment to update the container image.
-     * @param image the new image.
-     * @param container the container name to update.
+     * @param image      the new image.
+     * @param container  the container name to update.
      * @return updated deployment.
      * @throws ResourceNotFoundException if container is not found.
      */
@@ -84,7 +84,7 @@ public final class ImageUpdater
     {
         validate( deployment, image );
 
-        int index = findValidContainer( container, ()-> findIndexOfContainerWithName( deployment, container ) );
+        int index = findValidContainer( container, () -> findIndexOfContainerWithName( deployment, container ) );
 
         return setImageOfContainerAtIndex( deployment, image, index );
     }
@@ -111,9 +111,9 @@ public final class ImageUpdater
     {
         return pod.edit()
                 .editSpec()
-                    .editContainer( containerIndex )
-                        .withImage( image )
-                    .endContainer()
+                .editContainer( containerIndex )
+                .withImage( image )
+                .endContainer()
                 .endSpec()
                 .build();
     }
@@ -122,13 +122,13 @@ public final class ImageUpdater
     {
         return deployment.edit()
                 .editSpec()
-                    .editTemplate()
-                        .editSpec()
-                            .editContainer( containerIndex )
-                                .withImage( image )
-                            .endContainer()
-                        .endSpec()
-                    .endTemplate()
+                .editTemplate()
+                .editSpec()
+                .editContainer( containerIndex )
+                .withImage( image )
+                .endContainer()
+                .endSpec()
+                .endTemplate()
                 .endSpec()
                 .build();
     }

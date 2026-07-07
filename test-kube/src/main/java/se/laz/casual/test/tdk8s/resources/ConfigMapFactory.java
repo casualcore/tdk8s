@@ -42,7 +42,7 @@ public final class ConfigMapFactory
      * Create a ConfigMap called name, with data from each of the files provided.
      * The data key for the files will be the filename of the file path provided.
      *
-     * @param name of the ConfigMap.
+     * @param name  of the ConfigMap.
      * @param files 1 or more files to read as data for the ConfigMap.
      * @return ConfigMap containing the files.
      * @throws IOException if there is an issue whilst reading the files.
@@ -51,23 +51,28 @@ public final class ConfigMapFactory
     {
         validate( name, files );
 
-        ConfigMapBuilder builder =  new ConfigMapBuilder()
+        ConfigMapBuilder builder = new ConfigMapBuilder()
                 .withNewMetadata()
                 .withName( name )
                 .endMetadata();
-        for( Path file: files )
+        for( Path file : files )
         {
-                builder.addToData( file.getFileName().toString(), Files.readString( file ) );
+            Path filename = file.getFileName();
+            if( filename == null )
+            {
+                throw new IllegalArgumentException( "Path filename is null." + file );
+            }
+            builder.addToData( filename.toString(), Files.readString( file ) );
         }
         return builder.build();
     }
 
-    private static void validate( String name, Path...files )
+    private static void validate( String name, Path... files )
     {
         Objects.requireNonNull( name, "Name is null." );
         Objects.requireNonNull( files, "Files is null." );
 
-        for( Path file: files )
+        for( Path file : files )
         {
             Objects.requireNonNull( file, "Files is null." );
             if( !Files.exists( file ) )

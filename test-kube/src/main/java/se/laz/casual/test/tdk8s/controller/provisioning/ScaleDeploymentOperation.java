@@ -24,7 +24,7 @@ import static java.lang.System.Logger.Level.DEBUG;
  */
 public class ScaleDeploymentOperation implements ScaleOperation<Deployment>
 {
-    private static final System.Logger logger = System.getLogger(ScaleDeploymentOperation.class.getName());
+    private static final System.Logger logger = System.getLogger( ScaleDeploymentOperation.class.getName() );
 
     private final ResourceLookupController lookupController;
 
@@ -44,13 +44,13 @@ public class ScaleDeploymentOperation implements ScaleOperation<Deployment>
         int currentReplicas = deployment.getSpec().getReplicas();
         if( currentReplicas == replicas )
         {
-            logger.log( DEBUG, ()->"Deployment " + name + " replica count already correct: " + replicas );
+            logger.log( DEBUG, () -> "Deployment " + name + " replica count already correct: " + replicas );
             return deployment;
         }
 
         preScale( name, replicas, currentReplicas );
 
-        logger.log( DEBUG, ()-> "Deployment " + name + " scaling from " + currentReplicas + " to " + replicas );
+        logger.log( DEBUG, () -> "Deployment " + name + " scaling from " + currentReplicas + " to " + replicas );
         resource.scale( replicas );
 
         postScale();
@@ -69,13 +69,14 @@ public class ScaleDeploymentOperation implements ScaleOperation<Deployment>
             List<PodResource> pods = this.lookupController.getPodsForDeploymentAsResources( name );
             if( pods.size() != currentReplicas )
             {
-                throw new TestKubeException( "Unexpected number of current replicas found: " + pods.size() + ", expected: " + currentReplicas );
+                throw new TestKubeException( "Unexpected number of current replicas found: " + pods.size() + ", expected: " +
+                                             currentReplicas );
             }
             watcher = new DeleteResourceWatcher<>( pods, currentReplicas - replicas );
         }
     }
 
-    private void postScale( )
+    private void postScale()
     {
         // Wait and close watchers created in preScale.
         if( watcher != null )

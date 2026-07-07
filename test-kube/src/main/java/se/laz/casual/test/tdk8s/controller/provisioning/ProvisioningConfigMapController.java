@@ -24,7 +24,7 @@ import static se.laz.casual.test.tdk8s.TestKube.RESOURCE_LABEL_NAME;
  */
 public class ProvisioningConfigMapController implements ProvisionableAsync
 {
-    private static final System.Logger logger = System.getLogger( ProvisioningConfigMapController.class.getName());
+    private static final System.Logger logger = System.getLogger( ProvisioningConfigMapController.class.getName() );
 
     private final KubernetesClient client;
     private final ResourcesStore resourcesStore;
@@ -48,7 +48,7 @@ public class ProvisioningConfigMapController implements ProvisionableAsync
             ConfigMap updated = cm.edit().editMetadata().addToLabels( RESOURCE_LABEL_NAME, labelValue ).endMetadata().build();
             updated = client.configMaps().resource( updated ).serverSideApply();
             resourcesStore.putConfigMap( name, updated );
-            logger.log( DEBUG, ()-> "ConfigMap applied: " + name );
+            logger.log( DEBUG, () -> "ConfigMap applied: " + name );
         }
     }
 
@@ -61,13 +61,13 @@ public class ProvisioningConfigMapController implements ProvisionableAsync
     @Override
     public void destroyAsync()
     {
-        for( Map.Entry<String,ConfigMap> entry : resourcesStore.getConfigMaps().entrySet() )
+        for( Map.Entry<String, ConfigMap> entry : resourcesStore.getConfigMaps().entrySet() )
         {
             Resource<ConfigMap> configMapResource = client.configMaps().resource( entry.getValue() );
             deleteWatchers.add( new DeleteResourceWatcher<>( configMapResource ) );
 
             configMapResource.delete();
-            logger.log( DEBUG, ()-> "ConfigMap deleted: " + entry.getKey() );
+            logger.log( DEBUG, () -> "ConfigMap deleted: " + entry.getKey() );
         }
     }
 

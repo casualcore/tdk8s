@@ -29,7 +29,7 @@ import static java.lang.System.Logger.Level.WARNING;
  */
 public class ResourceLookupControllerImpl implements ResourceLookupController
 {
-    private static final System.Logger logger = System.getLogger( ResourceLookupControllerImpl.class.getName());
+    private static final System.Logger logger = System.getLogger( ResourceLookupControllerImpl.class.getName() );
 
     private final KubernetesClient client;
     private final ResourcesStore resourcesStore;
@@ -65,7 +65,7 @@ public class ResourceLookupControllerImpl implements ResourceLookupController
     public Optional<RollableScalableResource<Deployment>> getDeploymentAsResource( String name )
     {
         return getOrRetrieveDeployment( name )
-                .map( deployment-> this.client.apps().deployments().resource( deployment ) );
+                .map( deployment -> this.client.apps().deployments().resource( deployment ) );
     }
 
     @Override
@@ -168,7 +168,7 @@ public class ResourceLookupControllerImpl implements ResourceLookupController
         }
         if( podList.size() > 1 )
         {
-            logger.log( WARNING, ()-> "Retrieved first Pod from a Deployment with multiple replicas: " + podList.size() );
+            logger.log( WARNING, () -> "Retrieved first Pod from a Deployment with multiple replicas: " + podList.size() );
         }
         return Optional.ofNullable( podResource );
     }

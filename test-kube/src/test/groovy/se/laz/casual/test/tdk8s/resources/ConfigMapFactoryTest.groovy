@@ -51,6 +51,18 @@ class ConfigMapFactoryTest extends Specification
         null  | null
     }
 
+    def "Create with null within Path resolution, throws IllegalArgumentException."()
+    {
+        given:
+        Path path = Paths.get( "/" )
+
+        when:
+        ConfigMapFactory.fromFile(  "map", path )
+
+        then:
+        thrown IllegalArgumentException
+    }
+
     def "Create with non existing file."()
     {
         when:

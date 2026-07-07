@@ -25,7 +25,7 @@ import static se.laz.casual.test.tdk8s.TestKube.RESOURCE_LABEL_NAME;
  */
 public class ProvisioningPodController implements ProvisionableAsync
 {
-    private static final System.Logger logger = System.getLogger(ProvisioningPodController.class.getName());
+    private static final System.Logger logger = System.getLogger( ProvisioningPodController.class.getName() );
 
     private final KubernetesClient client;
     private final ResourcesStore resourcesStore;
@@ -49,30 +49,30 @@ public class ProvisioningPodController implements ProvisionableAsync
             Pod updated = p.edit().editMetadata().addToLabels( RESOURCE_LABEL_NAME, labelValue ).endMetadata().build();
             updated = client.pods().resource( updated ).serverSideApply();
             resourcesStore.putPod( name, updated );
-            logger.log( DEBUG, ()-> "Pod applied: " + name );
+            logger.log( DEBUG, () -> "Pod applied: " + name );
         }
     }
 
     @Override
     public void waitUntilReady()
     {
-        for( Map.Entry<String,Pod> entry: resourcesStore.getPods().entrySet() )
+        for( Map.Entry<String, Pod> entry : resourcesStore.getPods().entrySet() )
         {
             client.pods().resource( entry.getValue() ).waitUntilReady( 1, TimeUnit.MINUTES );
-            logger.log( DEBUG, ()-> "Pod ready: " + entry.getKey() );
+            logger.log( DEBUG, () -> "Pod ready: " + entry.getKey() );
         }
     }
 
     @Override
     public void destroyAsync()
     {
-        for( Map.Entry<String,Pod> entry: resourcesStore.getPods().entrySet() )
+        for( Map.Entry<String, Pod> entry : resourcesStore.getPods().entrySet() )
         {
             PodResource podResource = client.pods().resource( entry.getValue() );
             deleteWatchers.add( new DeleteResourceWatcher<>( podResource ) );
 
             podResource.delete();
-            logger.log( DEBUG, ()-> "Pod deleted: " + entry.getKey() );
+            logger.log( DEBUG, () -> "Pod deleted: " + entry.getKey() );
         }
     }
 

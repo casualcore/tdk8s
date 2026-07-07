@@ -32,7 +32,8 @@ public class ProvisioningControllerImpl implements ProvisioningController
         this.provisioningProbeController = provisioningProbeController;
         this.resourcesStore = resourcesStore;
 
-        this.provisioningDeploymentController = new ProvisioningDeploymentController( client, resourcesStore, lookupController, labelValue );
+        this.provisioningDeploymentController = new ProvisioningDeploymentController( client, resourcesStore, lookupController,
+                                                                                      labelValue );
         this.provisioningPodController = new ProvisioningPodController( client, resourcesStore, labelValue );
         this.provisioningServiceController = new ProvisioningServiceController( client, resourcesStore, labelValue );
         this.provisioningConfigMapController = new ProvisioningConfigMapController( client, resourcesStore, labelValue );
@@ -99,6 +100,6 @@ public class ProvisioningControllerImpl implements ProvisioningController
     @Override
     public CompletableFuture<Void> scaleAsync( String resource, int replicas )
     {
-        return CompletableFuture.runAsync( ()-> scale( resource, replicas ) );
+        return CompletableFuture.runAsync( () -> scale( resource, replicas ) );
     }
 }

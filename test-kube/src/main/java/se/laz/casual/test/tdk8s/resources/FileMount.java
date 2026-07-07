@@ -34,6 +34,7 @@ public class FileMount
 
     /**
      * ConfigMap containing the file data.
+     * 
      * @return ConfigMap.
      */
     public ConfigMap getConfigMap()
@@ -148,7 +149,7 @@ public class FileMount
 
         /**
          * Optional - name of the container to mount the file upon.
-         *<br/>
+         * <br/>
          * If not provided the first container will be used.
          *
          * @param container name to mount the file upon.
@@ -163,14 +164,14 @@ public class FileMount
         public FileMount build()
         {
             Objects.requireNonNull( configMap, "ConfigMap is null." );
-            Objects.requireNonNull( mountPath, "Mount path is null."  );
+            Objects.requireNonNull( mountPath, "Mount path is null." );
 
-            this.subPath = confirmValidSubPath( );
+            this.subPath = confirmValidSubPath();
 
             return new FileMount( configMap, mountPath, subPath, volume, container );
         }
 
-        private String confirmValidSubPath( )
+        private String confirmValidSubPath()
         {
             if( this.subPath == null )
             {

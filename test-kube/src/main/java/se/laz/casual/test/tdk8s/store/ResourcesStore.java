@@ -54,7 +54,7 @@ public class ResourcesStore
      *
      * @return map of Pods stored.
      */
-    public Map<String,Pod> getPods( )
+    public Map<String, Pod> getPods()
     {
         return this.podStore.getAll();
     }
@@ -72,8 +72,9 @@ public class ResourcesStore
 
     /**
      * Store a Pod by name.
+     * 
      * @param name of the Pod to store.
-     * @param pod to store.
+     * @param pod  to store.
      */
     public void putPod( String name, Pod pod )
     {
@@ -85,7 +86,7 @@ public class ResourcesStore
      *
      * @param pods to store.
      */
-    public void putPods( Map<String,Pod> pods )
+    public void putPods( Map<String, Pod> pods )
     {
         this.podStore.putAll( pods );
     }
@@ -119,7 +120,7 @@ public class ResourcesStore
      *
      * @return map of Deployments stored.
      */
-    public Map<String,Deployment> getDeployments( )
+    public Map<String, Deployment> getDeployments()
     {
         return this.deploymentStore.getAll();
     }
@@ -137,7 +138,8 @@ public class ResourcesStore
 
     /**
      * Store a Deployment by name.
-     * @param name of the Deployment to store.
+     * 
+     * @param name       of the Deployment to store.
      * @param deployment to store.
      */
     public void putDeployment( String name, Deployment deployment )
@@ -150,7 +152,7 @@ public class ResourcesStore
      *
      * @param deployments to store.
      */
-    public void putDeployments( Map<String,Deployment> deployments )
+    public void putDeployments( Map<String, Deployment> deployments )
     {
         this.deploymentStore.putAll( deployments );
     }
@@ -184,7 +186,7 @@ public class ResourcesStore
      *
      * @return map of Deployment Pods stored.
      */
-    public Map<String, List<Pod>> getPodsForDeployments( )
+    public Map<String, List<Pod>> getPodsForDeployments()
     {
         return this.deploymentPodsStore.getAll();
     }
@@ -216,7 +218,7 @@ public class ResourcesStore
      *
      * @param podsForDeployments to store.
      */
-    public void putPodsForDeployments( Map<String,List<Pod>> podsForDeployments )
+    public void putPodsForDeployments( Map<String, List<Pod>> podsForDeployments )
     {
         this.deploymentPodsStore.putAll( podsForDeployments );
     }
@@ -250,7 +252,7 @@ public class ResourcesStore
      *
      * @return map of Services stored.
      */
-    public Map<String,Service> getServices( )
+    public Map<String, Service> getServices()
     {
         return this.serviceStore.getAll();
     }
@@ -268,7 +270,8 @@ public class ResourcesStore
 
     /**
      * Store a Service by name.
-     * @param name of the Service to store.
+     * 
+     * @param name    of the Service to store.
      * @param service to store.
      */
     public void putService( String name, Service service )
@@ -281,7 +284,7 @@ public class ResourcesStore
      *
      * @param services to store.
      */
-    public void putServices( Map<String,Service> services )
+    public void putServices( Map<String, Service> services )
     {
         this.serviceStore.putAll( services );
     }
@@ -315,7 +318,7 @@ public class ResourcesStore
      *
      * @return map of ConfigMaps stored.
      */
-    public Map<String,ConfigMap> getConfigMaps( )
+    public Map<String, ConfigMap> getConfigMaps()
     {
         return this.configMapStore.getAll();
     }
@@ -333,7 +336,8 @@ public class ResourcesStore
 
     /**
      * Store a ConfigMap by name.
-     * @param name of the ConfigMap to store.
+     * 
+     * @param name      of the ConfigMap to store.
      * @param configMap to store.
      */
     public void putConfigMap( String name, ConfigMap configMap )

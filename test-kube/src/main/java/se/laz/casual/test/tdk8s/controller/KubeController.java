@@ -322,7 +322,8 @@ public class KubeController implements ProvisioningController, ConnectionControl
         {
             if( this.provisioningController == null )
             {
-                this.provisioningController = new ProvisioningControllerImpl( provisioningProbeController, client, store, resourceLookupController, label );
+                this.provisioningController = new ProvisioningControllerImpl( provisioningProbeController, client, store,
+                                                                              resourceLookupController, label );
             }
         }
 

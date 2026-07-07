@@ -35,8 +35,9 @@ public class ExecResult
     /**
      * Output returned when running the command.
      * <p>
-     *     The output combines both STDOUT and STDERR.
+     * The output combines both STDOUT and STDERR.
      * </p>
+     * 
      * @return the command output.
      */
     public String getOutput()
@@ -55,7 +56,7 @@ public class ExecResult
         {
             return false;
         }
-        ExecResult that = (ExecResult) o;
+        ExecResult that = (ExecResult)o;
         return exitCode == that.exitCode && Objects.equals( output, that.output );
     }
 
@@ -69,9 +70,9 @@ public class ExecResult
     public String toString()
     {
         return "ExecResult{" +
-                "exitCode=" + exitCode +
-                ", output='" + output + '\'' +
-                '}';
+               "exitCode=" + exitCode +
+               ", output='" + output + '\'' +
+               '}';
     }
 
     public static Builder newBuilder()
